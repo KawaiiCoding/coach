@@ -341,3 +341,21 @@ body.onb { padding-bottom: 0; }
 
 .seg.xs button { display: flex; flex-direction: column; align-items: center; line-height: 1.05; padding: 6px 0 5px; min-width: 42px; border-radius: 14px; }
 .seg.xs button b { font-size: 15px; } .seg.xs button small { font-size: 10px; color: inherit; opacity: .75; font-weight: 600; }
+
+/* welcome screen: what the app is, in a few words (first visit, and briefly when the installed app opens) */
+.splash { position: fixed; inset: 0; z-index: 300; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: calc(20px + env(safe-area-inset-top, 0px)) 28px calc(20px + env(safe-area-inset-bottom, 0px)); opacity: 1; transition: opacity .35s ease; overflow-y: auto; }
+.splash.out { opacity: 0; pointer-events: none; }
+.spin { width: 100%; max-width: 340px; text-align: center; animation: spup .5s ease both; }
+@keyframes spup { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .spin { animation: none; } .splash { transition: none; } }
+.spart { width: min(46vw, 176px); aspect-ratio: 1; margin: 0 auto 18px; border-radius: 50%; overflow: hidden; background: var(--ill-bg); }
+.spart .ill { width: 100%; height: 100%; display: block; }
+.splash h1 { font-size: 30px; margin: 0; letter-spacing: -.01em; }
+.splead { font-size: 17px; line-height: 1.4; color: var(--ink2); margin: 8px 0 20px; }
+.splist { list-style: none; margin: 0 auto; padding: 0; display: inline-flex; flex-direction: column; gap: 10px; text-align: left; }
+.splist li { display: flex; align-items: center; gap: 13px; font-size: 16px; font-weight: 550; }
+.splist i { flex: none; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--acc) 14%, var(--bg)); }
+.splist .ic { width: 27px; height: 27px; flex: none; color: var(--acc); stroke-width: 1.9; } .splist .ic .soft { fill: currentColor; stroke: none; opacity: .34; }
+.splash .btn { margin-top: 26px; }
+.splash.brief { cursor: pointer; }
+@media (max-height: 600px) { .spart { width: 112px; margin-bottom: 10px; } .splead { margin-bottom: 12px; } .splist { gap: 8px; } .splash .btn { margin-top: 16px; } }

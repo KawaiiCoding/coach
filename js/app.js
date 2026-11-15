@@ -667,8 +667,34 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
     else if (document.visibilityState === 'visible') toast(body); }, 60000);
   const qp = new URLSearchParams(location.search), qr = qp.get('reset'), qgo = qp.get('go');
 
+  /* ---------- welcome screen ----------
+     Says in a few words what the app is. On the very first visit it waits for a tap on the button. When the installed
+     app is opened from the home screen it shows briefly and fades by itself (a tap skips it). Never on a deep link
+     (shortcut or reminder), and only once per app launch. */
+  function welcome() {
+    const el = $('splash'); if (!el || qr || qgo) return;
+    const get = k => { try { return localStorage.getItem(k); } catch (e) { return '1'; } }, set = (st, k) => { try { st.setItem(k, '1'); } catch (e) {} };
+    const first = !get('coach.intro'), pwa = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+    let shown = false; try { shown = !!sessionStorage.getItem('coach.splash'); } catch (e) {}
+    if (!first && (!pwa || shown)) return;
+    try { set(sessionStorage, 'coach.splash'); } catch (e) {}
+    // what you get out of it, in three short lines
+    const rows = [
+      // a person with the sore spot marked on the shoulder
+      [P('<circle cx="12" cy="6.6" r="3.4"/><path d="M4 20.5c0-4.6 3.4-7.4 8-7.4s8 2.8 8 7.4"/><circle cx="17.3" cy="15.2" r="4.6" class="soft"/><circle cx="17.3" cy="15.2" r="2.2" class="fill"/>'), 'Built around where it hurts'],
+      // a stopwatch with a short slice of time filled in
+      [P('<path d="M12 13.2V5.4a7.8 7.8 0 0 1 6.75 3.9z" class="soft"/><circle cx="12" cy="13.2" r="7.8"/><path d="M12 13.2V8.6M9.6 2.6h4.8M12 2.6v2.8M18.4 6.2l1.3-1.3"/>'), 'From 5 minutes a day'],
+      // play, with the coach's voice coming out
+      [P('<path d="M4.5 6.6v10.8l8.2-5.4z" class="fill"/><path d="M15.6 8.6a4.8 4.8 0 0 1 0 6.8M18.4 5.9a8.6 8.6 0 0 1 0 12.2"/>'), 'Press play, the coach guides you']];
+    el.innerHTML = `<div class="spin"><div class="spart">${ILLUS.svg('walk', null, { uid: 'sp', fit: 1 })}</div><h1>Tension Coach</h1><p class="splead">Less neck, back and shoulder tension.</p>
+<ul class="splist">${rows.map(([ic, t]) => `<li><i>${ic}</i><span>${t}</span></li>`).join('')}</ul>${first ? `<button class="btn" id="spgo">Get started</button>` : ''}</div>`;
+    el.hidden = false; el.classList.toggle('brief', !first);
+    const close = () => { if (el.classList.contains('out')) return; set(localStorage, 'coach.intro'); el.classList.add('out'); setTimeout(() => { el.hidden = true; el.innerHTML = ''; el.classList.remove('out'); }, 380); };
+    if (first) $('spgo').onclick = close; else { el.onclick = close; setTimeout(close, 2600); }
+  }
+
   /* ---------- start ---------- */
-  applyTheme(); ILLUS.setFemale(isF());
+  applyTheme(); ILLUS.setFemale(isF()); welcome();
   if (!S.onboarded) renderOnboard(); else { show(qgo === 'quickies' ? 'resets' : 'today'); if (qr) setTimeout(() => startReset(qr), 300);
     // home-screen shortcut "Start": scroll is already at the Start button; sound needs a tap, so highlight it instead of auto-playing
     if (qgo === 'start') setTimeout(() => { const b = $('start'); if (b) { b.classList.add('nudge'); b.focus(); } }, 300); }
