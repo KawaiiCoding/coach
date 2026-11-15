@@ -1,4 +1,4 @@
-/* Resets: short ready-made routines for a moment in the day. Each step references an exercise id from the libraries
+/* Quickies (stored as RESETS): short ready-made routines for a moment in the day. Each step references an exercise id from the libraries
    (warm-up moves, stretches, strength, breathing) and can override its time. Order follows the usual rule:
    warm-ups are dynamic only (no long static holds before activity); cool-downs start with easy movement,
    then static stretches, then slow breathing. Steps the user's safety rules exclude are dropped automatically.
@@ -7,7 +7,7 @@ const RESETS = [
   /* ---------- warm up ---------- */
   { id: 'pre-walk', n: 'Before a walk or run', cat: 'warm', ill: 'leg-swing', sub: 'Wake up the legs',
     steps: [{ r: 'wu-march', t: 45 }, { r: 'wu-hip', t: 30 }, { r: 'leg-swing' }, { r: 'calf-raise', reps: 12, sets: 1 }, { r: 'wu-swing', t: 30 }] },
-  { id: 'pre-bike', n: 'Before a ride', cat: 'warm', ill: 'march', sub: 'Hips, knees and back ready',
+  { id: 'pre-bike', n: 'Before a bike ride', cat: 'warm', ill: 'march', sub: 'Hips, knees and back ready',
     steps: [{ r: 'wu-march', t: 45 }, { r: 'wu-hip', t: 30 }, { r: 'leg-swing' }, { r: 'sit-stand', reps: 8, sets: 1 }, { r: 'wu-swing', t: 30 }] },
   { id: 'morning', n: 'Morning wake-up', cat: 'warm', ill: 'side-bend', sub: 'Loosen up after sleep',
     steps: [{ r: 'wu-march', t: 40 }, { r: 'wu-swing', t: 30 }, { r: 'cat-cow' }, { r: 'bridge', reps: 10, sets: 1 }, { r: 'wu-march', t: 30 }] },
@@ -17,7 +17,7 @@ const RESETS = [
     steps: [{ r: 'walk', t: 60 }, { r: 'calf-straight', t: 25, reps: 1 }, { r: 'quad-stand', t: 25, reps: 1 }, { r: 'heel-step', t: 25, reps: 1 }, { r: 'breath:seated', t: 60 }] },
   { id: 'post-run', n: 'After a run', cat: 'cool', ill: 'quad-stand', sub: 'Bring the heart rate down',
     steps: [{ r: 'walk', t: 90 }, { r: 'calf-straight', t: 30, reps: 1 }, { r: 'calf-bent', t: 25, reps: 1 }, { r: 'quad-stand', t: 30, reps: 1 }, { r: 'half-kneel', t: 30, reps: 1 }, { r: 'heel-step', t: 30, reps: 1 }, { r: 'breath:seated', t: 60 }] },
-  { id: 'post-bike', n: 'After a ride', cat: 'cool', ill: 'half-kneel', sub: 'Open the hips and chest',
+  { id: 'post-bike', n: 'After a bike ride', cat: 'cool', ill: 'half-kneel', sub: 'Open the hips and chest',
     steps: [{ r: 'walk', t: 60 }, { r: 'half-kneel', t: 30, reps: 1 }, { r: 'quad-stand', t: 30, reps: 1 }, { r: 'doorway-low', t: 30, reps: 1 }, { r: 'calf-straight', t: 25, reps: 1 }, { r: 'breath:seated', t: 60 }] },
 
   /* ---------- energise ---------- */

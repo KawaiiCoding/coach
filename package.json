@@ -1,0 +1,14 @@
+{
+  "name": "tension-coach",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Voice-guided posture, stretching, strength and breathing coach. Offline PWA.",
+  "type": "module",
+  "scripts": {
+    "start": "node tools/serve.mjs .",
+    "build": "node tools/build.mjs",
+    "preview": "node tools/build.mjs && node tools/serve.mjs dist 8001",
+    "voice": "python3 tools/record_voice.py"
+  },
+  "engines": { "node": ">=18" }
+}

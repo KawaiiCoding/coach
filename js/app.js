@@ -1,4 +1,4 @@
-/* Tension Coach: Today, Resets, Program, Learn, and a full-screen coached player.
+/* Tension Coach: Today, Quickies, Program, Learn, and a full-screen coached player.
    Engine: adds up what the day's positions do to each muscle, weights it by where it hurts, stretches what is held short,
    strengthens what is held long or switched off. Session order: warm up, strengthen, lengthen, breathe (cool-down).
    All data stays in localStorage on the device. */
@@ -13,6 +13,7 @@
   S.profile = { ...DEF.profile, ...S.profile }; S.remind = S.remind || DEF.remind; S.logs = S.logs || []; S.pain = S.pain || {};
   for (const k in S.pain) if (typeof S.pain[k] === 'number') S.pain[k] = { v: S.pain[k], t: ['pain'] };
   for (const k in S.pain) if (!REGION[k]) delete S.pain[k];
+  if (!Array.isArray(S.profile.days)) S.profile.days = ({ desk: ['desk'], sofa: ['sofa', 'phone'], feet: ['feet'], mixed: ['desk', 'feet'] })[S.profile.dayType] || [];
   const pv = rid => (S.pain[rid] && S.pain[rid].v) || 0, pt = rid => (S.pain[rid] && S.pain[rid].t) || [];
   const log = (d = today()) => { let l = S.logs.find(x => x.d === d); if (!l) { l = { d, pain: {}, done: [], minutes: 0, resets: [] }; S.logs.push(l); } l.resets = l.resets || []; return l; };
   const active = l => l && ((l.done && l.done.length >= 2) || (l.resets && l.resets.length));
@@ -26,7 +27,7 @@
   /* ---------- theme ---------- */
   const mq = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
   const isDark = () => S.profile.theme === 'dark' || (S.profile.theme !== 'light' && mq && mq.matches);
-  function applyTheme() { document.documentElement.dataset.theme = isDark() ? 'dark' : 'light'; const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = isDark() ? '#16130F' : '#FAF6F1'; }
+  function applyTheme() { document.documentElement.dataset.theme = isDark() ? 'dark' : 'light'; const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = isDark() ? '#15120F' : '#FFFFFF'; }
   mq && mq.addEventListener && mq.addEventListener('change', () => { applyTheme(); rerender(); });
 
   /* ---------- icons (line icons, no emoji) ---------- */
@@ -36,7 +37,7 @@
     bolt: P('<path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/>'),
     chart: P('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'),
     book: P('<path d="M2 5c3-1.5 6.5-1.5 10 1 3.5-2.5 7-2.5 10-1v14c-3-1.5-6.5-1.5-10 1-3.5-2.5-7-2.5-10-1z"/><path d="M12 6v14"/>'),
-    play: P('<path d="M7 4.5v15l12.5-7.5z" class="fill"/>'), pause: P('<rect x="6" y="4.5" width="4" height="15" rx="1" class="fill"/><rect x="14" y="4.5" width="4" height="15" rx="1" class="fill"/>'),
+    play: P('<path d="M8 5.6v12.8a1.1 1.1 0 0 0 1.68.94l10.3-6.4a1.1 1.1 0 0 0 0-1.88L9.68 4.66A1.1 1.1 0 0 0 8 5.6z" class="fill"/>'), pause: P('<rect x="6" y="4.5" width="4" height="15" rx="1" class="fill"/><rect x="14" y="4.5" width="4" height="15" rx="1" class="fill"/>'),
     next: P('<path d="M5 5v14l10-7z" class="fill"/><path d="M19 5v14"/>'), prev: P('<path d="M19 5v14L9 12z" class="fill"/><path d="M5 5v14"/>'),
     x: P('<path d="M6 6l12 12M18 6 6 18"/>'), back: P('<path d="M15 5l-7 7 7 7"/>'), chev: P('<path d="M9 5l7 7-7 7"/>'),
     voice: P('<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>'),
@@ -51,40 +52,86 @@
     steps: P('<path d="M4 20h4v-4h4v-4h4V8h4"/>'), moon: P('<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z"/>'),
     bell: P('<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>'), sliders: P('<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>'),
     user: P('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'), trash: P('<path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/>'),
-    contrast: P('<circle cx="12" cy="12" r="9"/><path d="M12 3v18a9 9 0 0 0 0-18z" class="fill"/>'), desk: P('<path d="M3 10h18M5 10v10M19 10v10M8 10V5h8v5"/>'),
+    contrast: P('<circle cx="12" cy="12" r="9"/><path d="M12 3v18a9 9 0 0 0 0-18z" class="fill"/>'), desk: P('<circle cx="7.5" cy="4.3" r="2"/><path d="M7 8v6h4.5v6.5h1.8"/><path d="M7.2 9.8l4.3 1.7"/><path d="M3 9v11.5M3 15h4"/><path d="M10.5 11.5H22M20.5 11.5v9"/><path d="M14.5 11.5h4l1-4"/>'),
     sofa: P('<path d="M4 11V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3"/><path d="M2 13a2 2 0 0 1 4 0v2h12v-2a2 2 0 0 1 4 0v5H2zM5 18v2M19 18v2"/>'),
+    phone: P('<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>'), car: P('<path d="M5 16V11l2-5h10l2 5v5M3 11h18M5 16h14M5 16v2.5M19 16v2.5"/><circle cx="8" cy="13.5" r=".6" class="fill"/><circle cx="16" cy="13.5" r=".6" class="fill"/>'),
+    box: P('<path d="M3 8l9-4 9 4v9l-9 4-9-4z"/><path d="M3 8l9 4 9-4M12 12v9"/>'), play2: P('<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z" class="fill"/>'),
     walk: P('<circle cx="13" cy="4" r="2"/><path d="M10 21l2-6-3-3 1-5 4 3 3 1M9 12l-3 2"/>'), mix: P('<path d="M4 7h4l8 10h4M4 17h4l2.5-3M14 10l2-3h4M17 4l3 3-3 3M17 14l3 3-3 3"/>')
   };
 
-  /* ---------- body map ---------- */
-  const body = v => (isF() ? BODYIMG_F : BODYIMG)[v], fx = x => isF() ? 100 + (x - 100) * 0.86 : x;
-  const WARM = '<filter id="warmBody" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="-0.089 -0.300 -0.030 0 1.01  -0.091 -0.308 -0.031 0 0.925  -0.100 -0.336 -0.034 0 0.85  0 0 0 1 0"/></filter>';
-  const bodyImg = (v, extra = '') => `<image href="${body(v)}" x="0" y="0" width="200" height="430" ${isDark() ? '' : 'filter="url(#warmBody)"'} ${extra}/>`;
+  /* ---------- body map: a crisp vector figure drawn here (front and back, woman and man), no bitmap ---------- */
+  const fx = x => isF() ? 100 + (x - 100) * 0.86 : x;
+  // right half of the outline, top of the head down to the crotch, in the 200 x 430 chart units the regions use
+  const HALF = [[100, 15], [112, 19], [117, 34], [115, 49], [111, 59], [109, 71], [121, 82], [143, 90], [153, 103], [157, 136], [161, 172], [165, 200], [167, 216], [173, 234], [169, 250], [160, 246], [157, 219], [152, 196], [148, 172], [143, 142], [138, 121], [134, 142], [128, 180], [135, 215], [138, 245], [136, 280], [129, 312], [131, 342], [126, 376], [123, 395], [129, 412], [125, 423], [110, 423], [111, 397], [109, 350], [107, 312], [104, 270], [100, 238]];
+  function bodyPath() {
+    const F = isF(), half = HALF.map(([x, y], i) => { if (F && i > 4) { x = 100 + (x - 100) * 0.86; if (i === 21 || i === 22) x -= 3.5; if (i === 23 || i === 24) x += 3; } return [x, y]; });
+    const P = [...half, ...half.slice(1, -1).reverse().map(([x, y]) => [200 - x, y])], n = P.length, f = v => v.toFixed(1);
+    let d = `M${f(P[0][0])} ${f(P[0][1])}`;
+    for (let i = 0; i < n; i++) { const p0 = P[(i - 1 + n) % n], p1 = P[i], p2 = P[(i + 1) % n], p3 = P[(i + 2) % n];
+      d += `C${f(p1[0] + (p2[0] - p0[0]) / 6)} ${f(p1[1] + (p2[1] - p0[1]) / 6)} ${f(p2[0] - (p3[0] - p1[0]) / 6)} ${f(p2[1] - (p3[1] - p1[1]) / 6)} ${f(p2[0])} ${f(p2[1])}`; }
+    return d + 'Z';
+  }
+  let clipN = 0;
+  const bodyImg = (v, extra = '') => { const F = isF(), d = bodyPath(), id = 'bc' + (clipN++), m = (pth, o = '') => `<path d="${pth}" class="bl" ${o}/><path d="${pth}" class="bl" transform="translate(200 0) scale(-1 1)" ${o}/>`, k = F ? 0.86 : 1, X = x => (100 + (x - 100) * k).toFixed(1);
+    const hair = v === 'b' ? `<path d="M83 36C82 8 118 8 117 36C116 48 112 56 108 60C104 62 96 62 92 60C88 56 84 48 83 36Z" class="bh"/>`
+      : (F ? `<path d="M81.5 44C76 3 124 3 118.5 44C119 56 121 66 118 76L112 70C116 52 114 36 106 28C100 34 90 36 86 34C84 46 85 58 88 70L82 76C79 66 81 56 81.5 44Z" class="bh"/>` : `<path d="M83 34C80 8 120 8 117 34C114 26 108 22 100 22C92 22 86 26 83 34Z" class="bh"/>`);
+    const lines = v === 'f'
+      ? m(`M102 91Q${X(114)} 87 ${X(128)} 90`) + m(F ? `M103 132Q${X(114)} 142 ${X(128)} 128` : `M103 128Q${X(116)} 134 ${X(132)} 124`) + m(`M${X(112)} 306Q${X(118)} 301 ${X(124)} 306`) + `<path d="M100 150V178" class="bl" opacity=".5"/><circle cx="100" cy="190" r="1.3" class="bd"/>`
+      : m(`M${X(108)} 108Q${X(118)} 122 ${X(130)} 112`) + m(`M102 240Q${X(114)} 252 ${X(128)} 242`) + m(`M${X(112)} 316H${X(124)}`) + `<path d="M100 84V214" class="bl"/>`;
+    return `<g class="bodyfig" ${extra}><clipPath id="${id}"><path d="${d}"/></clipPath><path d="${d}" class="bs"/><g clip-path="url(#${id})"><rect x="62" y="206" width="76" height="${F ? 34 : 42}" class="bw"/>${F ? `<rect x="68" y="${v === 'f' ? 110 : 112}" width="64" height="${v === 'f' ? 30 : 22}" class="bw"/>` : ''}</g>${hair}${lines}<path d="${d}" class="bo"/></g>`; };
+  /* Where you should feel it: a small front and/or back body with the exercise's own target muscles marked, each at its
+     anatomical chart position from the muscle library. The first muscle is the main one (solid), the others are lighter.
+     Both sides are always marked; the side being worked is the one the coach names. */
+  function feelMap(st) {
+    if (!st || st.kind === 'breath' || st.kind === 'scan') return ['', ''];
+    const ids = st.feel || (st.x && (st.x.feel || st.x.m)) || [], ms = [...new Set(ids)].map(i => MUSCLE[i]).filter(m => m && m.ch).slice(0, 4);
+    if (!ms.length) return ['', ''];
+    /* Both views flank the timer (front on the left, back on the right), so nothing covers the exercise picture. Both are
+       zoomed onto the same part of the body (never less than about 40% of it, so it stays recognisable); a view with no
+       target muscle is shown dimmed, which tells you the feeling is on the other side of the body. */
+    let hw = 0, y0 = 1e9, y1 = -1e9; const spots = { f: '', b: '' };
+    ms.map((m, k) => [m, k]).reverse().forEach(([m, k]) => { const [v, xr, y, rx0, ry0, rot] = m.ch, x = fx(xr), rx = Math.max(rx0, 7), ry = Math.max(ry0, 7), r = Math.max(rx, ry), main = k === 0;
+      hw = Math.max(hw, Math.abs(x - 100) + r); y0 = Math.min(y0, y - r); y1 = Math.max(y1, y + r);
+      spots[v] += [1, -1].map(sd => { const cx = (100 + sd * (x - 100)).toFixed(1), tr = `transform="rotate(${sd * rot} ${cx} ${y})"`;
+        return `<ellipse class="halo" cx="${cx}" cy="${y}" rx="${rx + 6}" ry="${ry + 6}" ${tr} opacity="${main ? .3 : .16}"/><ellipse class="${main ? 'main' : 'sub'}" cx="${cx}" cy="${y}" rx="${rx}" ry="${ry}" ${tr}/>`; }).join(''); });
+    let h = Math.max(y1 - y0 + 40, 172), w = Math.max(2 * hw + 36, h * .75); h = Math.max(h, w / .75); if (h >= 424) { h = 424; w = 318; }
+    const top = Math.max(4, Math.min(430 - h, (y0 + y1) / 2 - h / 2)), vb = `${(100 - w / 2).toFixed(1)} ${top.toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`, names = esc(ms.map(m => m.n).join(', '));
+    const fig = v => `<figure class="pfm${spots[v] ? '' : ' off'}"${spots[v] ? ` role="img" aria-label="Where you should feel it, ${v === 'f' ? 'front' : 'back'}: ${names}"` : ' aria-hidden="true"'}><svg viewBox="${vb}" aria-hidden="true">${bodyImg(v)}<g class="fs">${spots[v]}</g></svg><figcaption>${v === 'f' ? 'Front' : 'Back'}</figcaption></figure>`;
+    return [fig('f'), fig('b')];
+  }
+  /* kept simple: the left of the screen is always your left, in both views (like a mirror at the front) */
+  const sideOf = (v, cx) => Math.abs(cx - 100) < 4 ? 'b' : cx < 100 ? 'l' : 'r';
+  /* severity colour: 1-3 mild (amber), 4-6 moderate (orange), 7-10 strong (red) */
+  const sevCol = v => v >= 7 ? '#D63A2A' : v >= 4 ? '#E8692A' : '#E3A126';
+  const ps = rid => (S.pain[rid] && S.pain[rid].side) || 'b', sideTxt = rid => ({ l: ' · left', r: ' · right', b: '' })[ps(rid)];
   function chartSvg(v) {
-    const zones = REGIONS.filter(r => r.zone && r.v === v && (!r.sex || r.sex === S.profile.sex)).map(r => { const [x0, y] = r.zone, x = fx(x0), p = pv(r.id);
-      return (Math.abs(x - 100) < 4 ? [100] : [x, 200 - x]).map(cx => `<g class="zone ${p ? 'sel' : ''}" data-r="${r.id}" tabindex="0" role="button" aria-label="${esc(r.n)}"><circle class="hit" cx="${cx}" cy="${y}" r="13"/><circle class="ring" cx="${cx}" cy="${y}" r="${p ? 11 : 8}"/><circle class="dot" cx="${cx}" cy="${y}" r="${p ? 8.5 : 5}"/>${p ? `<text x="${cx}" y="${y + 3.2}">${p}</text>` : ''}</g>`).join(''); }).join('');
-    return `<svg class="chart" viewBox="0 -4 200 438" role="img" aria-label="Body map, ${v === 'f' ? 'front' : 'back'}"><defs>${WARM}</defs>${bodyImg(v)}${zones}</svg>`;
+    const zones = REGIONS.filter(r => r.zone && r.v === v && (!r.sex || r.sex === S.profile.sex)).map(r => { const [x0, y] = r.zone, x = fx(x0), val = pv(r.id);
+      return (Math.abs(x - 100) < 4 ? [100] : [x, 200 - x]).map(cx => { const sd = sideOf(v, cx), p = val && (ps(r.id) === 'b' || sd === 'b' || ps(r.id) === sd) ? val : 0;
+        return `<g class="zone ${p ? 'sel' : ''}" ${p ? `style="--zc:${sevCol(p)}"` : ''} data-r="${r.id}" data-s="${sd}" tabindex="0" role="button" aria-label="${esc(r.n)}${sd === 'l' ? ', left' : sd === 'r' ? ', right' : ''}"><circle class="hit" cx="${cx}" cy="${y}" r="13"/><circle class="ring" cx="${cx}" cy="${y}" r="${p ? 11.5 : 8}"/><circle class="dot" cx="${cx}" cy="${y}" r="${p ? 8.5 : 4.6}"/>${p ? `<text x="${cx}" y="${y + 3.3}">${p}</text>` : ''}</g>`; }).join(''); }).join('');
+    const L = ['Left', 'Right'];
+    return `<svg class="chart" viewBox="0 -4 200 438" role="img" aria-label="Body map, ${v === 'f' ? 'front' : 'back'}">${bodyImg(v)}<text class="side" x="8" y="16" text-anchor="start">${L[0]}</text><text class="side" x="192" y="16" text-anchor="end">${L[1]}</text>${zones}</svg>`;
   }
   function bodyMap(el, after, o = {}) {
     let view = el.dataset.view || 'f';
     const draw = () => { el.dataset.view = view;
       el.innerHTML = `<div class="maptools">${o.head || ''}<div class="seg sm"><button class="${view === 'f' ? 'on' : ''}" data-v="f">Front</button><button class="${view === 'b' ? 'on' : ''}" data-v="b">Back</button></div></div><div class="mapwrap">${chartSvg(view)}</div>
-<div class="chips">${Object.keys(S.pain).map(id => `<button class="chip on" data-r="${id}">${esc(REGION[id].n)} <b>${pv(id)}</b></button>`).join('') || '<span class="hint">Tap a dot. Tap as many as you like.</span>'}</div>`;
+<div class="chips">${Object.keys(S.pain).map(id => `<button class="chip on" data-r="${id}">${esc(REGION[id].n)}${sideTxt(id)} <b style="color:${sevCol(pv(id))}">${pv(id)}</b></button>`).join('') || (o.compact ? '' : '<span class="hint">Tap a dot. Tap as many as you like.</span>')}</div>`;
       el.querySelectorAll('[data-v]').forEach(b => b.onclick = () => { view = b.dataset.v; draw(); }); o.bind && o.bind(el);
-      el.querySelectorAll('[data-r]').forEach(z => { const go = () => painSheet(z.dataset.r, () => { draw(); after && after(); }); z.onclick = go; z.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') go(); }; }); };
+      el.querySelectorAll('[data-r]').forEach(z => { const go = () => painSheet(z.dataset.r, () => { draw(); after && after(); }, z.dataset.s); z.onclick = go; z.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') go(); }; }); };
     draw();
   }
-  function painSheet(rid, after) {
-    const r = REGION[rid], types = new Set(pt(rid).length ? pt(rid) : ['pain']); let v = pv(rid) || 4;
+  function painSheet(rid, after, tapped) {
+    const r = REGION[rid], types = new Set(pt(rid).length ? pt(rid) : ['pain']), paired = Math.abs(r.zone[0] - 100) >= 4; let v = pv(rid) || 4, side = paired ? (tapped && tapped !== 'b' ? (S.pain[rid] && ps(rid) !== tapped ? 'b' : tapped) : ps(rid)) : 'b';
     const opts = SYMPTOMS.filter(t => (!t.joints || t.joints.includes(rid)) && (!t.regions || t.regions.includes(rid)));
     sheet(r.n, close => {
-      const draw = el => { el.innerHTML = `<p class="label">How strong?</p><div class="scale">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button class="${n === v ? 'on' : ''}" data-v="${n}">${n}</button>`).join('')}</div>
+      const draw = el => { el.innerHTML = `${paired ? `<p class="label">Which side?</p><div class="seg wrap">${[['l', 'Left'], ['r', 'Right'], ['b', 'Both']].map(([k, n]) => `<button class="${side === k ? 'on' : ''}" data-side="${k}">${n}</button>`).join('')}</div>` : ''}<p class="label">How strong?</p><div class="scale">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button class="${n === v ? 'on' : ''}" ${n === v ? `style="background:${sevCol(n)};border-color:${sevCol(n)}"` : ''} data-v="${n}">${n}</button>`).join('')}</div><div class="sevkey"><span style="color:${sevCol(2)}">Mild</span><span style="color:${sevCol(5)}">Moderate</span><span style="color:${sevCol(8)}">Strong</span></div>
 <p class="label">Feels like</p><div class="chips">${opts.map(t => `<button class="chip ${types.has(t.id) ? 'on' : ''}" data-t="${t.id}">${t.n}</button>`).join('')}</div>
 ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="note warn">${I.alert}<span>${SYMPTOM_ADVICE[t].default}</span></div>`).join('')}
 <div class="row"><button class="btn ghost" id="pclr">${S.pain[rid] ? 'Remove' : 'Cancel'}</button><button class="btn" id="pok">Done</button></div>`;
         el.querySelectorAll('[data-v]').forEach(b => b.onclick = () => { v = +b.dataset.v; draw(el); });
+        el.querySelectorAll('[data-side]').forEach(b => b.onclick = () => { side = b.dataset.side; draw(el); });
         el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { const t = b.dataset.t; types.has(t) ? types.delete(t) : types.add(t); if (!types.size) types.add('pain'); draw(el); });
-        el.querySelector('#pok').onclick = () => { S.pain[rid] = { v, t: [...types] }; log().pain[rid] = v; save(); close(); after(); };
+        el.querySelector('#pok').onclick = () => { S.pain[rid] = { v, t: [...types], side }; log().pain[rid] = v; save(); close(); after(); };
         el.querySelector('#pclr').onclick = () => { delete S.pain[rid]; save(); close(); after(); }; };
       return draw;
     });
@@ -142,13 +189,13 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
     // 1. warm-up: easy pulse raiser and joint mobility, never static holds
     const wu = (Pf.duration <= 5 ? WARMUP.slice(0, 2) : Pf.duration <= 10 ? WARMUP.slice(0, 3) : WARMUP);
     wu.forEach(w => { const t = Pf.duration <= 5 ? Math.round(w.secs * 0.7) : w.secs; items.push({ kind: 'move', section: 'warmup', ex: w, secs: t }); used += t; });
-    const breathT = Pf.duration <= 5 ? 75 : Pf.duration <= 10 ? 120 : 180; used += breathT;
+    const breathT = Pf.duration <= 5 ? 75 : Pf.duration <= 10 ? 120 : Pf.duration >= 30 ? 240 : 180; used += breathT;
     // stretch targets: shortened or painful tight-prone muscles, painful regions first
     const score = m => (painM.has(m.id) ? 0.5 : 0) + A[m.id].shortening * 0.6 + A[m.id].pain * 0.4;
     const tight = MUSCLES.filter(m => m.tend !== 'weak' && (A[m.id].shortening > 0.12 || A[m.id].pain > 0.4 || painM.has(m.id))).sort((a, b) => score(b) - score(a));
     const covered = new Set(), stretches = [];
     for (const m of tight) { if (covered.has(m.id) || A[m.id].noStretch) continue; const c = STRETCHES.filter(s => okS(s) && s.m.includes(m.id) && !stretches.some(q => q.ex === s) && !s.m.some(i => A[i] && A[i].noStretch)).sort((x, y) => (x.type === 'static' ? 0 : 1) - (y.type === 'static' ? 0 : 1) || x.m.indexOf(m.id) - y.m.indexOf(m.id));
-      if (!c.length) continue; const s = c[0], t = secs(s); if (used + t > dur * 0.75) continue; stretches.push({ kind: 'stretch', section: 'stretch', ex: s, secs: t, why: m }); used += t; s.m.forEach(i => covered.add(i)); if (stretches.length >= (ST.id === 1 ? 3 : 5)) break; }
+      if (!c.length) continue; const s = c[0], t = secs(s); if (used + t > dur * 0.75) continue; stretches.push({ kind: 'stretch', section: 'stretch', ex: s, secs: t, why: m }); used += t; s.m.forEach(i => covered.add(i)); if (stretches.length >= (ST.id === 1 ? 3 : 5) + (Pf.duration >= 30 ? 2 : 0)) break; }
     // 2. primer: a short 20 s stretch of the tightest muscle, right before strengthening its opposite
     if (stretches.length && Pf.duration >= 10) { const pri = stretches[0], t = 20 * pri.ex.sides + 8; items.push({ kind: 'stretch', section: 'pre', ex: pri.ex, secs: t, why: pri.why, primer: true }); used += t; }
     // 3. strengthen: weak-prone muscles of painful regions and the antagonists of the tight ones
@@ -156,7 +203,7 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
     tight.slice(0, 5).forEach(m => m.relax.forEach(i => { if (MUSCLE[i] && MUSCLE[i].tend !== 'tight') weak.set(i, Math.max(weak.get(i) || 0, 0.5)); }));
     const wl = [...weak.entries()].sort((a, b) => b[1] - a[1]).map(e => MUSCLE[e[0]]), sc = new Set(), str = [];
     for (const id of RU.add) { const s = STRENGTH_BY[id]; if (!s) continue; const t = secs(s); if (used + t > dur * 1.1) continue; str.push({ kind: 'strength', section: 'strength', ex: s, secs: t, why: MUSCLE[s.m[0]] }); used += t; s.m.forEach(i => sc.add(i)); }
-    for (const m of wl) { if (sc.has(m.id)) continue; const c = STRENGTH.filter(s => okS(s) && !s.id.startsWith('pf-') && s.m.includes(m.id) && s.level <= Math.min(ST.level, RU.maxLevel) && !str.some(i => i.ex === s)).sort((x, y) => x.level - y.level); if (!c.length) continue; const s = c[0], t = secs(s); if (used + t > dur) continue; str.push({ kind: 'strength', section: 'strength', ex: s, secs: t, why: m }); used += t; s.m.forEach(i => sc.add(i)); if (str.length >= ST.strength + RU.add.length) break; }
+    for (const m of wl) { if (sc.has(m.id)) continue; const c = STRENGTH.filter(s => okS(s) && !s.id.startsWith('pf-') && s.m.includes(m.id) && s.level <= Math.min(ST.level, RU.maxLevel) && !str.some(i => i.ex === s)).sort((x, y) => x.level - y.level); if (!c.length) continue; const s = c[0], t = secs(s); if (used + t > dur) continue; str.push({ kind: 'strength', section: 'strength', ex: s, secs: t, why: m }); used += t; s.m.forEach(i => sc.add(i)); if (str.length >= ST.strength + RU.add.length + (Pf.duration >= 30 ? 2 : 0)) break; }
     items.push(...str);
     // 4. lengthen: the main stretches, on warm tissue
     items.push(...stretches);
@@ -164,7 +211,7 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
     let br = Pf.breathless === 'yes' ? 'seated' : RU.breath || (Pf.breathless === 'mild' ? 'side' : (S.logs.length % 2 ? 'seated' : 'belly'));
     if (RU.breathAvoid.includes(br) || (br === 'belly' && RU.exclude.has('breathing'))) br = 'side';
     items.push({ kind: 'breath', section: 'breath', ex: BREATH.ex.find(e => e.id === br), secs: breathT });
-    if (Pf.duration >= 20) { items.push({ kind: 'scan', section: 'calm', ex: { id: 'scan', n: 'Body scan' }, secs: 240 }); used += 240; }
+    if (Pf.duration >= 20) { const sc = Pf.duration >= 30 ? Math.max(240, Math.min(420, dur - used)) : 240; items.push({ kind: 'scan', section: 'calm', ex: { id: 'scan', n: 'Body scan' }, secs: sc }); used += sc; }
     return { items, minutes: Math.max(1, Math.round(used / 60)), A, tight: tight.slice(0, 5), weak: wl.slice(0, 5), stretches, strength: str, stage: ST, rules: RU };
   }
   const itemKey = it => it.ex.id + (it.primer ? '-pre' : '');
@@ -181,13 +228,13 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
   /* spec: { r: id, t, reps, sets, section, primer, why, music, key } */
   function mkStep(spec, RU) {
     const r = spec.r, why = spec.why, st = { key: spec.key || r, section: spec.section, music: spec.music, cues: [] };
-    if (r === 'walk') return { ...st, kind: 'move', name: 'Easy walk', ill: 'stand', mv: { ...ILLUS.MOVES['wu-march'], a: { th2: 40, sh2: 100, ua: 105, fa: 95 }, b: { th2: 140, sh2: 95, ua: 75, fa: 70 }, tempo: [0.8, 0, 0.8, 0], alt: true },
-      intro: ['Easy walk.', 'Walk slowly, on the spot or around the room. Let your breathing settle.'], cues: ['Let the shoulders drop.', 'Breathe in through the nose, out a little longer.', 'Your heart rate is coming down. That is the point.'], cycles: [{ label: '', t: spec.t || 60 }], music: st.music || 'flow' };
+    if (r === 'walk') return { ...st, kind: 'move', name: 'Easy walk', ill: 'walk', mv: ILLUS.MOVES.walk,
+      intro: ['Easy walk.', 'Walk slowly, on the spot or around the room. Let your breathing settle.'], cues: ['Let the shoulders drop.', 'Breathe in through the nose, out a little longer.', 'Your heart rate is coming down. That is the point.'], cycles: [{ label: '', t: spec.t || 60 }], music: 'walk' };
     if (r.startsWith('breath:') || spec.kind === 'breath') { const x = BREATH_BY[r.replace('breath:', '')] || BREATH_BY.seated;
       return { ...st, kind: 'breath', name: x.n.replace(/,.*$/, ''), x, ill: x.id === 'seated' ? 'seated-twist' : 'breathing', intro: [x.n.replace(/,.*$/, '') + '.', sentences(x.pos)[0]], cues: [...sentences(x.steps.join(' ')).slice(1, 4), 'Small, quiet breaths work best.', 'Let the shoulders be heavy.'], cycles: [{ label: 'Breathe', t: spec.t || 120 }], music: 'calm' }; }
     if (r === 'scan') return { ...st, kind: 'scan', name: 'Body scan', ill: 'breathing', intro: ['Body scan.', RU.scanNote || 'Lie down or sit back, and let your eyes close.'], cycles: [{ label: 'Scan', t: spec.t || 240 }], music: 'calm' };
     if (WARM_BY[r]) { const w = WARM_BY[r], mv = ILLUS.MOVES[r];
-      return { ...st, kind: 'move', name: w.n, ill: illOf(w), mv, intro: [w.n + '.', sentences(w.how)[0]], cues: [...sentences(w.how).slice(1), 'Easy pace. You should be able to talk.', 'Breathe through the nose.'], cycles: [{ label: '', t: spec.t || w.secs }], music: st.music || 'energy' }; }
+      return { ...st, kind: 'move', name: w.n, ill: illOf(w), mv, feel: w.feel, intro: [w.n + '.', sentences(w.how)[0]], cues: [...sentences(w.how).slice(1), 'Easy pace. You should be able to talk.', 'Breathe through the nose.'], cycles: [{ label: '', t: spec.t || w.secs }], music: st.music || 'energy' }; }
     const x = STRETCH_BY[r] || STRENGTH_BY[r]; if (!x) return null;
     const isStretch = x.sets == null, sides = x.sides || 1, mv0 = ILLUS.MOVES[x.id], c = COACH[x.id] || { focus: [], avoid: [] };
     const where = WHERE[(why && why.id) || x.m[0]] || '';
@@ -204,9 +251,9 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
     }
     const how = sentences(x.how);
     const focus = c.focus.map(f => 'Focus on ' + low(f) + '.'), avoid = c.avoid.slice(0, 2).map(a => 'Avoid ' + low(a).replace(/^avoid /, '') + '.');
-    st.cues = [...how.slice(1), focus[0], where && isStretch ? `Let ${where} soften as you breathe out.` : where ? `Feel ${where} doing the work.` : '', avoid[0], focus[1], isStretch ? 'A mild pull only. Never sharp.' : 'Breathe out on the effort.', avoid[1], focus[2]].filter(Boolean);
-    return { ...st, kind: isStretch ? 'stretch' : 'strength', name: spec.primer ? x.n + ' (quick)' : x.n, x, ill: x.ill, mv, tempo, cycles,
-      intro: [x.n + '.', spec.primer ? 'A quick twenty seconds to loosen up before the strength work.' : how[0]], music: st.music || (isStretch ? 'flow' : 'energy'), where };
+    st.cues = [...(spec.primer ? ['A quick twenty seconds to loosen up before the strength work.'] : []), ...how.slice(1), focus[0], where && isStretch ? `Let ${where} soften as you breathe out.` : where ? `Feel ${where} doing the work.` : '', avoid[0], focus[1], isStretch ? 'A mild pull only. Never sharp.' : 'Breathe out on the effort.', avoid[1], focus[2]].filter(Boolean);
+    return { ...st, kind: isStretch ? 'stretch' : 'strength', name: x.n, x, ill: x.ill, mv, tempo, cycles,
+      intro: [x.n + '.', how[0]], music: st.music || (isStretch ? 'flow' : 'energy'), where };
   }
   function sessionSteps(sess) {
     const RU = sess.rules, cap = sess.stage.id === 1 ? 20 : 0;
@@ -220,7 +267,7 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
   const stepSecs = st => st.cycles.reduce((a, c) => a + c.t, 0) + 6;
 
   /* ---------- navigation ---------- */
-  const TABS = [['today', 'Today', I.sun], ['resets', 'Resets', I.bolt], ['program', 'Program', I.chart], ['learn', 'Learn', I.book]];
+  const TABS = [['today', 'Today', I.sun], ['resets', 'Quickies', I.bolt], ['program', 'Program', I.chart], ['learn', 'Learn', I.book]];
   let tab = 'today';
   function nav() { $('nav').innerHTML = TABS.map(([id, n, ic]) => `<button data-go="${id}" class="${tab === id ? 'on' : ''}" aria-label="${n}">${ic}<span>${n}</span></button>`).join(''); $('nav').querySelectorAll('button').forEach(b => b.onclick = () => show(b.dataset.go)); }
   function show(id) { tab = id; document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === 's-' + id)); nav(); window.scrollTo(0, 0); rerender(); }
@@ -228,30 +275,46 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
 
   /* ---------- onboarding: three light screens ---------- */
   let ob = 0;
-  const DAYS = [['desk', 'At a desk', I.desk, { desk: 7, sofa: 2, phone: 2, stand: 1 }], ['sofa', 'On the sofa', I.sofa, { desk: 0, sofa: 5, phone: 3, stand: 2 }], ['feet', 'On my feet', I.walk, { desk: 1, sofa: 2, phone: 1, stand: 8 }], ['mixed', 'A mix', I.mix, { desk: 4, sofa: 2, phone: 2, stand: 4 }]];
+  /* your day: pick everything that applies; hours add up and drive the muscle model */
+  const DAYS = [['desk', 'Desk or laptop', I.desk, { desk: 6 }], ['sofa', 'Sofa or TV', I.sofa, { sofa: 3 }], ['phone', 'Phone a lot', I.phone, { phone: 3 }],
+    ['drive', 'Driving', I.car, { desk: 2 }], ['feet', 'On my feet', I.walk, { stand: 6 }], ['lift', 'Lifting or physical work', I.box, { stand: 4 }]];
+  const FOCUS = { desk: 'undoing the desk', sofa: 'undoing the sofa', phone: 'phone neck', drive: 'undoing the drive', feet: 'tired legs and back', lift: 'a strong, happy back' };
+  function applyDays(Pf) { const h = { desk: 0, sofa: 0, phone: 0, stand: 1 }; const days = Pf.days.length ? Pf.days : ['desk', 'feet'];
+    days.forEach(id => { const d = DAYS.find(x => x[0] === id); if (d) for (const k in d[3]) h[k] += d[3][k]; });
+    const sit = h.desk + h.sofa + h.phone; if (sit > 12) { const f = 12 / sit; h.desk *= f; h.sofa *= f; h.phone *= f; }
+    for (const k in h) Pf[k] = Math.round(h[k] * 2) / 2; }
+  const dayNames = Pf => (Pf.days || []).map(id => (DAYS.find(d => d[0] === id) || [0, ''])[1].split(' ')[0]).filter(Boolean).join(', ') || 'Not set';
+  const dayGrid = Pf => `<div class="bigpick three">${DAYS.map(([id, n, ic]) => `<button data-day="${id}" class="${Pf.days.includes(id) ? 'on' : ''}" aria-pressed="${Pf.days.includes(id)}"><span class="tick">${I.check}</span>${ic}<span>${n}</span></button>`).join('')}</div>`;
+  const togDay = (Pf, id) => { const i = Pf.days.indexOf(id); i >= 0 ? Pf.days.splice(i, 1) : Pf.days.push(id); applyDays(Pf); save(); };
   const FLAGS = [['breath', 'Short of breath lying flat, better sitting up'], ['chest', 'Chest pain, or breathless with light effort'], ['cauda', 'Numbness around the groin, or new bladder or bowel problems'], ['limb', 'Weakness or numbness spreading into an arm or leg'], ['injury', 'Pain that started with a fall or accident'], ['night', 'Pain that wakes me at night, or fever or weight loss with it']];
   const flagged = () => S.profile.redflags.length || S.profile.breathless === 'yes';
   function renderOnboard() {
-    const el = $('s-onboard'), Pf = S.profile; el.classList.add('on'); $('nav').hidden = true;
-    const dots = `<div class="obtop"><div class="dots">${[0, 1, 2].map(i => `<i class="${i === ob ? 'on' : ''}"></i>`).join('')}</div><div class="seg icons" role="group" aria-label="Appearance">${[['light', I.sun, 'Light'], ['auto', I.contrast, 'Automatic'], ['dark', I.moon, 'Dark']].map(([v, ic, n]) => `<button class="${Pf.theme === v ? 'on' : ''}" data-theme="${v}" aria-label="${n}" title="${n}">${ic}</button>`).join('')}</div></div>`;
+    const el = $('s-onboard'), Pf = S.profile; el.classList.add('on'); el.classList.toggle('fit', ob === 0); document.body.classList.add('onb'); $('nav').hidden = true;
+    const dots = `<div class="obtop"><div class="obnav">${ob ? `<button class="iconbtn" id="obback" aria-label="Back">${I.back}</button>` : ''}<div class="dots">${[0, 1, 2].map(i => `<i class="${i === ob ? 'on' : ''}"></i>`).join('')}</div></div><div class="seg icons" role="group" aria-label="Appearance">${[['light', I.sun, 'Light'], ['auto', I.contrast, 'Automatic'], ['dark', I.moon, 'Dark']].map(([v, ic, n]) => `<button class="${Pf.theme === v ? 'on' : ''}" data-theme="${v}" aria-label="${n}" title="${n}">${ic}</button>`).join('')}</div></div>`;
     const bindTheme = () => el.querySelectorAll('[data-theme]').forEach(b => b.onclick = () => { Pf.theme = b.dataset.theme; save(); applyTheme(); renderOnboard(); });
+    const goBack = () => { if (ob > 0) { ob--; renderOnboard(); window.scrollTo(0, 0); } };
+    if (!el.dataset.swipe) { el.dataset.swipe = 1; let x0 = 0, y0 = 0;   // swipe right to go back a step
+      el.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+      el.addEventListener('touchend', e => { const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; if (dx > 70 && Math.abs(dy) < 60 && !e.target.closest('.zone')) el._back && el._back(); }, { passive: true }); }
+    el._back = goBack;
     if (ob === 0) {
-      el.innerHTML = `${dots}<h1>Where does it bother you?</h1><p class="lede">Tap a spot, or skip if you just want to keep moving.</p>
+      el.innerHTML = `${dots}<h1>Where do you have pain or issues?</h1>
 <div id="obmap"></div><div class="sticky"><button class="btn" id="obnext">${Object.keys(S.pain).length ? 'Continue' : 'Nothing, keep me moving'}</button></div>`;
-      bodyMap($('obmap'), () => renderOnboard(), { head: `<div class="seg sm"><button class="${Pf.sex === 'f' ? 'on' : ''}" data-sex="f">Woman</button><button class="${Pf.sex === 'm' ? 'on' : ''}" data-sex="m">Man</button></div>`,
+      bodyMap($('obmap'), () => renderOnboard(), { compact: true, head: `<div class="seg sm"><button class="${Pf.sex === 'f' ? 'on' : ''}" data-sex="f">Woman</button><button class="${Pf.sex === 'm' ? 'on' : ''}" data-sex="m">Man</button></div>`,
         bind: m => m.querySelectorAll('[data-sex]').forEach(b => b.onclick = () => { Pf.sex = b.dataset.sex; ILLUS.setFemale(isF()); save(); renderOnboard(); }) });
       $('obnext').onclick = () => { if (!Pf.sex) Pf.sex = 'x'; ob = 1; save(); renderOnboard(); };
     } else if (ob === 1) {
-      el.innerHTML = `${dots}<h1>Your day is mostly…</h1><p class="lede">One tap. You can fine-tune it later.</p><div class="bigpick">${DAYS.map(([id, n, ic]) => `<button data-day="${id}" class="${Pf.dayType === id ? 'on' : ''}">${ic}<span>${n}</span></button>`).join('')}</div>`;
-      el.querySelectorAll('[data-day]').forEach(b => b.onclick = () => { const d = DAYS.find(x => x[0] === b.dataset.day); Object.assign(Pf, d[3]); Pf.dayType = d[0]; ob = 2; save(); renderOnboard(); });
+      el.innerHTML = `${dots}<h1>Your day includes…</h1><p class="lede">Tap all that apply. Your workout adapts to each.</p>${dayGrid(Pf)}<div class="sticky"><button class="btn" id="obday">${Pf.days.length ? 'Continue' : 'Skip'}</button></div>`;
+      el.querySelectorAll('[data-day]').forEach(b => b.onclick = () => { togDay(Pf, b.dataset.day); renderOnboard(); });
+      $('obday').onclick = () => { applyDays(Pf); ob = 2; save(); renderOnboard(); };
     } else {
       const sel = k => k === 'breath' ? Pf.breathless === 'yes' : Pf.redflags.includes(k);
       el.innerHTML = `${dots}<h1>Quick safety check</h1><p class="lede">Does any of this apply right now?</p><div class="list">${FLAGS.map(([k, n]) => `<button class="opt ${sel(k) ? 'on' : ''}" data-f="${k}"><span class="box">${I.check}</span>${n}</button>`).join('')}</div>
 <div class="sticky"><button class="btn" id="obdone">${flagged() ? 'Continue' : 'None of these, let’s go'}</button></div>`;
       el.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { const k = b.dataset.f; if (k === 'breath') Pf.breathless = Pf.breathless === 'yes' ? 'no' : 'yes'; else { const i = Pf.redflags.indexOf(k); i >= 0 ? Pf.redflags.splice(i, 1) : Pf.redflags.push(k); } save(); renderOnboard(); });
-      $('obdone').onclick = () => { S.onboarded = true; S.lastCheck = today(); save(); el.classList.remove('on'); $('nav').hidden = false; show('today'); };
+      $('obdone').onclick = () => { document.body.classList.remove('onb'); S.onboarded = true; S.lastCheck = today(); save(); el.classList.remove('on'); $('nav').hidden = false; show('today'); };
     }
-    bindTheme();
+    bindTheme(); const bb = $('obback'); if (bb) bb.onclick = goBack;
   }
 
   /* ---------- today ---------- */
@@ -265,27 +328,27 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
     const el = $('s-today'), Pf = S.profile, L = log(); session = buildSession();
     const steps = sessionSteps(session), doneN = session.items.filter(i => L.done.includes(itemKey(i))).length, all = doneN >= session.items.length;
     const areas = Object.keys(S.pain), RU = session.rules;
-    const focus = areas.length ? areas.slice(0, 2).map(i => low(REGION[i].n)).join(' and ') : { desk: 'undoing the desk', sofa: 'undoing the sofa', feet: 'tired legs and back', mixed: 'whole-body balance' }[Pf.dayType] || 'moving well';
-    const hero = ILLUS.svg('stand', ILLUS.animPose('stand', ILLUS.MOVES['wu-march'], 0.62), { uid: 'h', glow: false, fit: 0.78 });
+    const focus = areas.length ? areas.slice(0, 2).map(i => low(REGION[i].n)).join(' and ') : FOCUS[Pf.days[0]] || 'moving well';
+    const hero = ILLUS.svg('walk', null, { uid: 'h', fit: 0.8 });
     // one small pain check, at most every 3 days, one area at a time
     const lastChk = S.lastCheck ? daysSince(S.lastCheck) : 99, chkId = areas.length && lastChk >= 3 ? areas[(S.logs.length) % areas.length] : null;
     const phaseRows = PHASES.map(([pid, n, secs], k) => { const its = session.items.map((it, i) => ({ it, i, st: steps[i] })).filter(o => secs.includes(o.it.section)); if (!its.length) return '';
       const m = Math.max(1, Math.round(its.reduce((a, o) => a + o.it.secs, 0) / 60)), done = its.every(o => L.done.includes(itemKey(o.it)));
       return `<details class="act ${done ? 'done' : ''}"><summary><div class="thumb">${ILLUS.svg((its.find(o => !o.it.primer) || its[0]).st?.ill || 'stand', null, { uid: 't' + k, glow: false, fit: 1.375 })}</div><div class="grow"><b>${n}</b><span>${m} min · ${its.length} ${its.length === 1 ? 'exercise' : 'exercises'}</span></div><span class="num">${done ? I.check : k + 1}</span></summary>
-<div class="exlist">${its.map(o => `<button class="exrow ${L.done.includes(itemKey(o.it)) ? 'done' : ''}" data-play="${o.i}"><div class="thumb sm">${ILLUS.svg(o.st ? o.st.ill : 'stand', null, { uid: 'e' + o.i, fit: 1.39 })}</div><span class="grow">${esc(o.st ? o.st.name : o.it.ex.n)}</span>${I.play}</button>`).join('')}</div></details>`; }).join('');
-    el.innerHTML = `<header class="top"><div><h1>Today</h1><p class="kicker">${I.sun}<span>${streak() > 1 ? streak() + ' days in a row' : 'Time for you'}</span></p></div><button class="iconbtn tint" data-go="program" aria-label="Program">${I.cal}</button></header>
-${!S.hideDisc ? `<div class="disc">${I.shield}<span>Guidance, not a diagnosis. Stop if anything hurts sharply.</span><button class="iconbtn" id="xdisc" aria-label="Dismiss">${I.x}</button></div>` : ''}
+<div class="exlist">${its.map(o => `<button class="exrow ${L.done.includes(itemKey(o.it)) ? 'done' : ''}" data-play="${o.i}"><div class="thumb sm">${ILLUS.svg(o.st ? o.st.ill : 'stand', null, { uid: 'e' + o.i, fit: 1.39 })}</div><span class="grow">${esc(o.st ? o.st.name : o.it.ex.n)}</span><span class="go">${I.play}</span></button>`).join('')}</div></details>`; }).join('');
+    el.innerHTML = `<header class="top"><div><h1>Today</h1>${streak() > 1 ? `<p class="kicker">${I.sun}<span>${streak()} days in a row</span></p>` : ''}</div><button class="iconbtn tint" data-go="program" aria-label="Program">${I.cal}</button></header>
+
 ${flagged() ? `<div class="note bad">${I.alert}<span><b>Check with a doctor first.</b> Something you ticked needs a look before training. Gentle walking and the calm resets are fine meanwhile. <a href="#" id="editflags">Change answers</a></span></div>` : ''}
 ${RU.gentle ? `<div class="note">${I.heart}<span>Gentler today, since yesterday felt worse.</span></div>` : ''}
-<section class="hero"><div class="herotxt"><h2>${all ? 'Done for today' : 'Your session'}</h2><p>${session.minutes} min for ${esc(focus)}.</p>
-<div class="seg xs">${[5, 10, 15, 20].map(m => `<button class="${Pf.duration === m ? 'on' : ''}" data-dur="${m}">${m}</button>`).join('')}<span>min</span></div></div><div class="heroart">${hero}</div></section>
+<section class="hero"><div class="herotxt"><h2>${all ? 'Done for today' : 'How much time would you like?'}</h2><p>${all ? 'Nice work. Go again any time.' : 'For ' + esc(focus) + '.'}</p>
+<div class="seg xs">${[5, 10, 15, 20, 30].map(m => `<button class="${Pf.duration === m ? 'on' : ''}" data-dur="${m}" aria-label="${m} minutes"><b>${m}</b><small>min</small></button>`).join('')}</div></div><div class="heroart">${hero}</div></section>
 <button class="btn big" id="start">${I.play}<span>${all ? 'Go again' : doneN ? 'Continue' : 'Start session'}</span></button>
 ${chkId ? `<section class="card chk"><p><b>How is your ${esc(low(REGION[chkId].n))} today?</b></p><div class="scale sm">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button data-chk="${n}" class="${n === pv(chkId) ? 'was' : ''}">${n}</button>`).join('')}</div></section>` : ''}
 <h3 class="sect">Today’s activities</h3>${phaseRows}
-<div class="secthead"><h3 class="sect">Quick resets</h3><button class="link" data-go="resets">See all</button></div>
+<div class="secthead"><h3 class="sect">Quickies for now</h3><button class="link" data-go="resets">See all</button></div>
 <div class="hscroll">${suggestResets().map(r => resetCard(r, 'q')).join('')}</div>
 <div class="secthead"><h3 class="sect">Where it bothers you</h3><button class="link" id="editmap">Edit</button></div>
-<div class="chips">${areas.map(id => `<button class="chip on" data-area="${id}">${esc(REGION[id].n)} <b>${pv(id)}</b></button>`).join('') || '<button class="chip" id="addmap">Add an area</button>'}</div>`;
+<div class="chips">${areas.map(id => `<button class="chip on" data-area="${id}">${esc(REGION[id].n)}${sideTxt(id)} <b style="color:${sevCol(pv(id))}">${pv(id)}</b></button>`).join('') || '<button class="chip" id="addmap">Add an area</button>'}</div>`;
     el.querySelectorAll('[data-go]').forEach(b => b.onclick = () => show(b.dataset.go));
     el.querySelectorAll('[data-dur]').forEach(b => b.onclick = () => { Pf.duration = +b.dataset.dur; save(); renderToday(); });
     $('start').onclick = () => { const first = all ? 0 : session.items.findIndex(i => !L.done.includes(itemKey(i))); play(steps, { kind: 'session', from: Math.max(0, first) }); };
@@ -300,44 +363,55 @@ ${chkId ? `<section class="card chk"><p><b>How is your ${esc(low(REGION[chkId].n
   function mapSheet(after) { sheet('Where it bothers you', close => el => { el.innerHTML = '<div id="smap"></div><button class="btn" id="mapdone">Done</button>'; bodyMap(el.querySelector('#smap'), () => {}); el.querySelector('#mapdone').onclick = () => { close(); after(); }; }); }
   function startReset(id) { const r = RESETS.find(x => x.id === id); if (!r) return; play(resetSteps(r), { kind: 'reset', id, n: r.n }); }
 
-  /* ---------- resets ---------- */
+  /* ---------- quickies (short routines) ---------- */
   let rcat = 'all';
   function renderResets() {
     const el = $('s-resets'), list = RESETS.filter(r => rcat === 'all' || r.cat === rcat);
-    el.innerHTML = `<header class="top"><div><h1>Resets</h1><p class="kicker">${I.bolt}<span>Two to six minutes. Press play.</span></p></div></header>
-<div class="seg scroll">${RESET_CATS.map(([id, n]) => `<button class="${rcat === id ? 'on' : ''}" data-cat="${id}">${n}</button>`).join('')}</div>
+    el.innerHTML = `<header class="top"><div><h1>Quickies</h1><p class="kicker">${I.bolt}<span>2 to 6 minutes, fully guided</span></p></div></header>
+<p class="lede">Short routines for right before or after something: a walk, a bike ride, a long sit, bedtime.</p>
+<div class="seg cats">${RESET_CATS.map(([id, n]) => `<button class="${rcat === id ? 'on' : ''}" data-cat="${id}">${n}</button>`).join('')}</div>
 <div class="grid">${list.map(r => resetCard(r, 'r')).join('')}</div>`;
     el.querySelectorAll('[data-cat]').forEach(b => b.onclick = () => { rcat = b.dataset.cat; renderResets(); });
     el.querySelectorAll('[data-reset]').forEach(b => b.onclick = () => startReset(b.dataset.reset));
   }
 
   /* ---------- program ---------- */
+  let wkOff = 0;
   function renderProgram() {
     const el = $('s-program'), sess = session || buildSession(), ST = stage(), Pf = S.profile;
-    const now = new Date(), mon = new Date(now); mon.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-    const week = [...Array(7)].map((_, i) => { const d = new Date(mon); d.setDate(mon.getDate() + i); const k = dkey(Math.round((d - new Date(today())) / 864e5)); return { k, d, l: S.logs.find(x => x.d === k) }; });
-    const doneW = week.filter(w => active(w.l)).length, st = streak();
+    const weekOf = off => { const now = new Date(), mon = new Date(now); mon.setDate(now.getDate() - ((now.getDay() + 6) % 7) + off * 7);
+      return [...Array(7)].map((_, i) => { const d = new Date(mon); d.setDate(mon.getDate() + i); const k = dkey(Math.round((d - new Date(today() + 'T00:00')) / 864e5)); return { k, d, l: S.logs.find(x => x.d === k) }; }); };
+    const week = weekOf(wkOff), doneW = week.filter(w => active(w.l)).length, st = streak(), thisW = weekOf(0).filter(w => active(w.l)).length;
+    const fmtD = d => d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }), wkLabel = wkOff === 0 ? 'This week' : wkOff === -1 ? 'Last week' : `${fmtD(week[0].d)} – ${fmtD(week[6].d)}`;
+    const startOff = -Math.floor(daysSince(S.started) / 7) - 1, weeks = [...Array(8)].map((_, i) => i - 7).map(o => { const wk = weekOf(o); return { o, d: wk[0].d, n: wk.filter(w => active(w.l)).length }; });
+    // stage progress: what the next stage asks for
+    const need = ST.id === 1 ? [14, 14] : ST.id === 2 ? [42, 28] : [84, 28], win = need[1], got = S.logs.filter(l => daysSince(l.d) < win && active(l)).length, req = Math.round(win * 4 / 7), dayN = daysSince(S.started) + 1;
     const msg = doneW >= Pf.perWeek ? ['Week complete', 'You hit your plan. That is how habits stick.'] : st >= 2 ? ['Keep it up', `${st} days in a row. Every bit of movement counts.`] : doneW ? ['Nice start', 'You are building a great habit.'] : ['Fresh week', 'Five minutes today gets it going.'];
-    const exRow = (it, k) => `<button class="exrow" data-ex="${it.ex.id}"><div class="thumb sm">${ILLUS.svg(it.ex.ill, null, { uid: 'g' + k + it.ex.id, fit: 1.39 })}</div><span class="grow"><b>${esc(it.ex.n)}</b><small>${esc(it.why ? cap(WHERE[it.why.id] || it.why.n) : '')}</small></span>${I.chev}</button>`;
-    const hist = S.logs.filter(active).sort((a, b) => a.d < b.d ? 1 : -1).slice(0, 5);
-    el.innerHTML = `<header class="top"><div><h1>Program</h1><p class="kicker">${I.chart}<span><b class="acc">${doneW}</b> of ${Pf.perWeek} sessions this week</span></p></div></header>
-<section class="card"><p class="label">This week</p><div class="week">${week.map(w => `<div class="${w.k === today() ? 'today' : ''}"><span>${'MTWTFSS'[(w.d.getDay() + 6) % 7]}</span><span class="dn">${w.d.getDate()}</span><i class="${active(w.l) ? 'on' : ''}">${active(w.l) ? I.check : ''}</i></div>`).join('')}</div></section>
+    const exRow = (it, k) => `<button class="exrow" data-ex="${it.ex.id}"><div class="thumb sm">${ILLUS.svg(it.ex.ill, null, { ex: it.ex.id, uid: 'g' + k + it.ex.id, fit: 1.39 })}</div><span class="grow"><b>${esc(it.ex.n)}</b><small>${esc(it.why ? cap(WHERE[it.why.id] || it.why.n) : '')}</small></span>${I.chev}</button>`;
+    const hist = week.map(w => w.l).filter(active).reverse();
+    el.innerHTML = `<header class="top"><div><h1>Program</h1><p class="kicker">${I.chart}<span><b class="acc">${thisW}</b> of ${Pf.perWeek} sessions this week</span></p></div></header>
+<section class="card"><div class="wknav"><button class="iconbtn" id="wkprev" aria-label="Previous week" ${wkOff <= startOff ? 'disabled' : ''}>${I.back}</button><p class="label">${wkLabel} · <b class="acc">${doneW}</b> of ${Pf.perWeek}</p><button class="iconbtn" id="wknext" aria-label="Next week" ${wkOff >= 0 ? 'disabled' : ''}>${I.chev}</button></div><div class="week">${week.map(w => `<div class="${w.k === today() ? 'today' : ''}"><span>${'MTWTFSS'[(w.d.getDay() + 6) % 7]}</span><span class="dn">${w.d.getDate()}</span><i class="${active(w.l) ? 'on' : ''}">${active(w.l) ? I.check : ''}</i></div>`).join('')}</div></section>
+<section class="card"><p class="label">Last 8 weeks</p><div class="weeks">${weeks.map(w => `<button class="${w.o === wkOff ? 'on' : ''}" data-wk="${w.o}" aria-label="${w.n} active days"><span class="track"><i style="height:${w.n ? Math.max(12, w.n / 7 * 100) : 0}%"></i></span><span>${w.o === 0 ? 'Now<br>&nbsp;' : w.d.getDate() + '<br>' + w.d.toLocaleDateString(undefined, { month: 'short' })}</span></button>`).join('')}</div></section>
 <section class="cheer"><span class="badge">${I.flag}</span><div><b>${msg[0]}</b><p>${msg[1]}</p></div></section>
-<section class="card"><div class="secthead"><p class="label">Stage ${ST.id} of 4</p><span class="small">${ST.weeks}</span></div><h2 class="stn">${ST.n}</h2><div class="stagebar">${STAGES.map(s => `<i class="${s.id <= ST.id ? 'on' : ''}"></i>`).join('')}</div><p class="small">${ST.goal}</p></section>
-<h3 class="sect">What your plan works on</h3>
-<section class="card flush"><p class="label pad">${I.layers} Lengthen what is held short</p>${sess.stretches.map(exRow).join('') || '<p class="small pad">Nothing clearly short. Nice.</p>'}</section>
-<section class="card flush"><p class="label pad">${I.bolt} Strengthen what is switched off</p>${sess.strength.map(exRow).join('') || '<p class="small pad">Add an area or your day to see targets.</p>'}</section>
-${hist.length ? `<h3 class="sect">Recent</h3><section class="card flush">${hist.map(l => `<div class="hrow"><span class="grow"><b>${new Date(l.d + 'T12:00').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}</b><small>${[l.done.length >= 2 ? 'Session' : '', ...(l.resets || []).map(id => (RESETS.find(r => r.id === id) || {}).n)].filter(Boolean).join(', ')}${l.minutes ? ' · ' + l.minutes + ' min' : ''}</small></span>${l.feel ? `<span class="feel ${l.feel}">${cap(l.feel)}</span>` : ''}<i class="ok">${I.check}</i></div>`).join('')}</section>` : ''}
+<h3 class="sect">Your program</h3><section class="card prog">
+<div class="stepper">${STAGES.map(s => `<button class="${s.id < ST.id ? 'done' : s.id === ST.id ? 'now' : ''}" data-stage="${s.id}" aria-label="Stage ${s.id}: ${s.n}"><span class="sdot">${s.id < ST.id ? I.check : s.id}</span><small>${s.n.split(' ')[0]}</small></button>`).join('')}</div>
+<div class="stnow"><b>${ST.n}</b><small>${ST.weeks}</small></div>
+${ST.id < 4 ? `<div class="pbar"><i style="width:${Math.min(100, got / req * 100)}%"></i></div><p class="small">${got} of ${req} active days to reach the next stage</p>` : ''}
+<div class="hscroll exs">${[...sess.stretches.map(it => [it, 'Lengthen', 'cool']), ...sess.strength.map(it => [it, 'Strengthen', 'energy'])].map(([it, tag, cl], k) => `<button class="xcard" data-ex="${it.ex.id}"><div class="thumb">${ILLUS.svg(it.ex.ill, null, { ex: it.ex.id, uid: 'g' + k + it.ex.id, fit: 1.375 })}</div><span class="tag ${cl}">${tag}</span><b>${esc(it.ex.n)}</b></button>`).join('') || '<p class="small">Add an area or your day to see your exercises.</p>'}</div></section>
+${hist.length ? `<h3 class="sect">${wkLabel}</h3><section class="card flush">${hist.map(l => `<div class="hrow"><span class="grow"><b>${new Date(l.d + 'T12:00').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}</b><small>${[l.done.length >= 2 ? 'Session' : '', ...(l.resets || []).map(id => (RESETS.find(r => r.id === id) || {}).n)].filter(Boolean).join(', ')}${l.minutes ? ' · ' + l.minutes + ' min' : ''}</small></span>${l.feel ? `<span class="feel ${l.feel}">${cap(l.feel)}</span>` : ''}<i class="ok">${I.check}</i></div>`).join('')}</section>` : ''}
 <h3 class="sect">Tune your plan</h3><section class="card flush settings">
-${[['map', I.body, 'Where it bothers you', Object.keys(S.pain).length + ' areas'], ['day', I.desk, 'Your day', (DAYS.find(d => d[0] === Pf.dayType) || [0, 'Custom'])[1]], ['about', I.user, 'About you', Pf.sex === 'f' ? 'Woman' : Pf.sex === 'm' ? 'Man' : 'Not set'], ['safety', I.shield, 'Safety answers', flagged() ? 'Needs a look' : 'All clear'], ['week', I.cal, 'Sessions per week', Pf.perWeek], ['remind', I.bell, 'Move reminders', S.remind.on ? 'Every ' + S.remind.every + ' min' : 'Off'], ['voice', I.voice, 'Coach voice', COACH_AUDIO.voiceName ? COACH_AUDIO.voiceName.split(' ')[0] : 'Default'], ['theme', I.contrast, 'Appearance', cap(Pf.theme)], ['stage', I.steps, 'Stage', Pf.stage ? 'Stage ' + Pf.stage : 'Automatic']].map(([id, ic, n, v]) => `<button class="setrow" data-set="${id}">${ic}<span class="grow">${n}</span><small>${esc(String(v))}</small>${I.chev}</button>`).join('')}
+${[['map', I.body, 'Where it bothers you', Object.keys(S.pain).length + ' areas'], ['day', I.desk, 'Your day', dayNames(Pf)], ['about', I.user, 'About you', Pf.sex === 'f' ? 'Woman' : Pf.sex === 'm' ? 'Man' : 'Not set'], ['safety', I.shield, 'Safety answers', flagged() ? 'Needs a look' : 'All clear'], ['week', I.cal, 'Sessions per week', Pf.perWeek], ['remind', I.bell, 'Move reminders', S.remind.on ? 'Every ' + S.remind.every + ' min' : 'Off'], ['voice', I.voice, 'Coach voice', COACH_AUDIO.voiceName === COACH_AUDIO.CLIPS ? 'Andrew' : COACH_AUDIO.voiceName ? COACH_AUDIO.voiceName.replace(/Microsoft |Google /, '').split(' ')[0] : 'Default'], ['music', I.music, 'Music', COACH_AUDIO.musicOn ? 'On' : 'Off'], ['theme', I.contrast, 'Appearance', cap(Pf.theme)], ['stage', I.steps, 'Stage', Pf.stage ? 'Stage ' + Pf.stage : 'Automatic']].map(([id, ic, n, v]) => `<button class="setrow" data-set="${id}">${ic}<span class="grow">${n}</span><small>${esc(String(v))}</small>${I.chev}</button>`).join('')}
 <button class="setrow danger" id="wipe">${I.trash}<span class="grow">Erase all my data</span></button></section>`;
     el.querySelectorAll('[data-ex]').forEach(b => b.onclick = () => exSheet(b.dataset.ex));
+    el.querySelectorAll('[data-stage]').forEach(b => b.onclick = () => { const st = STAGES[+b.dataset.stage - 1]; sheet(`${st.id}. ${st.n}`, () => e => { e.innerHTML = `<div class="prose"><p class="small">${cap(st.weeks)}${st.id === ST.id ? ' · you are here' : ''}</p><p>${st.goal}</p><ul>${st.does.slice(0, 3).map(d => `<li>${d.replace(/\s*\([^)]*\)/g, '')}</li>`).join('')}</ul>${st.id === ST.id && ST.id < 4 ? `<div class="pbar"><i style="width:${Math.min(100, got / req * 100)}%"></i></div><p class="small">${got} of ${req} active days to move on.</p>` : ''}</div>`; }); });
+    $('wkprev').onclick = () => { wkOff--; renderProgram(); }; $('wknext').onclick = () => { wkOff = Math.min(0, wkOff + 1); renderProgram(); };
+    el.querySelectorAll('[data-wk]').forEach(b => b.onclick = () => { wkOff = +b.dataset.wk; renderProgram(); });
     el.querySelectorAll('[data-set]').forEach(b => b.onclick = () => SETTINGS[b.dataset.set]());
     const w = $('wipe'); w.onclick = () => { if (w.dataset.arm) { localStorage.removeItem(KEY); location.reload(); } else { w.dataset.arm = 1; w.querySelector('span').textContent = 'Tap again to erase everything'; setTimeout(() => { if (w.isConnected) { delete w.dataset.arm; w.querySelector('span').textContent = 'Erase all my data'; } }, 3000); } };
   }
   function exSheet(id) {
     const x = STRETCH_BY[id] || STRENGTH_BY[id]; if (!x) return; const c = COACH[x.id] || { focus: [], avoid: [] };
-    sheet(x.n, close => el => { el.innerHTML = `<div class="exart">${ILLUS.svg(x.ill, null, { uid: 'x', fit: 1.6 })}</div><p class="dose">${PLAN.dose(x)}</p><p>${esc(x.how)}</p>
+    sheet(x.n, close => el => { el.innerHTML = `<div class="exart">${ILLUS.svg(x.ill, null, { ex: x.id, uid: 'x', fit: 1.6 })}</div><p class="dose">${PLAN.dose(x)}</p><p>${esc(x.how)}</p>
 <div class="fa"><div><p class="label ok">Focus on</p><ul>${c.focus.map(f => `<li>${esc(f)}</li>`).join('')}</ul></div><div><p class="label bad">Avoid</p><ul>${c.avoid.map(f => `<li>${esc(f)}</li>`).join('')}</ul></div></div>
 <button class="btn" id="exgo">${I.play}<span>Play this one</span></button>`;
       el.querySelector('#exgo').onclick = () => { close(); const st = mkStep({ r: id, section: x.sets == null ? 'stretch' : 'strength' }, rules()); play([st], { kind: 'single' }); }; });
@@ -353,12 +427,12 @@ ${[['map', I.body, 'Where it bothers you', Object.keys(S.pain).length + ' areas'
     map: () => mapSheet(rerender),
     safety: safetySheet,
     day: () => sheet('Your day', close => { const draw = el => { const Pf = S.profile;
-      el.innerHTML = `<div class="bigpick sm">${DAYS.map(([id, n, ic]) => `<button data-day="${id}" class="${Pf.dayType === id ? 'on' : ''}">${ic}<span>${n}</span></button>`).join('')}</div>
+      el.innerHTML = `<p class="small">Tap all that apply.</p>${dayGrid(Pf)}
 <details class="more"><summary>Fine-tune hours</summary>${[['desk', 'Desk or computer', 12], ['sofa', 'Sofa or armchair', 8], ['phone', 'Phone, head down', 8], ['stand', 'Standing or walking', 12]].map(([k, t, mx]) => `<label class="rng">${t} <b id="v_${k}">${Pf[k]} h</b><input type="range" min="0" max="${mx}" step="0.5" value="${Pf[k]}" data-h="${k}"></label>`).join('')}
 <p class="label">Desk setup</p>${chipRow([['1', 'Screen at eye level'], ['0', 'Laptop, or I slouch']], Pf.deskGood ? '1' : '0', 'desk')}
 <p class="label">Sleep</p>${chipRow([['side', 'Side'], ['back', 'Back'], ['curled', 'Curled up'], ['backHigh', 'Back, high pillow']], Pf.sleep, 'sleep')}</details><button class="btn" id="ddone">Done</button>`;
-      el.querySelectorAll('[data-day]').forEach(b => b.onclick = () => { const d = DAYS.find(x => x[0] === b.dataset.day); Object.assign(Pf, d[3]); Pf.dayType = d[0]; save(); draw(el); });
-      el.querySelectorAll('[data-h]').forEach(r => r.oninput = () => { Pf[r.dataset.h] = +r.value; Pf.dayType = 'custom'; el.querySelector('#v_' + r.dataset.h).textContent = r.value + ' h'; save(); });
+      el.querySelectorAll('[data-day]').forEach(b => b.onclick = () => { togDay(Pf, b.dataset.day); draw(el); });
+      el.querySelectorAll('[data-h]').forEach(r => r.oninput = () => { Pf[r.dataset.h] = +r.value; el.querySelector('#v_' + r.dataset.h).textContent = r.value + ' h'; save(); });
       el.querySelectorAll('[data-desk]').forEach(b => b.onclick = () => { Pf.deskGood = b.dataset.desk === '1'; save(); draw(el); el.querySelector('details').open = true; });
       el.querySelectorAll('[data-sleep]').forEach(b => b.onclick = () => { Pf.sleep = b.dataset.sleep; save(); draw(el); el.querySelector('details').open = true; });
       el.querySelector('#ddone').onclick = () => { close(); rerender(); }; }; return draw; }),
@@ -381,10 +455,20 @@ ${chipRow([['0', 'Off'], ['30', '30 min'], ['45', '45 min'], ['60', '60 min'], [
       el.querySelectorAll('[data-rm]').forEach(b => b.onclick = async () => { const v = +b.dataset.rm; S.remind.on = v > 0; if (v) S.remind.every = v; S.remind.last = Date.now(); save();
         if (v && 'Notification' in window && Notification.permission === 'default') { try { await Notification.requestPermission(); } catch (e) {} } draw(el); });
       el.querySelector('#rdone').onclick = () => { close(); rerender(); }; }; return draw; }),
-    voice: () => sheet('Coach voice', close => { const draw = el => { const vs = COACH_AUDIO.voices();
-      el.innerHTML = `<div class="list">${vs.length ? vs.slice(0, 24).map(v => `<button class="opt ${v.name === COACH_AUDIO.voiceName ? 'on' : ''}" data-vn="${esc(v.name)}"><span class="box">${I.check}</span>${esc(v.name)} <small>${v.lang}</small></button>`).join('') : '<p class="small">No voices found on this device.</p>'}</div><button class="btn" id="vdone">Done</button>`;
-      el.querySelectorAll('[data-vn]').forEach(b => b.onclick = () => { COACH_AUDIO.init(); COACH_AUDIO.setVoice(b.dataset.vn); COACH_AUDIO.hush(); COACH_AUDIO.say('Hi. I will guide you through each move.'); draw(el); });
-      el.querySelector('#vdone').onclick = () => { COACH_AUDIO.hush(); close(); rerender(); }; }; return draw; }),
+    voice: () => sheet('Coach voice', close => { const draw = el => { const vs = COACH_AUDIO.curated();
+      const rec = COACH_AUDIO.hasClips ? `<div class="vrow ${COACH_AUDIO.voiceName === COACH_AUDIO.CLIPS ? 'on' : ''}"><button class="vpick" data-vn="${COACH_AUDIO.CLIPS}"><span class="box">${I.check}</span><span class="grow"><b>Andrew</b><small>Male · natural · works on every device</small></span></button><button class="iconbtn tint" data-vs="${COACH_AUDIO.CLIPS}" aria-label="Play sample">${I.play2}</button></div>` : '';
+      el.innerHTML = `<div class="list">${rec}${vs.length ? vs.map(v => `<div class="vrow ${v.name === COACH_AUDIO.voiceName ? 'on' : ''}"><button class="vpick" data-vn="${esc(v.name)}"><span class="box">${I.check}</span><span class="grow"><b>${esc(v.name.replace(/\s*\(.*\)|Microsoft |Google | Online| Natural/g, '').trim())}</b><small>${v.gender === 'm' ? 'Male' : v.gender === 'f' ? 'Female' : 'Voice'}${v.natural ? ' · natural' : v.hq ? ' · high quality' : ''} · ${v.lang}</small></span></button><button class="iconbtn tint" data-vs="${esc(v.name)}" aria-label="Play sample">${I.play2}</button></div>`).join('') : '<p class="small">No voices found on this device.</p>'}</div>
+<div class="note">${I.alert}<span>${COACH_AUDIO.hasClips ? 'Andrew is recorded in the app and sounds the same everywhere. The others are your device voices.' : COACH_AUDIO.curated().some(v => v.natural) ? 'Natural voices found on this device.' : 'For a natural voice: on a computer, open the app in Microsoft Edge. On iPhone: Settings, Accessibility, Spoken Content, Voices, English, then download a Premium voice and reopen this list.'}</span></div><button class="btn" id="vdone">Done</button>`;
+      el.querySelectorAll('[data-vn]').forEach(b => b.onclick = () => { COACH_AUDIO.setVoice(b.dataset.vn); COACH_AUDIO.sample(b.dataset.vn); draw(el); });
+      el.querySelectorAll('[data-vs]').forEach(b => b.onclick = () => COACH_AUDIO.sample(b.dataset.vs));
+      el.querySelector('#vdone').onclick = () => { COACH_AUDIO.hush(); close(); rerender(); };
+      if (!COACH_AUDIO.hasClips) COACH_AUDIO.onClips(() => el.isConnected && draw(el)); }; return draw; }),
+    music: () => sheet('Music', close => { const draw = el => { el.innerHTML = `<p class="small">Original music made live on your phone. It gets quieter when the coach speaks.</p>
+<div class="list">${[['energy', 'Upbeat', 'Warm-ups and strength'], ['flow', 'Groove', 'Stretching'], ['walk', 'Walk', 'Easy walking'], ['calm', 'Calm', 'Breathing and the body scan']].map(([m, n, d]) => `<div class="vrow"><span class="grow vpick"><b>${n}</b><small>${d}</small></span><button class="iconbtn tint" data-mp="${m}" aria-label="Preview ${n}">${I.play2}</button></div>`).join('')}</div>
+${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '0', 'mon')}<button class="btn" id="mdone">Done</button>`;
+      el.querySelectorAll('[data-mp]').forEach(b => b.onclick = () => COACH_AUDIO.preview(b.dataset.mp));
+      el.querySelectorAll('[data-mon]').forEach(b => b.onclick = () => { COACH_AUDIO.musicOn = b.dataset.mon === '1'; draw(el); });
+      el.querySelector('#mdone').onclick = () => { COACH_AUDIO.stop(); close(); rerender(); }; }; return draw; }),
     theme: () => sheet('Appearance', close => el => { el.innerHTML = chipRow([['auto', 'Automatic'], ['light', 'Light'], ['dark', 'Dark']], S.profile.theme, 'th'); el.querySelectorAll('[data-th]').forEach(b => b.onclick = () => { S.profile.theme = b.dataset.th; save(); applyTheme(); close(); rerender(); }); }),
     stage: () => sheet('Stage', close => el => { el.innerHTML = `<p class="small">The app moves you on when you train 4 or more days a week and pain stays low. You can set it yourself.</p>${chipRow([[0, 'Automatic'], ...STAGES.map(s => [s.id, s.id + ' · ' + s.n])], S.profile.stage, 'st')}`; el.querySelectorAll('[data-st]').forEach(b => b.onclick = () => { S.profile.stage = +b.dataset.st; save(); close(); rerender(); }); })
   };
@@ -415,15 +499,32 @@ ${chipRow([['0', 'Off'], ['30', '30 min'], ['45', '45 min'], ['60', '60 min'], [
   let PL = null, raf = null;
   const reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const ease = u => u * u * (3 - 2 * u);
+  const HOLD_MOVES = new Set(['chin-tuck', 'neck-ext']);
   function animate() {
-    cancelAnimationFrame(raf); const el = $('pfig'); if (!el || !PL) return; const st = PL.steps[PL.i], mv = st.mv;
+    cancelAnimationFrame(raf); if (PL) PL.moves = false; const el = $('pfig'); if (!el || !PL) return; const st = PL.steps[PL.i];
     if (st.kind === 'breath' || st.kind === 'scan') return;
-    el.innerHTML = ILLUS.svg(st.ill, mv ? ILLUS.animPose(st.ill, mv, 0) : null, { uid: 'p', slice: true });
-    if (!mv || reduced) return;
-    const tempo = st.tempo || mv.tempo || [1, 0, 1, 0], total = tempo.reduce((a, b) => a + b, 0); let t = 0, last = performance.now(), drawn = 0;
-    const frame = now => { if (!el.isConnected || !PL) return; const cy = st.cycles[PL.c] || {}; if (!PL.paused && PL.phase === 'work' && !cy.rest) t += (now - last) / 1000; last = now;
-      if (now - drawn > 33) { drawn = now; const [up, hd, dn] = tempo, k = t % total, u = k < up ? ease(k / up) : k < up + hd ? 1 : k < up + hd + dn ? 1 - ease((k - up - hd) / dn) : 0;
-        el.innerHTML = ILLUS.svg(st.ill, ILLUS.animPose(st.ill, mv, u, Math.floor(t / total), k / total), { uid: 'p', slice: true }); }
+    const ex = (st.x && st.x.id) || st.key, front = ILLUS.isFront(st.ill, ex) && ex !== 'wu-hip';
+    const hold = !st.mv && (front || HOLD_MOVES.has(ex)) && st.cycles.some(c => c.hold), mv = st.mv || (HOLD_MOVES.has(ex) ? ILLUS.MOVES[ex] : null);
+    const vb = ILLUS.frame(st.ill, mv, (el.clientWidth || 4) / (el.clientHeight || 5), ex);      // one steady frame that holds the whole movement
+    const draw = (u, cyc, ph) => { const cy = st.cycles[PL.c] || {}, o = { uid: 'p', slice: true, ex, u, mirror: /left/i.test(cy.side || '') }; if (vb) o.vb = vb;
+      el.innerHTML = ILLUS.svg(st.ill, mv ? ILLUS.animPose(st.ill, mv, u, cyc, ph) : null, o); };
+    draw(hold ? 0 : 0, 0, 0);
+    if (reduced || (!st.mv && !hold)) return;
+    PL.moves = true;      // while the step is announced ('Up next'), the figure already demonstrates the movement as a preview
+    if (hold) {        // ease into the stretch over ~2 s, hold, ease back during the short release
+      let v = 0, pt = 0, last = performance.now(), drawn = 0;
+      const frame = now => { if (!el.isConnected || !PL) return; const dt = (now - last) / 1000; last = now; const cy = st.cycles[PL.c] || {};
+        if (!PL.paused) { const pre = PL.phase === 'ready'; pt = pre ? pt + dt : 0; const target = pre ? (pt > 0.6 && (pt - 0.6) % 6.4 < 4 ? 1 : 0) : PL.phase === 'work' && !cy.rest ? 1 : 0;      // preview: into the stretch, short hold, back out
+          v += Math.sign(target - v) * Math.min(Math.abs(target - v), dt / (target ? 2.2 : 1.2)); }
+        if (now - drawn > 15) { drawn = now; draw(ease(v), 0, 0); }
+        raf = requestAnimationFrame(frame); };
+      raf = requestAnimationFrame(frame); return;
+    }
+    const tempo = st.tempo || mv.tempo || [1, 0, 1, 0], total = tempo.reduce((a, b) => a + b, 0); let t = 0, last = performance.now(), drawn = 0, ph0 = PL.phase;
+    const frame = now => { if (!el.isConnected || !PL) return; const cy = st.cycles[PL.c] || {}; if (PL.phase !== ph0) { ph0 = PL.phase; t = 0; }      // the real reps start from the first position
+      if (!PL.paused && (PL.phase === 'ready' || (PL.phase === 'work' && !cy.rest))) t += (now - last) / 1000; last = now;
+      if (now - drawn > 15) { drawn = now; const [up, hd, dn] = tempo, k = t % total, u = k < up ? ease(k / up) : k < up + hd ? 1 : k < up + hd + dn ? 1 - ease((k - up - hd) / dn) : 0;
+        draw(u, Math.floor(t / total), k / total); }
       raf = requestAnimationFrame(frame); };
     raf = requestAnimationFrame(frame);
   }
@@ -440,9 +541,9 @@ ${chipRow([['0', 'Off'], ['30', '30 min'], ['45', '45 min'], ['60', '60 min'], [
     const st = PL.steps[PL.i], calm = st.music === 'calm';
     const P = $('player'); P.classList.toggle('calm', calm);
     P.innerHTML = `<div class="ptop"><button class="iconbtn" id="pclose" aria-label="End">${I.x}</button><div class="pprog">${PL.steps.map((_, k) => `<i class="${k < PL.i ? 'on' : ''}"><b id="pp${k}" style="width:${k < PL.i ? 100 : 0}%"></b></i>`).join('')}</div><span class="pcount">${PL.i + 1}/${PL.steps.length}</span></div>
-<div class="pstage">${st.kind === 'breath' ? `<div class="breathe"><div class="bring" id="bring"></div><div class="bcore" id="bcore"><span id="bword">Ready</span></div></div>` : st.kind === 'scan' ? `<svg class="scanfig" viewBox="0 0 200 430" aria-hidden="true"><defs>${WARM}<radialGradient id="sgg"><stop offset="0" stop-color="#F7A26B" stop-opacity=".9"/><stop offset="1" stop-color="#F7A26B" stop-opacity="0"/></radialGradient></defs>${bodyImg('f', 'opacity=".85"')}<ellipse id="sg" cx="100" cy="215" rx="75" ry="205" fill="url(#sgg)"/></svg>` : `<div class="pfig" id="pfig"></div>`}
+<div class="pstage">${st.kind === 'breath' ? `<div class="breathe"><div class="bring" id="bring"></div><div class="bcore" id="bcore"><span id="bword">Ready</span></div></div>` : st.kind === 'scan' ? `<svg class="scanfig" viewBox="0 0 200 430" aria-hidden="true"><defs><radialGradient id="sgg"><stop offset="0" stop-color="#F7A26B" stop-opacity=".9"/><stop offset="1" stop-color="#F7A26B" stop-opacity="0"/></radialGradient></defs>${bodyImg('f', 'opacity=".85"')}<ellipse id="sg" cx="100" cy="215" rx="75" ry="205" fill="url(#sgg)"/></svg>` : `<div class="pfigw"><div class="pfig" id="pfig"></div></div>`}
 <div class="upnext" id="upnext">Up next</div></div>
-<div class="pinfo"><span class="pphase">${SECTION_NAME[st.section] || ''}</span><h2 id="pname">${esc(st.name)}</h2><div class="pside" id="pside"></div><div class="ptime" id="ptime">0:00</div><div class="preps" id="preps">&nbsp;</div><p class="psub" id="psub"></p></div>
+<div class="pinfo"><span class="pphase">${SECTION_NAME[st.section] || ''}</span><h2 id="pname" class="${st.name.length > 26 ? 'long' : ''}"><span>${esc(st.name)}</span></h2><div class="pside" id="pside"></div><div class="ptrow">${feelMap(st)[0]}<div class="ptime" id="ptime">0:00</div>${feelMap(st)[1]}</div><div class="preps" id="preps">&nbsp;</div><p class="psub" id="psub"></p></div>
 <div class="pctl"><button class="iconbtn ${COACH_AUDIO.voiceOn ? '' : 'off'}" id="pvoice" aria-label="Coach voice">${COACH_AUDIO.voiceOn ? I.voice : I.voiceOff}</button><button class="iconbtn" id="pprev" aria-label="Previous">${I.prev}</button>
 <button class="pplay" id="pplay" aria-label="Pause">${PL.paused ? I.play : I.pause}</button><button class="iconbtn" id="pnext" aria-label="Next">${I.next}</button><button class="iconbtn ${COACH_AUDIO.musicOn ? '' : 'off'}" id="pmusic" aria-label="Music">${COACH_AUDIO.musicOn ? I.music : I.musicOff}</button></div>`;
     $('pplay').onclick = () => setPause(!PL.paused);
@@ -457,13 +558,14 @@ ${chipRow([['0', 'Off'], ['30', '30 min'], ['45', '45 min'], ['60', '60 min'], [
     playerShell(); animate(); COACH_AUDIO.setMood(st.music);
     const lines = [];
     if (first && !PL.greeted) { PL.greeted = true; const h = new Date().getHours(); lines.push(h < 12 ? 'Good morning.' : h < 18 ? 'Hi there.' : 'Good evening.');
-      if (PL.meta.kind === 'session' && S.tipDay !== today()) { S.tipDay = today(); save(); lines.push(TIPS[Math.floor(Date.now() / 864e5) % TIPS.length]); lines.push('Mild effort is fine. Sharp pain, tingling or dizziness means stop.'); } }
+      if (PL.meta.kind === 'session' && S.tipDay !== today()) { S.tipDay = today(); save(); lines.push(TIPS[Math.floor(Date.now() / 864e5) % TIPS.length]); lines.push('If anything does not feel good, just stop.'); } }
     else if (!first) lines.push(pick(PRAISE));
     lines.push((first ? 'First: ' : 'Next: ') + st.intro[0], st.intro[1]);
+    COACH_AUDIO.prefetch([...lines, ...st.cues, ...(PL.steps[i + 1] ? ['Next: ' + PL.steps[i + 1].intro[0], PL.steps[i + 1].intro[1]] : [])]);
     lines.filter(Boolean).forEach((l, k) => COACH_AUDIO.say(l, { urgent: k === 0, keep: true }));
     const words = lines.join(' ').split(/\s+/).length, posChange = prev && floorIll(prev.ill) !== floorIll(st.ill);
     PL.t = Math.min(first ? 8 : 12, Math.max(first ? 7 : 5, Math.round(words / 2.6) + 1 + (posChange ? 3 : 0)));
-    $('player').classList.add('ready'); $('upnext').textContent = first ? 'Get ready' : 'Up next';
+    $('player').classList.add('ready'); $('upnext').textContent = (first ? 'Get ready' : 'Up next') + (PL.moves ? ' · preview' : '');
     $('ptime').textContent = fmt(PL.t); $('pside').textContent = ''; $('preps').innerHTML = '&nbsp;';
   }
   function startWork() {
@@ -539,15 +641,35 @@ ${chipRow([['0', 'Off'], ['30', '30 min'], ['45', '45 min'], ['60', '60 min'], [
   }
   document.addEventListener('keydown', e => { if (!PL) return; if (e.key === ' ') { e.preventDefault(); setPause(!PL.paused); } if (e.key === 'ArrowRight') finishStep(true); if (e.key === 'Escape') endPlayer(); });
 
+  /* ---------- every line the coach can say (used by tools/record_voice.py to pre-record the voice) ---------- */
+  window.COACH_LINES = () => {
+    const out = new Set(), add = t => t && out.add(t), RU = rules(), steps = [];
+    WARMUP.forEach(w => steps.push(mkStep({ r: w.id }, RU)));
+    [...STRETCHES, ...STRENGTH].forEach(x => { [undefined, ...x.m.map(i => MUSCLE[i]).filter(Boolean)].forEach(why => steps.push(mkStep({ r: x.id, why }, RU))); steps.push(mkStep({ r: x.id, primer: true }, RU)); });
+    BREATH.ex.forEach(e => steps.push(mkStep({ r: 'breath:' + e.id }, RU))); steps.push(mkStep({ r: 'walk' }, RU)); steps.push(mkStep({ r: 'scan' }, RU));
+    steps.filter(Boolean).forEach(st => { add('First: ' + st.intro[0]); add('Next: ' + st.intro[0]); add(st.intro[1]); st.cues.forEach(add); });
+    add('Lie on your left side with a pillow between the knees, or sit supported.');
+    [...PRAISE, ...MID, ...TIPS, ...SCAN.flatMap(r => r.lines)].forEach(add);
+    ['Good morning.', 'Hi there.', 'Good evening.', 'If anything does not feel good, just stop.', 'Switch sides.', 'Rest. Shake it out.', 'Good. Take a breather.', 'Nice. Short rest.', 'And hold.', 'Here we go.', 'And again. Ease in.',
+      'Begin. Slow and controlled.', 'Ease in gently.', 'Go.', 'Halfway. Nice.', 'Halfway there.', 'Half done. Keep it smooth.', 'Last two.', 'Five more seconds.', 'Nearly there.', 'Almost done. Breathe.', 'Breathe in through the nose…', 'In…', 'and slowly out.', 'and out.',
+      'Let the out-breath be long and easy.', 'Shoulders heavy. Jaw soft.', 'Nothing to do but breathe.', 'Last breath. Let it all go.', 'That is it. Well done for showing up today.', 'All done. That was great work.', 'Finished. Your body will thank you.', 'How do you feel?',
+      'Thanks for telling me. Tomorrow will be gentler.', 'Love to hear it.', 'Good. Consistency does the work.', 'Right side. Here we go.', 'Left side. Here we go.', COACH_AUDIO.SAMPLE].forEach(add);
+    for (let n = 2; n <= 60; n++) add(`That is ${n} days in a row.`);
+    for (let k = 1; k <= 4; k++) for (let n = k; n <= 4; n++) if (n > 1) add(`Set ${k} of ${n}. Here we go.`);
+    return [...out].map(t => ({ id: COACH_AUDIO.clipId(t), text: t.replace(/\s*\([^)]*\)/g, '').trim() }));
+  };
+
   /* ---------- move reminders ---------- */
   setInterval(() => { const R = S.remind; if (!R.on || PL) return; const h = new Date().getHours(); if (h < 8 || h >= 21) return;
     if (Date.now() - (R.last || 0) < R.every * 60000) return; R.last = Date.now(); save();
-    const r = suggestResets()[0], body = `Time for a quick ${r.n.toLowerCase()} reset.`;
+    const r = suggestResets()[0], body = `Time to move. Try “${r.n}”.`;
     if ('Notification' in window && Notification.permission === 'granted' && navigator.serviceWorker) navigator.serviceWorker.ready.then(reg => reg.showNotification('Time to move', { body, tag: 'move', icon: 'icons/icon-192.png', data: { reset: r.id } })).catch(() => toast(body));
     else if (document.visibilityState === 'visible') toast(body); }, 60000);
-  const qr = new URLSearchParams(location.search).get('reset');
+  const qp = new URLSearchParams(location.search), qr = qp.get('reset'), qgo = qp.get('go');
 
   /* ---------- start ---------- */
   applyTheme(); ILLUS.setFemale(isF());
-  if (!S.onboarded) renderOnboard(); else { show('today'); if (qr) setTimeout(() => startReset(qr), 300); }
+  if (!S.onboarded) renderOnboard(); else { show(qgo === 'quickies' ? 'resets' : 'today'); if (qr) setTimeout(() => startReset(qr), 300);
+    // home-screen shortcut "Start": scroll is already at the Start button; sound needs a tap, so highlight it instead of auto-playing
+    if (qgo === 'start') setTimeout(() => { const b = $('start'); if (b) { b.classList.add('nudge'); b.focus(); } }, 300); }
 })();

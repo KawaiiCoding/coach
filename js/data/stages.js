@@ -14,10 +14,10 @@ const STAGES = [
     progress: 'Stay here. If pain returns, drop back a stage for two weeks.', level: 3, stretchHold: 30, strength: 4 }
 ];
 const WARMUP = [
-  { id: 'wu-march', n: 'March on the spot', secs: 60, how: 'Lift the knees to hip height, swing the arms, breathe through the nose.' },
-  { id: 'wu-swing', n: 'Arm swings and shoulder rolls', secs: 45, how: 'Swing both arms forward and back, then roll the shoulders backwards ten times.' },
-  { id: 'wu-hip', n: 'Hip circles', secs: 45, how: 'Hands on the hips, circle the pelvis slowly, five each way, then standing leg swings.' },
-  { id: 'wu-cat', n: 'Cat-cow', secs: 45, how: 'On hands and knees, round and arch the spine with the breath, slowly through every segment.' }
+  { id: 'wu-march', n: 'March on the spot', secs: 60, feel: ['psoas', 'rectFem', 'gastroc'], how: 'Lift the knees to hip height, swing the arms, breathe through the nose.' },
+  { id: 'wu-swing', n: 'Arm swings and shoulder rolls', secs: 45, feel: ['deltAnt', 'deltPost', 'pecMajor', 'upTrap'], how: 'Swing both arms forward and back, then roll the shoulders backwards ten times.' },
+  { id: 'wu-hip', n: 'Hip circles', secs: 45, feel: ['gmed', 'oblExt', 'quadlum'], how: 'Hands on the hips, circle the pelvis slowly, five each way, then standing leg swings.' },
+  { id: 'wu-cat', n: 'Cat-cow', secs: 45, feel: ['erector', 'abs', 'multifidus'], how: 'On hands and knees, round and arch the spine with the breath, slowly through every segment.' }
 ];
 const SECTION_WHY = {
   warmup: 'Three minutes of easy movement raises muscle temperature and blood flow, which makes stretches more effective and strengthening safer. Stretching cold tissue is less comfortable and gains less.',

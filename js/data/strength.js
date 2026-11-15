@@ -45,7 +45,7 @@ const STRENGTH = [
     how: 'Press light weights from the shoulders to overhead, finishing with the arms by the ears.', cue: 'Ribs down; only after overhead reach is pain free.' },
   { id: 'shrug', n: 'Shrug (controlled)', m: ['upTrap', 'levator'], sets: 2, reps: 10, hold: 2, sides: 1, type: 'strength', level: 1, ill: 'shrug',
     how: 'Lift the shoulders straight up toward the ears, hold, lower slowly.', cue: 'Most desk workers need the lower trapezius more than this; use when the upper trapezius tests weak.' },
-  { id: 'pushup', n: 'Push-up (incline if needed)', m: ['pecMajor', 'deltAnt', 'serratus', 'triceps', 'coraco'], sets: 3, reps: 10, sides: 1, type: 'strength', level: 2, ill: 'pushup',
+  { id: 'pushup', n: 'Push-up (incline if needed)', m: ['pecMajor', 'deltAnt', 'serratus', 'triceps', 'coraco'], feel: ['pecMajor', 'triceps', 'deltAnt'], sets: 3, reps: 10, sides: 1, type: 'strength', level: 2, ill: 'pushup',
     how: 'Hands under the shoulders, body straight. Lower the chest with the elbows about 45° from the trunk and push back up, reaching the floor away at the top.', cue: 'Hands on a bench or wall to make it easier.' },
 
   /* ---------- arm and forearm ---------- */

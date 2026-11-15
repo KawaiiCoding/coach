@@ -1,16 +1,25 @@
 {
+  "id": "./index.html",
   "name": "Tension Coach",
-  "short_name": "Tension",
-  "description": "Daily posture, breathing, stretch and strength coach. Works offline; your data stays on your device.",
+  "short_name": "Coach",
+  "description": "A calm voice coach for posture, stretching, strength and breathing. Short guided sessions, works offline, your data stays on your device.",
+  "lang": "en",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#FAF6F1",
-  "theme_color": "#E8692A",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
+  "background_color": "#FFFFFF",
+  "theme_color": "#E8692A",
+  "categories": ["health", "fitness", "lifestyle"],
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Start today's session", "short_name": "Start", "url": "./index.html?go=start", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Quickies", "short_name": "Quickies", "url": "./index.html?go=quickies", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Two-minute calm", "short_name": "Calm", "url": "./index.html?reset=calm2", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
   ]
 }

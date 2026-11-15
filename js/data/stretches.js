@@ -21,7 +21,7 @@ const STRETCHES = [
     how: 'Tuck the chin, then let the head hang forward. Clasp the hands behind the head and let their weight add to the stretch without pulling.', cue: 'Stop with any arm symptoms. Skip this if you have known cervical instability.' },
   { id: 'jaw', n: 'Jaw release', m: ['jaw'], hold: 30, reps: 2, sides: 1, type: 'release', ill: 'jaw',
     how: 'Rest the tongue on the roof of the mouth, let the teeth part and the jaw hang. Massage the masseter (the bulge when you clench) with slow circles for 30 seconds each side.', cue: 'The teeth should not touch at rest; check this during the day.' },
-  { id: 'breathing', n: 'Diaphragmatic breathing', m: ['scalenes', 'upTrap', 'pecMinor'], hold: 0, reps: 10, sides: 1, type: 'release', ill: 'breathing',
+  { id: 'breathing', n: 'Diaphragmatic breathing', m: ['scalenes', 'upTrap', 'pecMinor'], feel: ['abs', 'oblExt'], hold: 0, reps: 10, sides: 1, type: 'release', ill: 'breathing',
     how: 'Lie with the knees bent, one hand on the chest and one on the belly. Breathe in through the nose for four counts so only the lower hand rises, then out for six counts.', cue: 'The upper hand stays still; accessory neck muscles switch off when the diaphragm does the work.' },
 
   /* ---------- shoulder and chest ---------- */
@@ -143,7 +143,7 @@ const STRETCHES = [
     how: 'Toes up against a wall with the heel on the floor, lean the knee toward the wall.', cue: 'Useful before the first steps in the morning for heel pain.' },
   { id: 'peroneal', n: 'Peroneal (outer calf) stretch', m: ['peroneals'], hold: 30, reps: 2, sides: 2, type: 'static', ill: 'peroneal',
     how: 'Sitting with the ankle on the opposite knee, hold the forefoot and turn the sole upward and inward.', cue: 'A stretch along the outside of the lower leg.' },
-  { id: 'downdog', n: 'Downward dog', m: ['gastroc', 'soleus', 'medHams', 'bicFem', 'lats'], hold: 30, reps: 2, sides: 1, type: 'static', ill: 'downdog',
+  { id: 'downdog', n: 'Downward dog', m: ['gastroc', 'soleus', 'medHams', 'bicFem', 'lats'], feel: ['gastroc', 'medHams', 'bicFem', 'lats'], hold: 30, reps: 2, sides: 1, type: 'static', ill: 'downdog',
     how: 'Hands and feet on the floor, hips lifted high. Press the chest toward the thighs and pedal the heels toward the floor.', cue: 'Bend the knees if the back rounds; the spine stays long.' }
 ];
 const STRETCH = Object.fromEntries(STRETCHES.map(s => [s.id, s]));

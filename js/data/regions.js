@@ -125,7 +125,15 @@ const REGIONS = [
   { id: 'hipSide', n: 'Side of the hip', v: 'f', zone: [134, 228, 10, 12], m: ['gmed', 'gmin', 'tfl'],
     why: 'Standing on one leg, crossing the legs and sleeping on one side squeeze the tendons on the outside of the hip.',
     ev: 'Progressive side-hip strengthening and avoiding crossed-leg postures is the first-line treatment for side-hip pain.',
-    red: 'A hot swollen hip, pain after a fall, or being unable to put weight on the leg: see a doctor.' }
+    red: 'A hot swollen hip, pain after a fall, or being unable to put weight on the leg: see a doctor.' },
+  { id: 'neckSideB', n: 'Side of the neck', v: 'b', zone: [112, 86, 8, 10], m: ['levator', 'upTrap', 'scalenes', 'splenius'],
+    why: 'Looking down at a screen and holding the phone between ear and shoulder keep the side-neck muscles working all day.',
+    ev: 'Gentle side stretches, chin tucks and shoulder-blade strengthening ease most side-neck tightness within a few weeks.',
+    red: 'Tingling or weakness down the arm, or dizziness when you turn the head: see a doctor.' },
+  { id: 'trapTop', n: 'Top of the shoulders', v: 'b', zone: [125, 96, 10, 8], m: ['upTrap', 'levator', 'supra'],
+    why: 'Stress, shrugging at the desk and upper-chest breathing keep the upper trapezius switched on, so it feels hard and sore.',
+    ev: 'Slow breathing, upper-trap stretches and lower-trapezius strengthening reduce this tension; massage helps in the short term.',
+    red: 'Pain spreading into the arm with numbness, or pain with chest discomfort or breathlessness: get checked.' }
 ];
 /* Symptom types. Each changes the advice; 'click' only exists for joints. */
 const SYMPTOMS = [
