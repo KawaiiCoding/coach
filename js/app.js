@@ -99,6 +99,9 @@
     const fig = v => `<figure class="pfm${spots[v] ? '' : ' off'}"${spots[v] ? ` role="img" aria-label="Where you should feel it, ${v === 'f' ? 'front' : 'back'}: ${names}"` : ' aria-hidden="true"'}><svg viewBox="${vb}" aria-hidden="true">${bodyImg(v)}<g class="fs">${spots[v]}</g></svg><figcaption>${v === 'f' ? 'Front' : 'Back'}</figcaption></figure>`;
     return [fig('f'), fig('b')];
   }
+  /* Left / right / both picker: a little figure with that half of the body filled in. Same rule as the body map:
+     the left of the picture is your left. */
+  const sideIcon = k => `<svg class="sideic" viewBox="0 0 36 34" aria-hidden="true"><circle cx="18" cy="7" r="4.6" class="hd"/><path d="M17 14H12.5A6.5 6.5 0 0 0 6 20.5V31H17Z" class="${k === 'r' ? 'off' : 'fillh'}"/><path d="M19 14H23.5A6.5 6.5 0 0 1 30 20.5V31H19Z" class="${k === 'l' ? 'off' : 'fillh'}"/></svg>`;
   /* kept simple: the left of the screen is always your left, in both views (like a mirror at the front) */
   const sideOf = (v, cx) => Math.abs(cx - 100) < 4 ? 'b' : cx < 100 ? 'l' : 'r';
   /* severity colour: 1-3 mild (amber), 4-6 moderate (orange), 7-10 strong (red) */
@@ -124,7 +127,7 @@
     const r = REGION[rid], types = new Set(pt(rid).length ? pt(rid) : ['pain']), paired = Math.abs(r.zone[0] - 100) >= 4; let v = pv(rid) || 4, side = paired ? (tapped && tapped !== 'b' ? (S.pain[rid] && ps(rid) !== tapped ? 'b' : tapped) : ps(rid)) : 'b';
     const opts = SYMPTOMS.filter(t => (!t.joints || t.joints.includes(rid)) && (!t.regions || t.regions.includes(rid)));
     sheet(r.n, close => {
-      const draw = el => { el.innerHTML = `${paired ? `<p class="label">Which side?</p><div class="seg wrap">${[['l', 'Left'], ['r', 'Right'], ['b', 'Both']].map(([k, n]) => `<button class="${side === k ? 'on' : ''}" data-side="${k}">${n}</button>`).join('')}</div>` : ''}<p class="label">How strong?</p><div class="scale">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button class="${n === v ? 'on' : ''}" ${n === v ? `style="background:${sevCol(n)};border-color:${sevCol(n)}"` : ''} data-v="${n}">${n}</button>`).join('')}</div><div class="sevkey"><span style="color:${sevCol(2)}">Mild</span><span style="color:${sevCol(5)}">Moderate</span><span style="color:${sevCol(8)}">Strong</span></div>
+      const draw = el => { el.innerHTML = `${paired ? `<p class="label">Which side?</p><div class="seg sides">${[['l', 'Left'], ['r', 'Right'], ['b', 'Both']].map(([k, n]) => `<button class="${side === k ? 'on' : ''}" data-side="${k}" aria-pressed="${side === k}">${sideIcon(k)}<span>${n}</span></button>`).join('')}</div>` : ''}<p class="label">How strong?</p><div class="scale">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button class="${n === v ? 'on' : ''}" ${n === v ? `style="background:${sevCol(n)};border-color:${sevCol(n)}"` : ''} data-v="${n}">${n}</button>`).join('')}</div><div class="sevkey"><span style="color:${sevCol(2)}">Mild</span><span style="color:${sevCol(5)}">Moderate</span><span style="color:${sevCol(8)}">Strong</span></div>
 <p class="label">Feels like</p><div class="chips">${opts.map(t => `<button class="chip ${types.has(t.id) ? 'on' : ''}" data-t="${t.id}">${t.n}</button>`).join('')}</div>
 ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="note warn">${I.alert}<span>${SYMPTOM_ADVICE[t].default}</span></div>`).join('')}
 <div class="row"><button class="btn ghost" id="pclr">${S.pain[rid] ? 'Remove' : 'Cancel'}</button><button class="btn" id="pok">Done</button></div>`;
@@ -360,7 +363,7 @@ ${chkId ? `<section class="card chk"><p><b>How is your ${esc(low(REGION[chkId].n
     el.querySelectorAll('[data-chk]').forEach(b => b.onclick = () => { const v = +b.dataset.chk; S.pain[chkId].v = v; log().pain[chkId] = v; S.lastCheck = today(); save(); toast(v < pv(chkId) ? 'Noted. Going the right way.' : 'Noted. Thanks.'); renderToday(); });
   }
   const resetCard = (r, uid) => `<button class="rcard" data-reset="${r.id}"><div class="rart">${ILLUS.svg(r.ill, null, { uid: uid + r.id, glow: false, fit: 1.6 })}</div><span class="tag ${r.cat}">${SECTION_NAME[r.cat]}</span><b>${esc(r.n)}</b><span class="mins">${Math.max(1, Math.round(resetSteps(r).reduce((a, s) => a + stepSecs(s), 0) / 60))} min</span></button>`;
-  function mapSheet(after) { sheet('Where it bothers you', close => el => { el.innerHTML = '<div id="smap"></div><button class="btn" id="mapdone">Done</button>'; bodyMap(el.querySelector('#smap'), () => {}); el.querySelector('#mapdone').onclick = () => { close(); after(); }; }); }
+  function mapSheet(after) { sheet('Where it bothers you', close => el => { el.innerHTML = '<div id="smap"></div><div class="sfoot"><button class="btn" id="mapdone">Done</button></div>'; bodyMap(el.querySelector('#smap'), () => {}); el.querySelector('#mapdone').onclick = () => { close(); after(); }; }); }
   function startReset(id) { const r = RESETS.find(x => x.id === id); if (!r) return; play(resetSteps(r), { kind: 'reset', id, n: r.n }); }
 
   /* ---------- quickies (short routines) ---------- */
@@ -687,7 +690,7 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
       // play, with the coach's voice coming out
       [P('<path d="M4.5 6.6v10.8l8.2-5.4z" class="fill"/><path d="M15.6 8.6a4.8 4.8 0 0 1 0 6.8M18.4 5.9a8.6 8.6 0 0 1 0 12.2"/>'), 'Press play, the coach guides you']];
     el.innerHTML = `<div class="spin"><div class="spart">${ILLUS.svg('walk', null, { uid: 'sp', fit: 1 })}</div><h1>Tension Coach</h1><p class="splead">Less neck, back and shoulder tension.</p>
-<ul class="splist">${rows.map(([ic, t]) => `<li><i>${ic}</i><span>${t}</span></li>`).join('')}</ul>${first ? `<button class="btn" id="spgo">Get started</button>` : ''}</div>`;
+<ul class="splist">${rows.map(([ic, t]) => `<li><i>${ic}</i><span>${t}</span></li>`).join('')}</ul>${first ? `<button class="btn" id="spgo">Get started</button>` : ''}<p class="spsafe">${P('<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/><circle cx="12" cy="15.5" r="1.3" class="fill"/>')}<span>Your data stays on your device</span></p></div>`;
     el.hidden = false; el.classList.toggle('brief', !first);
     const close = () => { if (el.classList.contains('out')) return; set(localStorage, 'coach.intro'); el.classList.add('out'); setTimeout(() => { el.hidden = true; el.innerHTML = ''; el.classList.remove('out'); }, 380); };
     if (first) $('spgo').onclick = close; else { el.onclick = close; setTimeout(close, 2600); }

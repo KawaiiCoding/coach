@@ -359,3 +359,20 @@ body.onb { padding-bottom: 0; }
 .splash .btn { margin-top: 26px; }
 .splash.brief { cursor: pointer; }
 @media (max-height: 600px) { .spart { width: 112px; margin-bottom: 10px; } .splead { margin-bottom: 12px; } .splist { gap: 8px; } .splash .btn { margin-top: 16px; } }
+
+/* which side hurts: three equal buttons, each with a figure showing the half it means */
+.seg.sides { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
+.seg.sides button { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px 10px; border-radius: 18px; font-size: 15px; }
+.sideic { width: 46px; height: 43px; display: block; }
+.sideic .hd { fill: none; stroke: currentColor; stroke-width: 2; opacity: .55; }
+.sideic .fillh { fill: var(--acc); stroke: var(--acc); stroke-width: 2; stroke-linejoin: round; }
+.sideic .off { fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; opacity: .3; }
+.seg.sides button.on .hd { opacity: .9; } .seg.sides button.on .fillh { fill: #fff; stroke: #fff; } .seg.sides button.on .off { opacity: .55; }
+
+/* sheet footer: the main button stays pinned to the bottom of the sheet while the content scrolls behind it */
+.sfoot { position: sticky; bottom: 0; z-index: 2; margin: 10px -20px calc(-20px - env(safe-area-inset-bottom, 0px)); padding: 12px 20px calc(18px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(to bottom, transparent, var(--bg) 14px); }
+.sfoot .btn, .sfoot .row { margin-top: 0; }
+
+/* privacy reassurance on the welcome screen */
+.spsafe { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 18px 0 0; font-size: 13.5px; font-weight: 550; color: var(--mute); }
+.spsafe .ic { width: 17px; height: 17px; flex: none; color: var(--ok); }
