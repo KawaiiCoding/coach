@@ -17,7 +17,7 @@ const norm = a => ((a % 360) + 540) % 360 - 180;
 const ALL = [...STRETCHES, ...STRENGTH], illOf = x => x.ill, FLOOR = 93.7;
 
 /* ---------- 1. pictures and animation ---------- */
-const shoeLow = (K, A, T) => { const dx = T[0] - A[0], dy = T[1] - A[1], l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l; let nx = -uy, ny = ux; if (nx * (K[0] - A[0]) + ny * (K[1] - A[1]) > 0) { nx = -nx; ny = -ny; }
+const shoeLow = (K, A, T) => { const dx = T[0] - A[0], dy = T[1] - A[1], l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l; const nx = -uy, ny = ux;
   const q = (t, n) => A[1] + uy * t + ny * n; return Math.max(q(-1.9, -2), q(-3.3, .4), q(-3, 2.7), q(l + 2.4, 2.7), q(l + 3.3, 1.5), q(l + 1.4, -.5), q(2.6, -2.4), q(1, -2.5)) + 1; };
 // joint ranges in degrees, generous on purpose: the aim is to catch impossible poses, not to police style
 // poses where a limb is turned out of the picture plane, so its side-on angle is not the joint angle
@@ -44,6 +44,15 @@ for (const [id, mv] of Object.entries(I.MOVES)) { const ill = mv.ill || ILL[id] 
   for (let k = 0; k <= N; k++) { const u = k / N, g = poseChecks(`${id} @${u.toFixed(2)}`, I.animPose(ill, mv, u, 0, u)), P = pts(g);
     if (prev) maxStep = Math.max(maxStep, ...P.map((q, i) => Math.hypot(q[0] - prev[i][0], q[1] - prev[i][1]))); prev = P; if (!first) first = P; }
   ok(maxStep < 4.2, `${id}: a joint jumps ${maxStep.toFixed(1)} units between two frames (should glide)`);
+  { let prevA = null, worst = 0; for (let k = 0; k <= 120; k++) { const u = k / 120, g = I.geo(I.animPose(ill, mv, u, 0, u)), an = [[g.A, g.T], [g.A2, g.T2]].filter(q => q[0]).map(([a, t]) => Math.atan2(t[1] - a[1], t[0] - a[0]) * 180 / Math.PI);
+      if (prevA) an.forEach((a, i) => { worst = Math.max(worst, Math.abs(((a - prevA[i] + 540) % 360) - 180)); }); prevA = an; }
+    ok(worst < 8, `${id}: a foot turns ${worst.toFixed(0)}° between two frames (should turn smoothly)`); }
+  if (id === 'birddog') { const fr = [0, .25, .5, .75, 1].map(u => I.geo(I.animPose(ill, mv, u, 0, u))), b0 = fr[0];      // bird-dog: trunk, supporting hand, supporting knee and foot must not move at all
+    for (const g of fr) { ok(!!g.W2 && Math.abs(g.W2[1] - b0.W2[1]) < .2 && Math.abs(g.W2[0] - b0.W2[0]) < .2 && g.W2[1] > 86, 'birddog: the supporting hand must stay on the floor'); ok(Math.hypot(g.H[0] - b0.H[0], g.H[1] - b0.H[1]) < .2 && Math.hypot(g.S[0] - b0.S[0], g.S[1] - b0.S[1]) < .2, 'birddog: the trunk must stay still'); ok(Math.hypot(g.K[0] - b0.K[0], g.K[1] - b0.K[1]) < .2 && Math.hypot(g.T[0] - b0.T[0], g.T[1] - b0.T[1]) < .5, 'birddog: the supporting knee and foot must stay put'); }
+    for (let k = 1; k < 40; k++) { const g = I.geo(I.animPose(ill, mv, k / 40, 0, k / 40)); ok(g.W[1] + 4.7 <= 93.7 + .6, `birddog: the reaching hand goes through the floor at ${(k / 40).toFixed(2)}`); }
+    const e = fr[4]; ok(Math.abs(e.W[1] - e.S[1]) < 4 && Math.abs(e.A2[1] - e.H[1]) < 4, 'birddog: at the top the arm and the leg must be level with the trunk'); }
+  if (id === 'deadbug') for (const u of [0, .5, 1]) { const g = I.geo(I.animPose(ill, mv, u, 0, u)); ok(!!g.W2 && g.W2[1] < g.S[1] - 20, 'deadbug: the other arm must stay pointing at the ceiling'); ok(Math.abs(g.K[0] - g.H[0]) < 2 && g.K[1] < g.H[1] - 15, 'deadbug: the other knee must stay above the hip'); }
+  if (id === 'pendulum') for (const u of [0, .5, 1]) { const g = I.geo(I.animPose(ill, mv, u, 0, u)), hc = [g.S[0] + Math.cos(g.p.nk * Math.PI / 180) * 11.4, g.S[1] + Math.sin(g.p.nk * Math.PI / 180) * 11.4]; ok(hc[1] + 7.5 < 42, 'pendulum: the head must stay clear above the table, never resting on it'); ok(!!g.W2 && Math.abs(g.W2[1] - 40.5) < 1.5 && g.W2[0] > 84, 'pendulum: the supporting hand must be on the table'); ok(Math.abs(g.W[0] - g.S[0]) < 9 && g.W[1] > g.S[1] + 20, 'pendulum: the free arm must hang down from the shoulder'); }
   if (mv.spin || mv.circle) { const d = Math.max(...prev.map((q, i) => Math.hypot(q[0] - first[i][0], q[1] - first[i][1]))); ok(d < 1.5, `${id}: the loop does not close (end is ${d.toFixed(1)} from start)`); }
   if (mv.alt) { const a = pts(I.geo(I.animPose(ill, mv, 0, 0, 0))), b = pts(I.geo(I.animPose(ill, mv, 0, 1, 0))), body = [0, 1].map(i => Math.hypot(a[i][0] - b[i][0], a[i][1] - b[i][1])); ok(Math.max(...body) < .6, `${id}: body jumps when the sides swap`); }
   if (mv.pin) { const base = I.geo(I.animPose(ill, mv, 0, 0, 0)); for (const u of [.25, .5, .75, 1]) { const g = I.geo(I.animPose(ill, mv, u, 0, u));

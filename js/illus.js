@@ -14,18 +14,19 @@ const ILLUS = (() => {
     'wall-chest': { ua: 180, fa: 180, w: 41, hl: 'ua' },
     'hands-behind': { ua: 125, fa: 125, hl: 'ua' },
     'wall-biceps': { ua: 180, fa: 180, w: 41, hl: 'ua fa' },
-    'overhead-triceps': { ua: -75, fa: 135, hl: 'ua' },
+    'overhead-triceps': { ua: -75, fa: 135, far: ['E', -125], hl: 'ua' },      // one hand down the back, the other hand on that elbow
     'cross-body': { ua: 10, fa: 170, hl: 'ua' },
     sleeper: { ...LY, hy: 80, ua: 0, fa: -90, th: -20, sh: 40, hl: 'fa' },
     'door-er': { tr: -88, ua: 88, fa: 0, w: 86, hl: 'ua' },      // elbow at the side bent 90°, forearm level against the frame
     child: { hx: 40, hy: 78, tr: 5, nk: 10, ua: 15, fa: 15, th: 30, sh: 180, hl: 'tr' },
     uptrap: { nk: -55, ua: -30, fa: -130, hl: 'nk' },
     levator: { nk: -30, ua: -60, fa: 150, hl: 'nk' },
-    chintuck: { nk: -105, hl: 'nk' },
+    chintuck: { nk: -97, hd: 13, zoom: true, hl: 'nk' },
+    'shoulder-roll': { zoom: true, rollCue: true, ua: 92, fa: 88 },      // side-on, upper body: the shoulder draws a circle, up, back, down, forward      // head drawn back over the shoulders, chin slightly down, eyes level: a tuck, not a tilt
     'supine-chin': { ...LY, nk: 178, th: -60, sh: 60, hl: 'nk' },
     scm: { nk: -115, hl: 'nk' },
-    'neck-ext': { nk: -48, hand: [-6.2, .4, -20], armBack: true, hl: 'nk' },          // hands clasped behind the head, chin toward the chest
-    'iso-neck': { nk: -90, hand: [8.2, 1.2, 20], hl: 'nk' },             // palm on the forehead, head pressing into it
+    'neck-ext': { nk: -48, hand: [-6.3, .6, -22], hand2: [-7.2, -2.6, -46], armBack: true, ghost: .55, zoom: true, hl: 'nk' },      // both hands on the back of the head; the near arm crosses in front of the face, so it is drawn see-through there
+    'iso-neck': { nk: -90, hand: [8.2, 1.2, 20], zoom: true, hl: 'nk' },             // palm on the forehead, head pressing into it
     sphinx: { ...PR, tr: -25, nk: -30, ua: 90, hl: 'tr' },
     'side-bend': { tr: -72, ua: -60, fa: -60, hl: 'tr' },
     allfours: { ...AF, hl: 'tr' },
@@ -38,19 +39,19 @@ const ILLUS = (() => {
     'half-kneel-reach': { hy: 66, tr: -93, th: 0, sh: 90, th2: 100, sh2: 180, ua: -86, fa: -98, hl: 'th2' },      // same position, the arm on the kneeling side reaching up
     thomas: { hx: 85, hy: 52, tr: 180, nk: 180, th: -122, sh: 30, grab: ['K', 75, 0, -1], th2: 14, sh2: 96, prop: 'bed', hl: 'th2' },      // one knee hugged to the chest, the other thigh hangs just below level off the edge, shin dropping
     couch: { hx: 76, hy: 66, th: 0, sh: 90, th2: 110, sh2: -92, w: 62, hl: 'th2 sh2' },      // back knee on the floor close to the wall, shin up the wall behind
-    'quad-stand': { th2: 100, sh2: -103, grab: ['A2', 120, 1, -1], hl: 'th2' },      // the hand holds the ankle behind
-    figure4: { ...LY, th: -70, sh: 60, th2: -35, sh2: -140, hl: 'th2' },
+    'quad-stand': { th2: 100, sh2: -103, grab: ['A2', 120, 1, -1], w: 99, far: ['wall', 3, 30], hl: 'th2' },      // the hand holds the ankle behind
+    figure4: { ...LY, th: -70, sh: 60, th2: -35, sh2: -140, grab: ['K', -40, 1, 1], note: 'ANKLE ON THE OTHER KNEE · PULL THE THIGH IN', hl: 'th2' },      // hands pulling the supporting thigh toward the chest
     pigeon: { hx: 60, hy: 76, tr: -60, nk: -60, ua: 60, fa: 60, th: 150, sh: 30, th2: 170, sh2: 170, hl: 'th' },
     'seated-fig4': { hx: 60, hy: 72, tr: -55, nk: -55, th: 0, sh: 90, th2: -15, sh2: 130, prop: 'chair', hl: 'th2' },
-    'knee-opp': { ...LY, th: -110, sh: 40, th2: 0, sh2: 0, ua: -35, fa: -35, hl: 'th' },
+    'knee-opp': { ...LY, th: -110, sh: 40, th2: 0, sh2: 0, grab: ['K', -40, 0, 1], hl: 'th' },      // hand on the knee, drawing it across
     'itb-cross': { th: 75, sh: 100, th2: 105, sh2: 80, tr: -100, hl: 'th' },
     butterfly: { hx: 60, hy: 88, tr: -60, nk: -60, th: 10, sh: 175, hl: 'th' },
     frog: { ...AF, hy: 72, th: 60, sh: 180, hl: 'th' },
     'side-lunge': { hx: 60, hy: 70, tr: -75, nk: -75, th: 40, sh: 110, th2: 5, sh2: 5, hl: 'th2' },
     '9090': { hx: 70, hy: 86, tr: -85, nk: -85, ua: 60, fa: 60, th: -8, sh: 25, th2: 188, sh2: 150, hl: 'th' },
-    'supine-ham': { ...LY, hx: 80, th: -80, sh: -80, th2: 0, sh2: 0, ua: -52, fa: -66, hl: 'th' },      // arms reaching up the strap toward the lifted leg
+    'supine-ham': { ...LY, hx: 80, th: -80, sh: -80, th2: 0, sh2: 0, ua: -52, fa: -66, strap: true, hl: 'th' },      // hands hold a strap looped round the lifted foot
     'heel-step': { th2: 28, sh2: 28, tr: -62, nk: -66, ua: 60, fa: 40, prop: 'step', hl: 'th2' },      // front knee straight, heel on the step, hinge from the hips with a flat back
-    'seated-ham': { hx: 60, hy: 88, tr: -60, nk: -50, ua: -20, fa: -20, th: 0, sh: 0, hl: 'th' },
+    'seated-ham': { hx: 60, hy: 88, tr: -60, nk: -50, ua: -20, fa: -20, th: 0, sh: 0, th2: -39, sh2: 65, hl: 'th' },      // one leg straight, the other bent
     'wall-calf': { hx: 62, hy: 58, tr: -65, ua: 10, fa: 10, th: 60, sh: 95, th2: 115, sh2: 115, ft2: 0, w: 100, hl: 'sh2' },
     'wall-calf-bent': { hx: 62, hy: 58, tr: -65, ua: 10, fa: 10, th: 60, sh: 95, th2: 100, sh2: 120, ft2: 0, w: 100, hl: 'sh2' },
     'heel-drop': { hy: 40, ft: 30, prop: 'stair', hl: 'sh' },
@@ -67,14 +68,14 @@ const ILLUS = (() => {
     'wall-lat': { hx: 40, tr: -5, nk: -5, ua: 0, fa: 0, w: 96, hl: 'tr' },
     'downdog': { hx: 86, hy: 56, tr: 42, nk: 42, ua: 42, fa: 42, th: 113, sh: 113, ft: 0, hl: 'sh' },      // folded forward from the hips (belly toward the thighs), hands in front, heels back
     'wgs': { hx: 55, hy: 68.5, tr: -40, nk: -40, ua: 60, fa: 60, th: 10, sh: 90, th2: 152, sh2: 152, hl: 'th2' },      // long lunge: front shin upright, back leg straight on its toes
-    'leg-swing': { th2: 20, sh2: 20, ua: -170, fa: -170, hl: 'th2' },
+    'leg-swing': { th2: 20, sh2: 20, ua: 176, fa: 176, w: 41, hl: 'th2' },      // one hand on a wall for balance
     'arm-circle': { ua: -60, fa: -60, hl: 'ua' },
     'wrist-flex': { ua: 0, fa: 0, hl: 'fa' },
     'wrist-ext': { ua: 0, fa: 0, hl: 'fa' },
-    'jaw': { nk: -88, hand: [5, -4.6, 30], hl: 'nk' },                 // fingertips on the jaw muscle, in front of the ear
+    'jaw': { nk: -88, hand: [5, -4.6, 30], zoom: true, hl: 'nk' },                 // fingertips on the jaw muscle, in front of the ear
     'deep-squat': { hx: 50, hy: 70, tr: -70, nk: -75, ua: 0, fa: 0, th: 20, sh: 125, hl: 'th' },
     'wall-angel': { ua: -120, fa: -120, w: 57, hl: 'ua' },
-    pendulum: { hx: 50, tr: -30, nk: -30, prop: 'table', hl: 'ua' },
+    pendulum: { hx: 48, tr: -42, nk: -36, prop: 'table', far: ['pt', 93.5, 40.5, -80], note: 'ONE HAND ON THE TABLE · THE OTHER ARM HANGS LOOSE', hl: 'ua' },      // hinged forward with a long back, head clear of the table, free arm hanging straight down
     'band-row': { ua: 150, fa: 10, band: { at: 'W', x: 116, y: 31 }, hl: 'ua' },                 // band tied in front at chest height
     'face-pull': { ua: -20, fa: -115, band: { at: 'W', x: 116, y: 15 }, hl: 'ua' },            // band tied in front at face height
     'prone-T': { ...PR, ua: -90, fa: -90, hl: 'ua' },
@@ -82,13 +83,13 @@ const ILLUS = (() => {
     'prone-W': { ...PR, ua: -90, fa: -10, hl: 'fa' },
     'wall-slide': { hx: 66.4, hy: 53.3, tr: -83, nk: -83, th: 97, sh: 97, ft: 0, ua: -10, fa: -84, w: 88, hl: 'ua' },      // leaning in from the ankles, forearms upright on the wall, elbows at shoulder height
     'scap-pushup': { hx: 73.2, hy: 72.8, tr: -19.2, nk: -21, ua: 90, fa: 90, th: 160.8, sh: 160.8, toes: true, hl: 'ua' },
-    deadbug: { ...LY, ua: -90, fa: -90, th: -90, sh: 0, th2: -10, sh2: -10, hl: 'tr' },
+    deadbug: { ...LY, ua: -172, fa: -172, ua2: -90, fa2: -90, th: -90, sh: 0, th2: -8, sh2: -8, hl: 'tr' },      // one arm lowers overhead and the opposite leg lowers; the other arm stays pointing at the ceiling, the other knee stays above the hip
     plank: { hy: 80, tr: -8, nk: -16, ua: 90, fa: 0, th: 172, sh: 172, toes: true, hl: 'tr' },      // one straight line from shoulders to ankles, on the toes
     'side-plank': { hy: 80, tr: -8, nk: -16, ua: -90, fa: -90, th: 172, sh: 172, toes: true, hl: 'tr' },
     copenhagen: { hy: 82, tr: -12, nk: -20, ua: -90, fa: -90, th: 172.5, sh: 172.5, toes: true, th2: 175, sh2: 175, prop: 'bench', hl: 'th2' },
-    birddog: { ...AF, ua: 0, fa: 0, th2: -175, sh2: -175, hl: 'tr' },
+    birddog: { ...AF, ua: -6, fa: -6, ua2: 90, fa2: 90, th2: 178, sh2: 178, hl: 'tr' },      // one arm reaches forward, the opposite leg reaches back; the other hand and knee stay on the floor
     bridge: { hx: 92, hy: 72, tr: 145, nk: 175, ua: 0, fa: 0, th: -5, sh: 95, hl: 'th' },
-    'sl-bridge': { hx: 92, hy: 72, tr: 145, nk: 175, ua: 0, fa: 0, th: -5, sh: 95, th2: -50, sh2: -50, hl: 'th' },
+    'sl-bridge': { hx: 92, hy: 72, tr: 145, nk: 175, th: -5, sh: 95, th2: -50, sh2: -50, grab: ['K2', -60, 0, 1], hl: 'th' },      // one knee held to the chest
     clam: { hx: 90, hy: 86, tr: 180, nk: 180, ua: 0, fa: 0, th: -35, sh: 70, th2: -65, sh2: 55, hl: 'th2' },
     'side-raise-leg': { hx: 90, hy: 86, tr: 180, nk: 180, ua: 0, fa: 0, th: -10, sh: 20, th2: -40, sh2: -40, hl: 'th2' },
     rdl: { hx: 45, tr: -5, nk: -10, th: 85, sh: 95, hl: 'th' },
@@ -138,7 +139,7 @@ const ILLUS = (() => {
     const d = (a, l) => [Math.cos(a * R) * l, Math.sin(a * R) * l], ad = (q, v) => [q[0] + v[0], q[1] + v[1]];
     const cl = v => Math.max(0, Math.min(1, v)), turn = (from, to, w) => from + ((((to - from) % 360) + 540) % 360 - 180) * w;
     // lowest point of a shoe outline (same shape the renderer draws) for an ankle A, toe direction a, knee K
-    const shoeLow = (K, A, a) => { const ux = Math.cos(a * R), uy = Math.sin(a * R); let ny = ux; if (-uy * (K[0] - A[0]) + ux * (K[1] - A[1]) > 0) ny = -ny;
+    const shoeLow = (K, A, a) => { const ux = Math.cos(a * R), uy = Math.sin(a * R); const ny = ux;      // the sole is always on the same side of the foot (see shoe() in the renderer)
       const q = (t, n) => A[1] + uy * t + ny * n; return Math.max(q(-1.9, -2), q(-3.3, .4), q(-3, 2.7), q(9.4, 2.7), q(10.3, 1.5), q(8.4, -.5), q(2.6, -2.4), q(1, -2.5)) + 1; };
     /* Foot angle. Unless a pose sets it, a foot sits square to its shin. Three things override that:
        1. a foot standing on the floor or mat lies flat on it (ankle at floor height, shin fairly upright). The exception is
@@ -148,7 +149,7 @@ const ILLUS = (() => {
        3. if the shoe would still go through the floor, it is turned just far enough to rest on it.
        1 and 2 are blended over the last few units of height, so a foot that lands or lifts during a movement never snaps. */
     const footA = (set, th, sh, K, A, solve) => { if (set !== undefined) return set; if (p.top) return sh - 90; const def = sh - 90, sn = Math.abs(Math.sin(sh * R)), trail = cl((-Math.cos(th * R) - .1) / .15) * cl((-Math.cos(sh * R) - .1) / .15);
-      const w1 = cl((A[1] - 83.5) / 3) * cl((sn - .42) / .15) * (1 - trail), w2 = p.toes ? 0 : cl((A[1] - 83) / 2) * cl((.4 - sn) / .1) * (Math.sin(def * R) > 0 ? 1 : 0);
+      const w1 = cl((A[1] - 83.5) / 3) * cl((sn - .42) / .15) * (1 - trail), w2 = p.toes ? 0 : cl((A[1] - 76) / 9) * cl((.5 - sn) / .35) * (Math.sin(def * R) > 0 ? 1 : 0);      // wide blends: a foot leaving the floor turns gradually, it never flips
       let a = w2 ? turn(def, sh, w2) : w1 ? turn(def, Math.cos(def * R) >= 0 ? 0 : 180, w1) : def;
       if (solve && shoeLow(K, A, a) > FLOOR + .3) { let best = a, bl = shoeLow(K, A, a); for (let k = 2; k <= 40 && bl > FLOOR + .3; k += 2) for (const sg of [1, -1]) { const l = shoeLow(K, A, a + sg * k); if (l < bl) { bl = l; best = a + sg * k; } } a = best; }
       return a; };
@@ -163,12 +164,18 @@ const ILLUS = (() => {
          forward = the way the face looks). grab: [joint, elbow hint, dx, dy] puts it on a knee or ankle. The arm is solved
          from there, so the hand stays where it holds however the body moves. */
       if (p.hand) { const up = d(p.nk, 1), c = ad(S, d(p.nk, 11.4)), Q = [c[0] - up[1] * p.hand[0] + up[0] * p.hand[1], c[1] + up[0] * p.hand[0] + up[1] * p.hand[1]]; [p.ua, p.fa] = ik(S, Q, 14, 12, p.hand[2]); }
+      if (p.hand2) { const up = d(p.nk, 1), c = ad(S, d(p.nk, 11.4)), Q = [c[0] - up[1] * p.hand2[0] + up[0] * p.hand2[1], c[1] + up[0] * p.hand2[0] + up[1] * p.hand2[1]]; [p.ua2, p.fa2] = ik(S, Q, 14, 12, p.hand2[2]); }      // the other hand has its own spot, so both arms can be seen
       if (p.grab) { const q = { K, A, K2, A2 }[p.grab[0]]; if (q) [p.ua, p.fa] = ik(S, [q[0] + (p.grab[2] || 0), q[1] + (p.grab[3] || 0)], 14, 12, p.grab[1]); }
-      const al = p.al === undefined ? 1 : p.al, E = ad(S, d(p.ua, 14 * al)), W = ad(E, d(p.fa, 12 * al));      // al < 1: arm pointing toward the viewer
-      const E2 = p.ua2 !== undefined ? ad(S, d(p.ua2, 14)) : null, W2 = E2 ? ad(E2, d(p.fa2 !== undefined ? p.fa2 : p.ua2, 12)) : null;
+      const SA = [S[0] + (p.sx || 0), S[1] + (p.sy || 0)];      // where the arms hang from: the shoulder can ride up, back, down and forward on the trunk
+      const al = p.al === undefined ? 1 : p.al, E = ad(SA, d(p.ua, 14 * al)), W = ad(E, d(p.fa, 12 * al));      // al < 1: arm pointing toward the viewer
+      /* far: what the other arm does when the two arms are not doing the same thing. ['E', hint] = holds the near elbow,
+         ['K' | 'K2' | 'A' | 'A2', hint] = holds that joint, ['pt', x, y, hint] = rests on a fixed spot (a table),
+         ['wall', dy, hint] = holds the wall at dy below shoulder height */
+      if (p.far) { const k = p.far[0], Q = k === 'pt' ? [p.far[1], p.far[2]] : k === 'wall' ? [(p.w || 0) - 3, S[1] + p.far[1]] : { E, K, A, K2, A2 }[k]; if (Q) [p.ua2, p.fa2] = ik(SA, Q, 14, 12, p.far[p.far.length - 1]); }
+      const E2 = p.ua2 !== undefined ? ad(SA, d(p.ua2, 14)) : null, W2 = E2 ? ad(E2, d(p.fa2 !== undefined ? p.fa2 : p.ua2, 12)) : null;
       const hand = (e, w) => w ? w[1] + 2.2 * (w[1] - e[1]) / 12 + 2.5 : -99, c = ad(S, d(p.nk, 11.4));
       const low = Math.max(shoeLow(K, A, fa1), two ? shoeLow(K2, A2, fa2) : -99, K[1] + 4.5, two ? K2[1] + 4.5 : -99, H[1] + 7.7, S[1] + 6.4, c[1] + 6.8, E[1] + 3.2, E2 ? E2[1] + 3.2 : -99, hand(E, W), hand(E2, W2));
-      return { p, H, S, E, W, K, A, N, K2, A2, T, T2, E2, W2, low, seg: { tr: [H, S], nk: [S, N], ua: [S, E], fa: [E, W], th: [H, K], sh: [K, A], th2: [H, K2], sh2: [K2, A2] } }; };
+      return { p, H, S, SA, E, W, K, A, N, K2, A2, T, T2, E2, W2, low, seg: { tr: [H, S], nk: [S, N], ua: [S, E], fa: [E, W], th: [H, K], sh: [K, A], th2: [H, K2], sh2: [K2, A2] } }; };
     if (raw || p.top) return build(false);
     if (p.prop) return build(true);
     let g = build(false);
@@ -186,6 +193,7 @@ const ILLUS = (() => {
   const FRONT = {
     uptrap: u => ({ tilt: -24 * u, lift: 0, turn: 0, L: 'head', R: 'sit' }),             // ear to shoulder, near hand over the head, far hand sat on
     scm: u => ({ tilt: -20 * u, lift: u, turn: .45 * u, L: 'collar', R: 'down' }),        // collarbone anchored, tilt away, chin up and toward it
+    jaw: u => ({ tilt: 0, lift: 0, turn: 0, L: 'jaw', R: 'jaw' }),      // facing you: fingertips of both hands on the jaw muscles, just in front of the ears
     levator: u => ({ tilt: -14 * u, lift: -u, turn: -.7 * u, L: 'back', R: 'behind' })    // nose to armpit, hand on the back of the head, far hand behind
   };
   function front(key, u, opt = {}) {
@@ -212,7 +220,7 @@ const ILLUS = (() => {
         const flat = rot(pose === 'head' ? [HC[0] - sx * 8.2, 30.4] : [HC[0] - sx * 4.2, 27.2]), str = [ha[0] + Math.cos(aF) * 7.4, ha[1] + Math.sin(aF) * 7.4], kd = E(cl((ka - .6) / .4));
         return sleeve(sh, el, ha, lerp(str, [flat[0] + (ha[0] - gH[0]), flat[1] + (ha[1] - gH[1])], kd)); }
       // these stay put from the start: collarbone anchored, hand sat on, or reaching behind (the forearm disappears behind the body)
-      const fixed = { collar: [[sh[0] - sx * 9, 84], [80 - sx * 9.5, 68]], sit: [[sh[0] + sx * 3.5, 102], [sh[0] + sx * 1, 130]], behind: [[sh[0] + sx * 6.5, 97], [sh[0] - sx * 5, 118]] }[pose] || [rE, rH];
+      const fixed = { jaw: [[sh[0] - sx * 2, 89], [80 + sx * 13.4, 54.6]], collar: [[sh[0] - sx * 9, 84], [80 - sx * 9.5, 68]], sit: [[sh[0] + sx * 3.5, 102], [sh[0] + sx * 1, 130]], behind: [[sh[0] + sx * 6.5, 97], [sh[0] - sx * 5, 118]] }[pose] || [rE, rH];
       return sleeve(sh, fixed[0], fixed[1]); };
     let o = `<svg class="ill" viewBox="${opt.fit ? '24 8 112 84' : '0 -8 160 108'}"${opt.fit || opt.slice ? ' preserveAspectRatio="xMidYMid slice"' : ''} role="img" aria-label="${key}">`;
     if (opt.scene !== false) o += `<rect x="-200" y="-200" width="560" height="400" ${F(V('ill-bg', '#FBEDE1'))}/><circle cx="80" cy="42" r="50" ${F(V('ill-glow', '#FFF7F0'))}/><g ${F(V('ill-cloud', '#F4E6D9'))}><circle cx="30" cy="12" r="6"/><circle cx="38" cy="9" r="7.5"/><circle cx="46" cy="13" r="5.5"/><rect x="24" y="12" width="28" height="6" rx="3"/></g><ellipse cx="80" cy="108" rx="120" ry="17" ${F(V('ill-hill', '#CFDCBD'))}/><circle cx="22" cy="94" r="11" ${F(V('ill-bush', '#B4C7A3'))}/><circle cx="138" cy="94" r="11" ${F(V('ill-bush', '#B4C7A3'))}/>`;
@@ -236,7 +244,7 @@ const ILLUS = (() => {
     inFront.forEach(([k, sx]) => { o += arm(st[k], sx); });
     // direction cue: a short arc showing which way the head goes, fading out as it gets there
     const ao = 1 - cl(kh * 2.2);
-    if (ao > .02 && opt.arrow !== false) { const R = 49, a0 = (-90 - 13) * Math.PI / 180, a1 = (-90 + full.tilt - 9) * Math.PI / 180, P0 = [piv[0] + R * Math.cos(a0), piv[1] + R * Math.sin(a0)], P1 = [piv[0] + R * Math.cos(a1), piv[1] + R * Math.sin(a1)];
+    if (ao > .02 && opt.arrow !== false && full.tilt) { const R = 49, a0 = (-90 - 13) * Math.PI / 180, a1 = (-90 + full.tilt - 9) * Math.PI / 180, P0 = [piv[0] + R * Math.cos(a0), piv[1] + R * Math.sin(a0)], P1 = [piv[0] + R * Math.cos(a1), piv[1] + R * Math.sin(a1)];
       const tg = Math.atan2(-Math.cos(a1), Math.sin(a1)), hd = k => [P1[0] + 4.2 * Math.cos(tg + k * 2.55), P1[1] + 4.2 * Math.sin(tg + k * 2.55)];
       o += `<path d="M${q(P0)}A${R} ${R} 0 0 0 ${q(P1)}M${q(hd(1))}L${q(P1)}L${q(hd(-1))}" style="stroke:${TOPd}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="${ao.toFixed(2)}"/>`; }
     return o + '</g></svg>';
@@ -329,8 +337,7 @@ const ILLUS = (() => {
     'side-plank': { a: { ...SIDE, rot: -84, aL: [174, -96, .45, .55] }, b: { ...SIDE, rot: -76, aL: [166, -104, 1, .55] } },          // forearm down, hips lift into one straight line
     copenhagen: { a: { ...SIDE, rot: -84, bench: 1, aL: [174, -96, .5, .55], lR: [88, 88, 1, 1], lL: [108, 102, 1, 1] }, b: { ...SIDE, rot: -84, bench: 1, aL: [174, -96, .5, .55], lR: [88, 88, 1, 1], lL: [93, 90, 1, 1] } },
     shrug: { a: { ...REST, wt: 'LR' }, b: { ...REST, wt: 'LR', shr: 1 } },
-    'shoulder-roll': { a: REST, b: { ...REST, shr: 1 } },                                                       // warm-up: shoulders roll up and back down, no weights
-    rest: { a: { ...REST, aL: [96, 92, 1, 1], aR: [84, 88, 1, 1] }, b: { ...REST, shr: .32, aL: [99, 94, 1, 1], aR: [81, 86, 1, 1] } },      // between sets: stand tall and breathe
+    rest: { a: { ...REST, aL: [96, 92, 1, 1], aR: [84, 88, 1, 1] }, b: { ...REST, shr: .07, ts: 1.012, aL: [97, 93, 1, 1], aR: [83, 87, 1, 1] } },      // between sets: stand tall and breathe; barely visible on purpose, so it can never be mistaken for a shoulder exercise
     'reverse-fly': { a: { ...REST, hy: 60, ts: .5, nod: .8, wt: 'LR', lL: [96, 86, .95, .95], lR: [84, 94, .95, .95], aL: [94, 92, 1, 1], aR: [86, 88, 1, 1] }, b: { ...REST, hy: 60, ts: .5, nod: .8, wt: 'LR', lL: [96, 86, .95, .95], lR: [84, 94, .95, .95], aL: [168, 172, 1, 1], aR: [12, 8, 1, 1] } },
     'prone-T': { a: { ...REST, rot: -90, view: 'top', back: 1, aL: [180, 180, 1, 1], aR: [0, 0, 1, 1] }, b: { ...REST, rot: -90, view: 'top', back: 1, lift: 1, aL: [180, 180, 1, 1], aR: [0, 0, 1, 1] } },
     'prone-W': { a: { ...REST, rot: -90, view: 'top', back: 1, aL: [158, -92, 1, .95], aR: [22, -88, 1, .95] }, b: { ...REST, rot: -90, view: 'top', back: 1, lift: 1, aL: [158, -92, 1, .95], aR: [22, -88, 1, .95] } },
@@ -346,9 +353,24 @@ const ILLUS = (() => {
        one hand goes to the outside of the opposite knee and the other to the chair back. */
     'seated-twist': { a: { ...FCHAIR, aL: [95, 64, 1, 1.1], aR: [85, 116, 1, 1.1] }, b: { ...FCHAIR, tw: 1, turn: -.75, aL: [142, -108, 1, .8], aR: [115, 120, 1.15, 1.3] } },
     'seated-side': { a: { ...FCHAIR, aL: [95, 64, 1, 1.1], aR: [85, 116, 1, 1.1] }, b: { ...FCHAIR, lean: -14, aL: [104, 88, 1, .95], aR: [-98, -138, 1, 1] } },      // one hand holds the seat, the other arm reaches up and over
+    /* doorway chest stretches, from the front: standing in the doorway, both forearms upright on the frame, elbows below
+       (low) or above (high) shoulder height, then the chest eases forward through the door */
+    'doorway-low': { a: { ...REST, door: 1, note: 'HANDS STAY · CHEST FORWARD', aL: [152, 270, 1, 1], aR: [28, -90, 1, 1] }, b: { ...REST, door: 1, note: 'HANDS STAY · CHEST FORWARD', ts: 1.05, aL: [158, 268, 1.06, 1.04], aR: [22, -88, 1.06, 1.04] } },
+    'doorway-high': { a: { ...REST, door: 1, note: 'HANDS STAY · CHEST FORWARD', aL: [203, 270, 1, 1], aR: [-23, -90, 1, 1] }, b: { ...REST, door: 1, note: 'HANDS STAY · CHEST FORWARD', ts: 1.05, aL: [197, 268, 1.06, 1.04], aR: [-17, -88, 1.06, 1.04] } },
+    /* one arm on a wall or door frame beside you, from the front: the arm stays where it is and the body turns away from it */
+    'wall-chest': { a: { ...REST, post: 105, aR: [0, -90, 1, 1] }, b: { ...REST, post: 105, tw: .8, turn: -.6, aR: [0, -90, 1.285, 1] } },      // elbow bent 90°, palm and forearm on the wall at shoulder height
+    biceps: { a: { ...REST, post: 117, aR: [0, 0, 1, 1] }, b: { ...REST, post: 117, tw: .8, turn: -.6, aR: [0, 0, 1.148, 1.148] } },              // arm straight, palm flat on the wall at shoulder height
+    'door-er': { a: { ...REST, post: 105.5, aR: [86, 0, 1, 1] }, b: { ...REST, post: 105.5, tw: .5, turn: -.45, aR: [86, 0, 1, 1.2] } },          // elbow at the side bent 90°, forearm against the frame
+    /* wall slides, seen from behind: you face the wall, forearms on it with the elbows at shoulder height, and slide them up into a Y */
+    'wall-slide': { a: { ...REST, back: 1, wallBg: 1, note: 'FACING THE WALL', aL: [172, 270, .5, 1], aR: [8, -90, .5, 1] }, b: { ...REST, back: 1, wallBg: 1, note: 'FACING THE WALL', lift: .6, aL: [236, 262, .95, 1], aR: [-56, -82, .95, 1] } },
+    /* figure-4 on the back, seen from above. The legs make the "4": one foot stays down with the knee bent, the other ankle
+       rests across that knee with its knee out to the side. Both hands then reach to the supporting thigh and draw it in.
+       The legs are drawn over the arms, so the "4" is never hidden. */
+    figure4: { a: { ...REST, rot: -90, view: 'top', armsUnder: 1, note: 'ANKLE ON THE OTHER KNEE · PULL THE THIGH IN', lL: [90, 90, .75, .3], lR: [63, 188, 1, 1], aL: [100, 96, 1, 1], aR: [80, 84, 1, 1] },
+      b: { ...REST, rot: -90, view: 'top', armsUnder: 1, note: 'ANKLE ON THE OTHER KNEE · PULL THE THIGH IN', lL: [90, 90, .55, .3], lR: [67, 202, 1, 1], aL: [86, 86, 1.1, 1.1], aR: [112, 112, 1.1, 1.1] } },      // limb lengths are true, so the crossed leg forms a real triangle: hip, knee out to the side, ankle on the other knee
     butterfly: { a: { ...REST, hy: 80, view: 'sit', lL: [196, 28, .9, .84], lR: [-16, 152, .9, .84], aL: [82, 66, 1, 1], aR: [98, 114, 1, 1] }, b: { ...REST, hy: 80, view: 'sit', lL: [174, 6, .95, .86], lR: [6, 174, .95, .86], aL: [82, 66, 1, 1], aR: [98, 114, 1, 1] } }
   };
-  const RIG_ILL = { 'itb-cross': 'itb', 'side-raise-leg': 'side-leg' };
+  const RIG_ILL = { 'itb-cross': 'itb', 'side-raise-leg': 'side-leg', doorway: 'doorway-low', 'corner-high': 'doorway-high', 'wall-biceps': 'biceps' };
   const rigOf = (key, ex) => RIG[ex] || RIG[key] || RIG[RIG_ILL[key]] || null;
   function frontRig(spec, u, opt = {}) {
     u = Math.max(0, Math.min(1, u));
@@ -382,7 +404,7 @@ const ILLUS = (() => {
       else { const cx = o.ft[0] + o.sd * 1.3, cy = o.ft[1] + 1.9;      // standing or on a chair: the toe of the trainer points at you
         sh += `<path d="M${f(cx - 4.9)} ${f(cy + 2.3)}Q${f(cx - 5.3)} ${f(cy - 2.9)} ${f(cx)} ${f(cy - 3.2)}Q${f(cx + 5.3)} ${f(cy - 2.9)} ${f(cx + 4.9)} ${f(cy + 2.3)}Z" fill="#fff" stroke="#CFC7BE" stroke-width=".8" stroke-linejoin="round"/><path d="M${f(cx - 4.9)} ${f(cy + 2.3)}H${f(cx + 4.9)}" stroke="${SOLE}" stroke-width="1.4" stroke-linecap="round"/><path d="M${f(cx - 1.5)} ${f(cy - 1.4)}h3M${f(cx - 1.7)} ${f(cy - .1)}h3.4" stroke="#C9C2BA" stroke-width=".5" stroke-linecap="round"/>`; }
       return sh; };
-    const box = view === 'top' || view === 'side' ? (opt.fit ? '26 26 108 72' : '24 -14 112 138') : view === 'sit' || view === 'chair' ? (opt.fit ? '40 30 80 68' : '30 12 100 88') : (opt.fit ? '34 0 92 98' : '18 -6 124 106');
+    const box = view === 'top' || view === 'side' ? (opt.fit ? '26 26 108 72' : '24 -14 112 138') : view === 'sit' || view === 'chair' ? (opt.fit ? '40 30 80 68' : '30 12 100 88') : (opt.fit ? '34 0 92 98' : '18 -6 124 111');
     let o = `<svg class="ill" viewBox="${box}"${opt.fit || opt.slice ? ' preserveAspectRatio="xMidYMid slice"' : ''} role="img" aria-label="exercise">`;
     if (opt.scene !== false) o += view === 'top' ? `<rect x="-200" y="-200" width="560" height="400" ${F(V('ill-bg', '#FBEDE1'))}/><rect x="28" y="23.2" width="104" height="80" rx="8" fill="#000" opacity=".05"/><rect x="28" y="22" width="104" height="80" rx="8" ${F(V('ill-bg', '#FBEDE1'))}/><rect x="28" y="22" width="104" height="80" rx="8" ${F(V('ill-mat', '#F4B48D'))} opacity=".42"/><rect x="30.6" y="24.6" width="98.8" height="74.8" rx="6" fill="none" style="stroke:${V('ill-mat', '#F4B48D')}" stroke-width=".7" opacity=".7"/><rect x="56.5" y="10.6" width="47" height="8.2" rx="4.1" ${F(V('ill-glow', '#FFF7F0'))}/><text x="80" y="16.4" text-anchor="middle" font-size="4.6" font-weight="700" letter-spacing=".5" font-family="system-ui,-apple-system,sans-serif" ${F(V('fig-top2', '#CF6630'))}>SEEN FROM ABOVE</text>`
       : sceneFront(V, F) + (view === 'side' || view === 'sit' ? `<rect x="22" y="89.5" width="116" height="4" rx="2" ${F(V('ill-mat', '#F4B48D'))}/>` : '');
@@ -396,11 +418,17 @@ const ILLUS = (() => {
     if (P.bench) { const tf = rp(lR.ft), ty = tf[1] + dyv + 3.4; o += `<rect x="${f(tf[0] - 13)}" y="${f(ty)}" width="26" height="${f(Math.max(2, 93.4 - ty))}" rx="2.5" ${F(V('ill-prop', '#D8C7B6'))}/>`; }
     o += `<g transform="translate(0 ${f(dyv)}) rotate(${f(P.rot)} 80 60)">`;
     // arms lifted off the floor (seen from above): their shadow separates from them as they rise
-    if (P.lift > .02) [L, Rr].forEach(a => { o += `<path d="M${q(a.sh)}L${q(a.el)}L${q(a.ha)}" transform="translate(${f(-2.6 * P.lift)} ${f(1.6 * P.lift)})" stroke="#000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="${(.13 * P.lift).toFixed(3)}"/>`; });
+    if (P.lift > .02 && view === 'top') [L, Rr].forEach(a => { o += `<path d="M${q(a.sh)}L${q(a.el)}L${q(a.ha)}" transform="translate(${f(-2.6 * P.lift)} ${f(1.6 * P.lift)})" stroke="#000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="${(.13 * P.lift).toFixed(3)}"/>`; });
     if (P.under) o += drawArm(P.under === 'R' ? Rr : L);
     const BAND = V('ill-stem', '#7F9A70');      // resistance bands are green, so they never read as part of the figure or as a stray line
     if (Array.isArray(P.band)) o += `<rect x="${f(P.band[0] - 2)}" y="14" width="4" height="79.4" rx="1.5" ${F(PR2)}/>`;      // the post or door the band is tied to
-    o += drawLeg(lL) + drawLeg(lR);
+    let doorFront = '';
+    if (P.wallBg) o += `<rect x="36" y="-4" width="88" height="${f(97.4 - dyv)}" rx="3" ${F(V('ill-prop', '#D8C7B6'))} opacity=".55"/>`;      // the wall you are facing
+    if (P.post) o += `<rect x="${f(P.post - 2.5)}" y="-2" width="5" height="${f(96 - dyv)}" rx="1.5" ${F(PR2)}/>`;      // the wall or door frame beside you
+    if (P.door) { const PRd = V('ill-prop', '#D8C7B6'), xl = Math.min(L.el[0], L.ha[0]) - 4.6, xr = Math.max(Rr.el[0], Rr.ha[0]) + 4.6, B = spec.b, fx = s => 80 + s * (9.5 + 12.5 * Math.abs(Math.cos(B[s < 0 ? 'aL' : 'aR'][0] * R))) + s * 4.6;      // door frame: two posts where the forearms end up, and the top of the frame
+      const l0 = fx(-1), r0 = fx(1), post = x => `<rect x="${f(x - 3.4)}" y="3" width="6.8" height="${f(91 - dyv)}" rx="1.5" ${F(PR2)}`; o += `<rect x="${f(l0 - 5)}" y="1" width="${f(r0 - l0 + 10)}" height="5" rx="1.5" ${F(PRd)}/>` + post(l0) + ' opacity=".35"/>' + post(r0) + ' opacity=".35"/>';
+      doorFront = post(l0) + ' opacity=".5"/>' + post(r0) + ' opacity=".5"/>'; }      // you face out of the doorway, so the frame is in front of your forearms: it is drawn see-through over them
+    if (!P.armsUnder) o += drawLeg(lL) + (P.legTop ? '' : drawLeg(lR));
     if (P.band === 'knees') { const m = [(lL.kn[0] + lR.kn[0]) / 2, (lL.kn[1] + lR.kn[1]) / 2], dxk = lR.kn[0] - lL.kn[0], dyk = lR.kn[1] - lL.kn[1];      // a loop band round both legs, just above the knees
       o += `<ellipse cx="${f(m[0])}" cy="${f(m[1] - 2.5)}" rx="${f(Math.hypot(dxk, dyk) / 2 + 4.6)}" ry="2.7" transform="rotate(${f(Math.atan2(dyk, dxk) / R)} ${f(m[0])} ${f(m[1] - 2.5)})" fill="none" style="stroke:${BAND}" stroke-width="2"/>`; }
     if (!P.back) o += `<ellipse cx="${f(atT(24.6, 0)[0])}" cy="${f(atT(24.6, 0)[1])}" rx="${f(7.4 * twc)}" ry="3.3" transform="rotate(${f(P.lean)} ${q(atT(24.6, 0))})" ${F(TOPd)}/>`;      // hood resting behind the neck
@@ -416,10 +444,12 @@ const ILLUS = (() => {
       `<path d="M${n(dx * 1.12)} 1.1q${n(P.turn * 1.4)} 1.1 ${n(P.turn * .4)} 1.6" stroke="${SKd}" stroke-width=".55" fill="none" stroke-linecap="round"/>${[-1, 1].map(sd => Math.abs(dx + sd * 3.9 * sp) < 5 ? `<circle cx="${n(dx + sd * 3.9 * sp)}" cy="2.7" r="1" fill="#F2A48C" opacity=".35"/>` : '').join('')}<path d="M${n(dx - 1.6)} 4.1q1.6 1.1 3.2 0" stroke="#B5745C" stroke-width=".55" fill="none" stroke-linecap="round"/></g></g>`;
     if (P.band === 1) o += `<path d="M${q(L.ha)}L${q(Rr.ha)}" style="stroke:${BAND}" stroke-width="2" stroke-linecap="round"/>`;
     if (Array.isArray(P.band)) o += `<path d="M${f(P.band[0])} ${f(Rr.ha[1])}L${q(Rr.ha)}" style="stroke:${BAND}" stroke-width="2" stroke-linecap="round"/><circle cx="${f(P.band[0])}" cy="${f(Rr.ha[1])}" r="2.2" fill="none" style="stroke:${BAND}" stroke-width="1.4"/>`;
-    o += (P.under === 'L' ? '' : drawArm(L)) + (P.under === 'R' ? '' : drawArm(Rr));
+    o += (P.under === 'L' ? '' : drawArm(L)) + (P.under === 'R' ? '' : drawArm(Rr)) + doorFront + (P.armsUnder ? drawLeg(lL) + drawLeg(lR) : '') + (P.legTop ? `<g opacity="${P.legTop}">${drawLeg(lR)}</g>` : '');
     const wt = h => `<rect x="${f(h[0] - 4.2)}" y="${f(h[1] - 1.6)}" width="8.4" height="3.2" rx="1.2" ${F(PR2)}/><rect x="${f(h[0] - 5)}" y="${f(h[1] - 2.6)}" width="2.2" height="5.2" rx=".8" ${F(V('ill-prop', '#D8C7B6'))}/><rect x="${f(h[0] + 2.8)}" y="${f(h[1] - 2.6)}" width="2.2" height="5.2" rx=".8" ${F(V('ill-prop', '#D8C7B6'))}/>`;
     if (P.wt) { if (P.wt.includes('L')) o += wt(L.ha); if (P.wt.includes('R')) o += wt(Rr.ha); }
-    return o + '</g></g></svg>';
+    o += '</g></g>';
+    if (P.note) { const w = P.note.length * 2.55 + 8; const ny = view === 'top' ? 108 : 96.4; o += `<rect x="${f(80 - w / 2)}" y="${ny}" width="${f(w)}" height="6.6" rx="3.3" ${F(V('ill-glow', '#FFF7F0'))}/><text x="80" y="${ny + 4.8}" text-anchor="middle" font-size="4" font-weight="700" letter-spacing=".4" font-family="system-ui,-apple-system,sans-serif" ${F(TOPd)}>${P.note}</text>`; }      // one short line for what cannot be seen from this angle
+    return o + '</svg>';
   }
 
   /* Full-body front view for moves that read best from the front: hip circles (phase 0-1), the side bend and the side lunge (u 0-1). */
@@ -481,7 +511,9 @@ const ILLUS = (() => {
   const leg = (H, K, A, T, c, far) => limb(mix(K, A, .8), A, 4.6, 4.2, far ? SKd : SK) + limb(H, K, 12.6, 9, c) + limb(K, mix(K, A, .84), 9, 5.6, c) + shoe(K, A, T, far);
   // trainer: rounded white upper, grey sole on the side away from the knee, two laces
   const shoe = (K, A, T, far) => { const dx = T[0] - A[0], dy = T[1] - A[1], l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l; let nx = -uy, ny = ux;
-    if (nx * (K[0] - A[0]) + ny * (K[1] - A[1]) > 0) { nx = -nx; ny = -ny; }
+    /* The sole is on a fixed side of the foot: below it when the toes point forward. It used to be picked as "the side away
+       from the knee", which has no answer when the foot lies in line with the shin (kneeling, lying face down, a leg stretched
+       back), so the shoe flipped upside down and back from one frame to the next. */
     const q = (t, n) => [A[0] + ux * t + nx * n, A[1] + uy * t + ny * n], L = l;
     const P = [q(-1.9, -2), q(-3.3, .4), q(-3, 2.7), q(L + 2.4, 2.7), q(L + 3.3, 1.5), q(L + 1.4, -.5), q(2.6, -2.4), q(1, -2.5)], up = far ? '#EFEAE4' : '#FFFFFF';
     const lace = t => { const a = q(t, -2.1 + t * .18), b = q(t + 1.2, -.6 + t * .1); return `<path d="M${f(a[0])} ${f(a[1])}L${f(b[0])} ${f(b[1])}" stroke="#C9C2BA" stroke-width=".5" stroke-linecap="round"/>`; };
@@ -526,6 +558,9 @@ const ILLUS = (() => {
       out += `<ellipse cx="80" cy="99" rx="110" ry="8" ${F(GR)}/><rect x="-200" y="99" width="560" height="200" ${F(GR)}/>`;
     }
   }
+  /* left side: the figure and its props are mirrored about the middle of the frame, so it faces the other way and stays in view */
+  const MIRX = opt.mirror ? (() => { const v = vb.split(' ').map(Number); return 2 * v[0] + v[2]; })() : 0;
+  if (opt.mirror) out += `<g transform="translate(${f(MIRX)} 0) scale(-1 1)">`;
   if (p.w) out += `<rect x="${p.w - 2}" y="-8" width="4" height="101" rx="1" ${F(PR2)}/>`;
   if (floor) out += `<rect x="12" y="89.5" width="136" height="4" rx="2" ${F(V('ill-mat', '#F4B48D'))}/>`;
   const props = { chair: `<rect x="36" y="74" width="52" height="6" rx="3" ${F(PR)}/><rect x="36" y="36" width="6" height="40" rx="3" ${F(PR)}/><rect x="40" y="80" width="4" height="13" rx="1" ${F(PR2)}/><rect x="80" y="80" width="4" height="13" rx="1" ${F(PR2)}/>`,
@@ -543,27 +578,35 @@ const ILLUS = (() => {
   if (opt.scene !== false && !p.prop && !p.top) { const lo = body.filter(q => q[1] > 80).map(q => q[0]), a = lo.length ? Math.min(...lo) : g.H[0] - 8, b = lo.length ? Math.max(...lo) : g.H[0] + 8; out += `<ellipse cx="${f((a + b) / 2)}" cy="${floor ? 94.4 : 94.6}" rx="${f(Math.max(9, (b - a) / 2 + 3))}" ry="1.5" fill="#000" opacity=".09"/>`; }
   // back to front: far arm, far leg, neck, torso with hood, near leg, head, near arm
   const E2 = g.E2 || g.E, W2 = g.W2 || g.W;
-  out += arm(g.S, E2, W2, TOPd, TOPd, true);
+  out += arm(g.SA, E2, W2, TOPd, TOPd, true);
   if (g.K2) out += leg(g.H, g.K2, g.A2, g.T2, LEGd, true);
   out += limb(g.S, c, 5, 4.6, SKd);
   out += limb(g.H, mix(g.H, g.K, .3), 15.4, 12.2, LEG);
   out += torso(g.H, g.S);
   out += leg(g.H, g.K, g.A, g.T, LEG);
   // head in its own frame: up = from neck to crown, forward = the way the face looks
-  if (p.armBack) out += arm(g.S, g.E, g.W, TOP, TOPd);      // hands clasped behind the head: the forearm passes behind it, the face stays clear
-  out += `<g transform="translate(${f(c[0])} ${f(c[1])}) rotate(${f(p.nk + 90)}) scale(1.1)">`;
+  if (p.armBack) out += arm(g.SA, g.E, g.W, TOP, TOPd);      // hands clasped behind the head: the forearm passes behind it, the face stays clear
+  // hd turns the head on the neck (a nod), separately from where the neck carries it: a chin tuck slides the head back while the face stays level
+  out += `<g transform="translate(${f(c[0])} ${f(c[1])}) rotate(${f(p.nk + 90 + (p.hd || 0))}) scale(1.1)">`;
   if (FM) out += `<path d="M-2.6 -6C-5.8 -8.6 -10.8 -7.4 -11.4 -2.8C-11.8 .6 -11 3.6 -9.5 6.2C-9.4 3.4 -8.4 .8 -5 -1.2Z" fill="${HAIR}"/>`;
   out += `<ellipse cx="0" cy="0" rx="5.6" ry="6.2" fill="${SK}"/><path d="M5.3 -.9Q6.8 .7 5.3 1.7Z" fill="${SK}"/>`;
   out += FM ? `<path d="M4.4 -3.8C3.4 -7.6 -4.2 -8 -5.7 -2.8C-6.3 -.2 -5.8 2.4 -4.5 4.1C-3.4 4 -2.7 3.5 -2.6 2.6C-2.5 .8 -1.8 -.9 -.4 -2C1 -3 2.8 -3.2 4.4 -3.8Z" fill="${HAIR}"/>`
     : `<path d="M4.3 -4.2C3.4 -7.6 -4.4 -7.9 -5.7 -2.6C-6 -.8 -5.7 1.2 -5 2.4L-3.3 2.3C-3.3 .7 -2.9 -.9 -1.9 -2C-.6 -3.1 2.1 -3.4 4.3 -4.2Z" fill="${HAIR}"/>`;
   const ex = FM ? -1.6 : -2.4;   // ear sits on the hairline, skin coloured with one soft inner curve
   out += `<ellipse cx="${ex}" cy="1.1" rx="1.15" ry="1.55" fill="${SK}"/><path d="M${ex + .35} .4Q${ex - .45} 1.1 ${ex + .25} 1.9" stroke="#D69878" stroke-width=".35" fill="none" stroke-linecap="round"/><path d="M2.7 -2.3Q3.4 -2.7 4.1 -2.35" stroke="${HAIR}" stroke-width=".45" fill="none" stroke-linecap="round"/><circle cx="3.4" cy="-.6" r=".6" fill="#2A1E19"/><circle cx="4.2" cy="1.5" r=".85" fill="#F2A48C" opacity=".35"/><path d="M2.9 3Q3.8 3.6 4.7 2.9" stroke="#B5745C" stroke-width=".55" fill="none" stroke-linecap="round"/></g>`;
-  if (!p.armBack) out += arm(g.S, g.E, g.W, TOP, TOPd);
+  if (!p.armBack) out += arm(g.SA, g.E, g.W, TOP, TOPd);
+  if (p.armBack && p.ghost) out += `<g opacity="${p.ghost}">${arm(g.SA, g.E, g.W, TOP, TOPd)}</g>`;      // the same arm again over the head, see-through: you see the hand and arm and still see the face
   if (BD) { const J = { W: g.W, K: g.K, A: g.A, T: g.T }[BD.at] || g.W, an = [BD.x, BD.y + (BD.hook ? 2 : 0)], mx = (an[0] + J[0]) / 2, my = (an[1] + J[1]) / 2, lab = BD.label || 'BAND', lw = lab.length * 2.75 + 6;
     out += `<path d="M${f(an[0])} ${f(an[1])}L${f(J[0])} ${f(J[1])}" style="stroke:${BAND}" stroke-width="2.1" stroke-linecap="round"/><circle cx="${f(an[0])}" cy="${f(an[1])}" r="2.3" style="fill:${V('ill-glow', '#FFF7F0')};stroke:${BAND}" stroke-width="1.5"/>`;
     out += BD.at === 'W' ? `<circle cx="${f(J[0])}" cy="${f(J[1])}" r="1.9" style="fill:${BAND}"/>` : `<circle cx="${f(J[0])}" cy="${f(J[1])}" r="${BD.r || 4.6}" fill="none" style="stroke:${BAND}" stroke-width="2"/>`;      // gripped in the hand, or looped round the limb
-    const ly = Math.max(-2, Math.min(my - 6.5, 84)); out += `<rect x="${f(mx - lw / 2)}" y="${f(ly - 4.3)}" width="${f(lw)}" height="6.4" rx="3.2" style="fill:${V('ill-glow', '#FFF7F0')};stroke:${BAND}" stroke-width=".6"/><text x="${f(mx)}" y="${f(ly + .5)}" text-anchor="middle" font-size="4" font-weight="700" letter-spacing=".4" font-family="system-ui,-apple-system,sans-serif" style="fill:${BAND}">${lab}</text>`; }
+    const ly = Math.max(-2, Math.min(my - 6.5, 84)); out += `<rect x="${f(mx - lw / 2)}" y="${f(ly - 4.3)}" width="${f(lw)}" height="6.4" rx="3.2" style="fill:${V('ill-glow', '#FFF7F0')};stroke:${BAND}" stroke-width=".6"/><text x="${f(mx)}" y="${f(ly + .5)}"${opt.mirror ? ` transform="translate(${f(2 * mx)} 0) scale(-1 1)"` : ''} text-anchor="middle" font-size="4" font-weight="700" letter-spacing=".4" font-family="system-ui,-apple-system,sans-serif" style="fill:${BAND}">${lab}</text>`; }
+  if (p.strap) out += `<path d="M${f(g.W[0])} ${f(g.W[1])}L${f(g.T[0])} ${f(g.T[1])}" style="stroke:${V('ill-stem', '#7F9A70')}" stroke-width="1.6" stroke-linecap="round"/>`;
+  if (p.rollCue) { const cx = g.S[0] - 7, cy = g.S[1] - 1, R2 = 8.4, pt = a => [cx + R2 * Math.cos(a * R), cy + R2 * Math.sin(a * R)], a0 = pt(-112), a1 = pt(-218), tg = (-218 - 90) * R, hd = k => [a1[0] - 3.9 * Math.cos(tg + k * .62), a1[1] - 3.9 * Math.sin(tg + k * .62)];      // round arrow behind the shoulder: up, back and down, clear of the face
+    out += `<path d="M${f(a0[0])} ${f(a0[1])}A${R2} ${R2} 0 0 0 ${f(a1[0])} ${f(a1[1])}M${f(hd(1)[0])} ${f(hd(1)[1])}L${f(a1[0])} ${f(a1[1])}L${f(hd(-1)[0])} ${f(hd(-1)[1])}" style="stroke:${TOPd}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".9"/>`; }
   if (p.wt) out += `<rect x="${f(g.W[0] - 5)}" y="${f(g.W[1])}" width="10" height="8" rx="2" ${F(PR2)}/>`;
+  out += opt.mirror ? '</g>' : '';
+  if (p.note && (opt.vb || !opt.fit)) { const v = vb.split(' ').map(Number), fs = Math.min(4.2, v[2] / (p.note.length * .66)), w = p.note.length * fs * .62 + fs * 2, cx = v[0] + v[2] / 2, y = v[1] + v[3] - fs * 2.4;      // one short line for what cannot be seen from this angle (not on small thumbnails)
+    out += `<rect x="${f(cx - w / 2)}" y="${f(y)}" width="${f(w)}" height="${f(fs * 1.7)}" rx="${f(fs * .85)}" ${F(V('ill-glow', '#FFF7F0'))}/><text x="${f(cx)}" y="${f(y + fs * 1.22)}" text-anchor="middle" font-size="${f(fs)}" font-weight="700" letter-spacing=".3" font-family="system-ui,-apple-system,sans-serif" ${F(TOPd)}>${p.note}</text>`; }
   return out + '</svg>';
 }
   /* ---------- movement ----------
@@ -574,30 +617,31 @@ const ILLUS = (() => {
   const SQ = { hx: 58, tr: -88, nk: -88, th: 60, sh: 100, th2: 125, sh2: 140, ua: 90, fa: 90 };
   const MOVES = {
     'prone-T': { rig: true, a: {}, b: {}, tempo: [1.5, 2, 2, 0.5] }, 'prone-W': { rig: true, a: {}, b: {}, tempo: [1.5, 2, 2, 0.5] }, 'reverse-fly': { rig: true, a: {}, b: {}, tempo: [1.5, 0.5, 2.5, 0.5] }, shrug: { rig: true, a: {}, b: {}, tempo: [1.5, 2, 2.5, 0.5] }, copenhagen: { rig: true, a: {}, b: {}, tempo: [1.5, 5, 2, 1] },
-    'shoulder-roll': { rig: true, a: {}, b: {}, tempo: [1, 0.25, 1, 0.25] }, 'wrist-curl': { rig: true, a: {}, b: {} }, 'reverse-wrist': { rig: true, a: {}, b: {} }, grip: { rig: true, a: {}, b: {} }, 'finger-ext': { rig: true, a: {}, b: {} },
+    'shoulder-roll': { roll: true, a: {}, b: {}, tempo: [2.5, 0, 0, 0] },      // one backward circle of the shoulders every two and a half seconds
+    'wrist-curl': { rig: true, a: {}, b: {} }, 'reverse-wrist': { rig: true, a: {}, b: {} }, grip: { rig: true, a: {}, b: {} }, 'finger-ext': { rig: true, a: {}, b: {} },
     'lateral-raise': { rig: true, a: {}, b: {}, tempo: [1.5, 0.5, 2.5, 0.5] }, 'pull-apart': { rig: true, a: {}, b: {}, tempo: [1.5, 1, 2, 0.5] }, 'band-er': { rig: true, a: {}, b: {}, tempo: [1.5, 0.5, 2.5, 0.5] }, 'band-ir': { rig: true, a: {}, b: {}, tempo: [1.5, 0.5, 2.5, 0.5] }, monster: { rig: true, a: {}, b: {}, tempo: [0.9, 0.2, 0.9, 0.2] },
     'wu-march': { ill: 'stand', a: { th2: 90, sh2: 90 }, b: { th2: -5, sh2: 90 }, tempo: [0.45, 0.05, 0.45, 0], alt: true, armSwing: true },
     walk: { ill: 'walk', a: {}, b: { th: 118, sh: 130, th2: 62, sh2: 72, ua: 62, fa: 12, ua2: 112, fa2: 92 }, tempo: [0.6, 0, 0.6, 0] },
-    'chin-tuck': { ill: 'chintuck', a: { nk: -88 }, b: { nk: -106 }, tempo: [1.5, 2, 1.5, .5] },
+    'chin-tuck': { ill: 'chintuck', a: { nk: -75, hd: -15 }, b: { nk: -97, hd: 13 }, tempo: [1.5, 2, 1.5, .5] },      // from head-forward to head-back: the head glides straight back and the chin tucks, it never tips backward
     'neck-ext': { ill: 'neck-ext', a: { nk: -84 }, b: {}, tempo: [2, 2, 2, .5] },
     'wu-swing': { ill: 'stand', a: { ua: 126, fa: 132 }, b: { ua: -84, fa: -88 }, tempo: [1, 0, 1, 0] },      // from a little behind the body, forward and up to overhead: never past what a shoulder can do
     'wu-hip': { ill: 'stand', a: {}, b: {}, circle: true, flipAt: 5, tempo: [3.2, 0, 0, 0] },      // five circles one way, then the other way
     'wu-cat': { ill: 'allfours', a: { nk: -46, curl: 4.5 }, b: { nk: 26, curl: -7 }, tempo: [2.4, 0.4, 2.4, 0.4] },      // cow: back sags, head up; cat: back rounds up, head drops
     'cat-cow': { a: { nk: -46, curl: 4.5 }, b: { nk: 26, curl: -7 }, tempo: [2.4, 0.4, 2.4, 0.4] },
-    pendulum: { a: { ua: 72, fa: 72 }, b: { ua: 108, fa: 108 }, tempo: [1, 0, 1, 0] },
+    pendulum: { a: { ua: 76, fa: 74 }, b: { ua: 104, fa: 106 }, tempo: [1.1, 0, 1.1, 0] },      // a small, relaxed swing of the hanging arm
     'arm-circles': { spin: true, small: true, tempo: [2.4, 0, 0, 0] },      // arms out to the sides (toward you), circles growing from small to large
     'leg-swing': { a: { th2: 128, sh2: 140 }, b: { th2: 22, sh2: 30 }, tempo: [0.9, 0, 0.9, 0] },
     'knee-wall': { a: { th2: 104 }, b: { th2: 121 }, pin: ['knee2', 'foot'], tempo: [2, 1, 2, 0] },      // back knee stays on the floor, the hips glide forward, the front knee travels over the toes
     'open-book': { book: true, a: {}, b: {}, tempo: [3, 1, 3, 0] },
-    'supine-chin': { a: { nk: 180 }, b: { nk: 187 } }, 'chin-lift': { a: { nk: 180 }, b: { nk: 200 } },      // lying head-left: angles above 180 lift the head off the mat 'prone-neck': { a: { nk: 8 }, b: { nk: -22 } },
+    'supine-chin': { a: { nk: 180, hd: 0 }, b: { nk: 180, hd: 11 } }, 'chin-lift': { a: { nk: 180, hd: 11 }, b: { nk: 189, hd: 14 } },      // lying head-left: the nod (hd) brings the chin toward the chest with the head still on the mat; the lift then raises it a little 'prone-neck': { a: { nk: 8 }, b: { nk: -22 } },
     'band-row': { a: { ua: 15, fa: 5 }, b: { ua: 150, fa: 10 } }, 'face-pull': { a: { ua: 5, fa: 0 }, b: { ua: -20, fa: -115 } },
-    'prone-Y': { a: { ua: 6, fa: 6 }, b: { ua: -28, fa: -28 } }, 'wall-slide': { a: { ua: -10, fa: -84 }, b: { ua: -62, fa: -88 }, wall: true, tempo: [2, 0.5, 2.5, 0.5] },
+    'prone-Y': { a: { ua: 6, fa: 6 }, b: { ua: -28, fa: -28 } }, 'wall-slide': { rig: true, a: {}, b: {}, tempo: [2, 0.5, 2.5, 0.5] },
     pulldown: { a: { ua: -80, fa: -85 }, b: { ua: 55, fa: -65 } }, press: { a: { ua: 35, fa: -80 }, b: { ua: -85, fa: -88 } },
     pushup: { a: {}, b: { hx: 75.2, hy: 83.6, tr: -10, nk: -12, ua: 150 }, pin: ['foot', 'hand'] },
     'hammer-curl': { a: { fa: 85 }, b: { fa: -55 } }, pushdown: { a: { fa: -25 }, b: { fa: 88 } },
-    deadbug: { a: { ua: -90, fa: -90, th2: -90, sh2: 0 }, b: { ua: -172, fa: -172, th2: -8, sh2: -8 } },
+    deadbug: { a: { ua: -90, fa: -90, ua2: -90, fa2: -90, th2: -90, sh2: 0 }, b: { ua: -172, fa: -172, ua2: -90, fa2: -90, th2: -8, sh2: -8 }, swap: true, tempo: [2.5, 0.5, 2.5, 0.5] },      // the other side uses the other arm and leg, same view
     'curl-up': { a: { tr: 180, nk: 180 }, b: { tr: 192, nk: 205 } },
-    birddog: { a: { ua: 90, fa: 90, th2: 90, sh2: 180 }, b: { ua: -6, fa: -6, th2: 178, sh2: 178 } },
+    birddog: { a: { ua: 90, fa: 90, ua2: 90, fa2: 90, th2: 90, sh2: 180 }, b: { ua: -6, fa: -6, ua2: 90, fa2: 90, th2: 178, sh2: 178 }, tuck: 42, swap: true, tempo: [2, 2, 2, 0.5] },      // reach, hold, sweep back; the supporting hand never leaves the floor
     pallof: { a: { ua: 55, fa: -45 }, b: { ua: 0, fa: 0 } },
     superman: { a: { tr: -3, nk: -4, ua: 4, fa: 4, th: 180, sh: 180 }, b: { th: 188, sh: 188 } },
     rdl: { a: { hx: 52, tr: -88, nk: -88, th: 90, sh: 90 }, b: { hx: 45, tr: -12, nk: -18, th: 84, sh: 96 }, pin: ['foot'] },
@@ -622,10 +666,12 @@ const ILLUS = (() => {
     const a1 = diff(base + al) < diff(base - al) ? base + al : base - al, J = [P[0] + Math.cos(a1) * l1, P[1] + Math.sin(a1) * l1];
     return [a1 / RD, Math.atan2(Q[1] - J[1], Q[0] - J[0]) / RD];
   }
-  function animPose(key, mv, u, cycle = 0, phase = 0) {
+  function animPose(key, mv, u, cycle = 0, phase = 0, other = false) {
     const base = T[mv.ill || key] || T.stand, A = { ...DEF, ...base, ...(mv.a || {}) }, B = { ...DEF, ...base, ...(mv.b || {}) };
     for (const X of [A, B]) { const Y = X === A ? B : A; if (X.ft === undefined && Y.ft !== undefined) X.ft = X.sh - 90; }
     const P = { ...A }; for (const k in B) if (typeof B[k] === 'number' && typeof A[k] === 'number') P[k] = A[k] + (B[k] - A[k]) * u;
+    if (mv.tuck) P.fa = P.ua - mv.tuck * Math.sin(Math.PI * u);      // the elbow bends on the way, so the reaching hand clears the floor instead of sweeping through it
+    if (mv.roll) { const a = 2 * Math.PI * phase; P.sx = -3 * Math.sin(a); P.sy = -1 - 2.7 * Math.cos(a); P.ua = 92 + 3 * Math.sin(a); P.fa = 88 + 4 * Math.sin(a); }      // up, then back, then down, then forward: a backward roll for a figure facing right
     if (mv.spin) { P.ua = P.fa = -90 + 360 * phase; if (mv.small) P.al = Math.min(.62, .2 + .045 * (cycle + phase)); }
     /* open book, seen from above: the top arm lifts off the bottom one, points at the ceiling (toward the viewer, so it
        shortens to nothing) and opens down behind the back, while the head turns after it. Knees and bottom arm stay put. */
@@ -655,6 +701,8 @@ const ILLUS = (() => {
     // alternating moves change legs only when both feet are down (pose A), so nothing jumps between steps
     if (mv.alt && cycle % 2) { [P.th, P.th2] = [P.th2, P.th]; [P.sh, P.sh2] = [P.sh2, P.sh]; if (!mv.armSwing && P.ua2 !== undefined) { [P.ua, P.ua2] = [P.ua2, P.ua]; [P.fa, P.fa2] = [P.fa2, P.fa]; } }
     // arms swing continuously, opposite to the lifting leg: a sine over the whole two-step cycle, no reset
+    // the other side of a move that uses one arm and the opposite leg: the same view, with the other arm and the other leg doing the work
+    if (other && mv.swap) for (const [a, b] of [['ua', 'ua2'], ['fa', 'fa2'], ['th', 'th2'], ['sh', 'sh2'], ['ft', 'ft2']]) { const t = P[a]; P[a] = P[b]; P[b] = t; if (P[a] === undefined) delete P[a]; if (P[b] === undefined) delete P[b]; }
     if (mv.armSwing) { const w = Math.sin(Math.PI * (cycle + phase)); P.ua = 85 - 32 * w; P.fa = P.ua - 15 - 35 * Math.max(0, w); P.ua2 = 85 + 32 * w; P.fa2 = P.ua2 - 15 - 35 * Math.max(0, -w); }
     return P;
   }
@@ -664,12 +712,14 @@ const ILLUS = (() => {
   function frame(key, mv, ratio, ex) {
     if (isFront(key, ex)) return null;
     const poses = mv ? [0, .25, .5, .75, 1].flatMap(u => [0, 1].map(c => animPose(key, mv, u, c, u))) : [T[key] || T.stand];
-    let x0 = 1e9, x1 = -1e9, y0 = 1e9;
+    let x0 = 1e9, x1 = -1e9, y0 = 1e9, zoom = false, hipY = 0;
     for (const o of poses) { const g = geo({ ...o }), p = g.p, c = [g.S[0] + Math.cos(p.nk * RD) * 11.4, g.S[1] + Math.sin(p.nk * RD) * 11.4];
-      for (const q of [g.H, g.S, g.E, g.W, g.K, g.A, g.T, g.K2, g.A2, g.T2, g.E2, g.W2, [c[0] - 9, c[1]], [c[0] + 9, c[1]], [c[0], c[1] - 9]]) if (q) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); }
+      if (p.zoom) { zoom = true; hipY = Math.max(hipY, g.H[1]); }      // small neck and head movements: frame the upper body only, so they can be seen
+      for (const q of (p.zoom ? [g.H, g.S, g.E, g.W, g.E2, g.W2, [g.S[0] - 16, g.S[1]], [g.S[0] + 16, g.S[1]], [c[0] - 9, c[1]], [c[0] + 9, c[1]], [c[0], c[1] - 9]] : [g.H, g.S, g.E, g.W, g.K, g.A, g.T, g.K2, g.A2, g.T2, g.E2, g.W2, [c[0] - 9, c[1]], [c[0] + 9, c[1]], [c[0], c[1] - 9]])) if (q) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); }
       if (p.prop === 'chair') { x0 = Math.min(x0, 34); x1 = Math.max(x1, 90); } else if (p.prop) { x0 = Math.min(x0, p.hx - 34); x1 = Math.max(x1, p.hx + 34); }
-      if (p.w) { x0 = Math.min(x0, p.w - 4); x1 = Math.max(x1, p.w + 4); } if (p.top) { x0 = Math.min(x0, 46); x1 = Math.max(x1, 128); y0 = Math.min(y0, 26); } if (p.band) { x0 = Math.min(x0, p.band.x - 4); x1 = Math.max(x1, p.band.x + 4); y0 = Math.min(y0, p.band.y - 2); } }
-    x0 -= 11; x1 += 11; y0 -= 8; const y1 = 100; let w = x1 - x0, h = Math.max(62, y1 - y0); y0 = y1 - h;
+      if (p.w) { x0 = Math.min(x0, p.w - 4); x1 = Math.max(x1, p.w + 4); } if (p.prop === 'table') x1 = Math.max(x1, 120);
+      if (p.top) { x0 = Math.min(x0, 46); x1 = Math.max(x1, 128); y0 = Math.min(y0, 26); } if (p.band) { x0 = Math.min(x0, p.band.x - 4); x1 = Math.max(x1, p.band.x + 4); y0 = Math.min(y0, p.band.y - 2); } }
+    x0 -= 11; x1 += 11; y0 -= 8; const y1 = zoom ? hipY + 9 : 100; let w = x1 - x0, h = Math.max(zoom ? 40 : 62, y1 - y0); y0 = y1 - h;
     if (w / h < ratio) { const nw = h * ratio; x0 -= (nw - w) / 2; w = nw; } else { const nh = w / ratio; y0 -= (nh - h) * .72; h = nh; }
     return [x0, y0, w, h].map(v => v.toFixed(1)).join(' ');
   }

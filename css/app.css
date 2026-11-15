@@ -385,3 +385,10 @@ body.onb { padding-bottom: 0; }
 .feelpick button.on { background: var(--acc); border-color: var(--acc); color: #fff; }
 .feelnote { min-height: 1.4em; margin: 10px 0 0; font-size: 14.5px; font-weight: 550; opacity: 0; transition: opacity .25s; } .feelnote.on { opacity: 1; }
 .setrow .grow small { display: block; font-weight: 450; font-size: 12.5px; color: var(--mute); margin-top: 1px; }
+
+/* several sessions in one day: count on Today, count in the week strip, one line per session in the history */
+.kicker.runsum { margin-top: 4px; } .kicker.runsum .ic { width: 18px; height: 18px; stroke-width: 2.4; } .kicker.runsum b { font-size: 17px; }
+.week i b { font-size: 15px; font-weight: 700; line-height: 1; } .hrow i.ok b { font-size: 14px; font-weight: 700; }
+.hrow.run { padding: 8px 16px 8px 28px; border-top: 0 !important; } .hrow.run:last-child { padding-bottom: 14px; }
+.hrow.run time { flex: none; width: 46px; font-size: 13px; font-weight: 600; color: var(--mute); font-variant-numeric: tabular-nums; }
+.hrow.run b { font-weight: 550; } .hrow.day + .hrow.run { padding-top: 0; }

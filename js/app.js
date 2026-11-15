@@ -16,7 +16,11 @@
   if (!Array.isArray(S.profile.days)) S.profile.days = ({ desk: ['desk'], sofa: ['sofa', 'phone'], feet: ['feet'], mixed: ['desk', 'feet'] })[S.profile.dayType] || [];
   const pv = rid => (S.pain[rid] && S.pain[rid].v) || 0, pt = rid => (S.pain[rid] && S.pain[rid].t) || [];
   const log = (d = today()) => { let l = S.logs.find(x => x.d === d); if (!l) { l = { d, pain: {}, done: [], minutes: 0, resets: [] }; S.logs.push(l); } l.resets = l.resets || []; return l; };
-  const active = l => l && ((l.done && l.done.length >= 2) || (l.resets && l.resets.length));
+  const active = l => l && ((l.done && l.done.length >= 2) || (l.resets && l.resets.length) || (l.runs && l.runs.length));
+  /* Each time you train is one "run" in that day's log: { at: 'HH:MM', kind: 'session' | 'reset', n: name, min, feel, part }.
+     Two or three a day simply become two or three runs; nothing is merged away. */
+  const runsOf = l => (l && l.runs) || [], ordinal = n => n + (n % 10 === 1 && n % 100 !== 11 ? 'st' : n % 10 === 2 && n % 100 !== 12 ? 'nd' : n % 10 === 3 && n % 100 !== 13 ? 'rd' : 'th');
+  const dayTotal = l => { const r = runsOf(l); return r.length ? r.reduce((a, x) => a + (x.min || 0), 0) : (l && l.minutes) || 0; };
   const isF = () => S.profile.sex === 'f';
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const fmt = s => { s = Math.max(0, Math.ceil(s)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -361,11 +365,11 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
       const m = Math.max(1, Math.round(its.reduce((a, o) => a + o.it.secs, 0) / 60)), done = its.every(o => L.done.includes(itemKey(o.it)));
       return `<details class="act ${done ? 'done' : ''}"><summary><div class="thumb">${ILLUS.svg((its.find(o => !o.it.primer) || its[0]).st?.ill || 'stand', null, { uid: 't' + k, glow: false, fit: 1.375 })}</div><div class="grow"><b>${n}</b><span>${m} min · ${its.length} ${its.length === 1 ? 'exercise' : 'exercises'}</span></div><span class="num">${done ? I.check : k + 1}</span></summary>
 <div class="exlist">${its.map(o => `<button class="exrow ${L.done.includes(itemKey(o.it)) ? 'done' : ''}" data-play="${o.i}"><div class="thumb sm">${ILLUS.svg(o.st ? o.st.ill : 'stand', null, { uid: 'e' + o.i, fit: 1.39 })}</div><span class="grow">${esc(o.st ? o.st.name : o.it.ex.n)}</span><span class="go">${I.play}</span></button>`).join('')}</div></details>`; }).join('');
-    el.innerHTML = `<header class="top"><div><h1>Today</h1>${streak() > 1 ? `<p class="kicker">${I.sun}<span>${streak()} days in a row</span></p>` : ''}</div><div class="topbtns"><button class="iconbtn tint" data-go="program" aria-label="Program">${I.cal}</button><button class="iconbtn" data-settings aria-label="Settings">${I.cog}</button></div></header>
+    el.innerHTML = `<header class="top"><div><h1>Today</h1>${streak() > 1 ? `<p class="kicker">${I.sun}<span>${streak()} days in a row</span></p>` : ''}${runsOf(L).length ? `<p class="kicker runsum">${I.check}<span><b>${runsOf(L).length}</b> ${runsOf(L).length === 1 ? 'session' : 'sessions'} today · ${dayTotal(L)} min</span></p>` : ''}</div><div class="topbtns"><button class="iconbtn tint" data-go="program" aria-label="Program">${I.cal}</button><button class="iconbtn" data-settings aria-label="Settings">${I.cog}</button></div></header>
 
 ${flagged() ? `<div class="note bad">${I.alert}<span><b>Check with a doctor first.</b> Something you ticked needs a look before training. Gentle walking and the calm resets are fine meanwhile. <a href="#" id="editflags">Change answers</a></span></div>` : ''}
 ${RU.gentle ? `<div class="note">${I.heart}<span>Gentler today, since yesterday felt worse.</span></div>` : ''}
-<section class="hero"><div class="herotxt"><h2>${all ? 'Done for today' : 'How much time would you like?'}</h2><p>${all ? 'Nice work. Go again any time.' : 'For ' + esc(focus) + '.'}</p>
+<section class="hero"><div class="herotxt"><h2>${all ? 'Done for today' : 'How much time would you like?'}</h2><p>${all ? (runsOf(L).length > 1 ? `That is ${runsOf(L).length} today. Go again any time.` : 'Nice work. Go again any time.') : 'For ' + esc(focus) + '.'}</p>
 <div class="seg xs">${[5, 10, 15, 20, 30].map(m => `<button class="${Pf.duration === m ? 'on' : ''}" data-dur="${m}" aria-label="${m} minutes"><b>${m}</b><small>min</small></button>`).join('')}</div></div><div class="heroart">${hero}</div></section>
 <button class="btn big" id="start">${I.play}<span>${all ? 'Go again' : doneN ? 'Continue' : 'Start session'}</span></button>
 ${chkId ? `<section class="card chk"><p><b>How is your ${esc(low(REGION[chkId].n))} today?</b></p><div class="scale sm">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button data-chk="${n}" class="${n === pv(chkId) ? 'was' : ''}">${n}</button>`).join('')}</div></section>` : ''}
@@ -415,7 +419,7 @@ ${chkId ? `<section class="card chk"><p><b>How is your ${esc(low(REGION[chkId].n
     const exRow = (it, k) => `<button class="exrow" data-ex="${it.ex.id}"><div class="thumb sm">${ILLUS.svg(it.ex.ill, null, { ex: it.ex.id, uid: 'g' + k + it.ex.id, fit: 1.39 })}</div><span class="grow"><b>${esc(it.ex.n)}</b><small>${esc(it.why ? cap(WHERE[it.why.id] || it.why.n) : '')}</small></span>${I.chev}</button>`;
     const hist = week.map(w => w.l).filter(active).reverse();
     el.innerHTML = `<header class="top"><div><h1>Program</h1><p class="kicker">${I.chart}<span><b class="acc">${thisW}</b> of ${Pf.perWeek} sessions this week</span></p></div><button class="iconbtn" data-settings aria-label="Settings">${I.cog}</button></header>
-<section class="card"><div class="wknav"><button class="iconbtn" id="wkprev" aria-label="Previous week" ${wkOff <= startOff ? 'disabled' : ''}>${I.back}</button><p class="label">${wkLabel} · <b class="acc">${doneW}</b> of ${Pf.perWeek}</p><button class="iconbtn" id="wknext" aria-label="Next week" ${wkOff >= 0 ? 'disabled' : ''}>${I.chev}</button></div><div class="week">${week.map(w => `<div class="${w.k === today() ? 'today' : ''}"><span>${'MTWTFSS'[(w.d.getDay() + 6) % 7]}</span><span class="dn">${w.d.getDate()}</span><i class="${active(w.l) ? 'on' : ''}">${active(w.l) ? I.check : ''}</i></div>`).join('')}</div></section>
+<section class="card"><div class="wknav"><button class="iconbtn" id="wkprev" aria-label="Previous week" ${wkOff <= startOff ? 'disabled' : ''}>${I.back}</button><p class="label">${wkLabel} · <b class="acc">${doneW}</b> of ${Pf.perWeek}</p><button class="iconbtn" id="wknext" aria-label="Next week" ${wkOff >= 0 ? 'disabled' : ''}>${I.chev}</button></div><div class="week">${week.map(w => `<div class="${w.k === today() ? 'today' : ''}"><span>${'MTWTFSS'[(w.d.getDay() + 6) % 7]}</span><span class="dn">${w.d.getDate()}</span><i class="${active(w.l) ? 'on' : ''}">${active(w.l) ? (runsOf(w.l).length > 1 ? `<b>${runsOf(w.l).length}</b>` : I.check) : ''}</i></div>`).join('')}</div></section>
 <section class="card"><p class="label">Last 8 weeks</p><div class="weeks">${weeks.map(w => `<button class="${w.o === wkOff ? 'on' : ''}" data-wk="${w.o}" aria-label="${w.n} active days"><span class="track"><i style="height:${w.n ? Math.max(12, w.n / 7 * 100) : 0}%"></i></span><span>${w.o === 0 ? 'Now<br>&nbsp;' : w.d.getDate() + '<br>' + w.d.toLocaleDateString(undefined, { month: 'short' })}</span></button>`).join('')}</div></section>
 <section class="cheer"><span class="badge">${I.flag}</span><div><b>${msg[0]}</b><p>${msg[1]}</p></div></section>
 <h3 class="sect">Your program</h3><section class="card prog">
@@ -423,7 +427,9 @@ ${chkId ? `<section class="card chk"><p><b>How is your ${esc(low(REGION[chkId].n
 <div class="stnow"><b>${ST.n}</b><small>${ST.weeks}</small></div>
 ${ST.id < 4 ? `<div class="pbar"><i style="width:${Math.min(100, got / req * 100)}%"></i></div><p class="small">${got} of ${req} active days to reach the next stage</p>` : ''}
 <div class="hscroll exs">${[...sess.stretches.map(it => [it, 'Lengthen', 'cool']), ...sess.strength.map(it => [it, 'Strengthen', 'energy'])].map(([it, tag, cl], k) => `<button class="xcard" data-ex="${it.ex.id}"><div class="thumb">${ILLUS.svg(it.ex.ill, null, { ex: it.ex.id, uid: 'g' + k + it.ex.id, fit: 1.375 })}</div><span class="tag ${cl}">${tag}</span><b>${esc(it.ex.n)}</b></button>`).join('') || '<p class="small">Add an area or your day to see your exercises.</p>'}</div></section>
-${hist.length ? `<h3 class="sect">${wkLabel}</h3><section class="card flush">${hist.map(l => `<div class="hrow"><span class="grow"><b>${new Date(l.d + 'T12:00').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}</b><small>${[l.done.length >= 2 ? 'Session' : '', ...(l.resets || []).map(id => (RESETS.find(r => r.id === id) || {}).n)].filter(Boolean).join(', ')}${l.minutes ? ' · ' + l.minutes + ' min' : ''}</small></span>${l.feel ? `<span class="feel ${l.feel}">${cap(l.feel)}</span>` : ''}<i class="ok">${I.check}</i></div>`).join('')}</section>` : ''}
+${hist.length ? `<h3 class="sect">${wkLabel}</h3><section class="card flush">${hist.map(l => { const rs = runsOf(l), day = new Date(l.d + 'T12:00').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+  if (!rs.length) return `<div class="hrow"><span class="grow"><b>${day}</b><small>${[l.done.length >= 2 ? 'Session' : '', ...(l.resets || []).map(id => (RESETS.find(r => r.id === id) || {}).n)].filter(Boolean).join(', ')}${l.minutes ? ' · ' + l.minutes + ' min' : ''}</small></span>${l.feel ? `<span class="feel ${l.feel}">${cap(l.feel)}</span>` : ''}<i class="ok">${I.check}</i></div>`;
+  return `<div class="hrow day"><span class="grow"><b>${day}</b><small>${rs.length} ${rs.length === 1 ? 'session' : 'sessions'} · ${dayTotal(l)} min</small></span><i class="ok">${rs.length > 1 ? `<b>${rs.length}</b>` : I.check}</i></div>${rs.map(r => `<div class="hrow run"><time>${r.at}</time><span class="grow"><b>${esc(r.n)}${r.part ? ' (part)' : ''}</b><small>${r.min} min</small></span>${r.feel ? `<span class="feel ${r.feel}">${cap(r.feel)}</span>` : ''}</div>`).join('')}`; }).join('')}</section>` : ''}
 <h3 class="sect">Tune your plan</h3><section class="card flush settings">
 ${settingRows().map(setRow).join('')}
 <button class="setrow danger" id="wipe">${I.trash}<span class="grow">Erase all my data</span></button></section>`;
@@ -558,20 +564,27 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
   function animate() {
     cancelAnimationFrame(raf); if (PL) PL.moves = false; const el = $('pfig'); if (!el || !PL) return; const st = PL.steps[PL.i];
     if (st.kind === 'breath' || st.kind === 'scan') return;
-    const ratio = (el.clientWidth || 4) / (el.clientHeight || 5), views = [], work = c => { while (c > 0 && st.cycles[c] && st.cycles[c].rest) c--; return c; };
+    let ratio = (el.clientWidth || 4) / (el.clientHeight || 5), views = [];      // the frame is recomputed if the picture area changes shape (rotation, resize, layout settling), so nothing gets cropped
+    const fit = () => { const r = (el.clientWidth || 4) / (el.clientHeight || 5); if (Math.abs(r - ratio) > .02 * ratio) { ratio = r; views = []; return true; } return false; }, work = c => { while (c > 0 && st.cycles[c] && st.cycles[c].rest) c--; return c; };
     const view = c => { if (views[c]) return views[c]; const cy = st.cycles[c] || {}, ex = cy.ex || (st.x && st.x.id) || st.key, ill = cy.ill || st.ill, front = ILLUS.isFront(ill, ex) && ex !== 'wu-hip';
       const hold = !st.mv && !cy.mv && (front || HOLD_MOVES.has(ex)) && st.cycles.some(q => q.hold), mv = cy.mv || st.mv || (HOLD_MOVES.has(ex) ? ILLUS.MOVES[ex] : null);
       return views[c] = { ex, ill, hold, mv, vb: ILLUS.frame(ill, mv, ratio, ex), tempo: (cy.mv && cy.mv.tempo) || st.tempo || (mv && mv.tempo) || [1, 0, 1, 0] }; };
-    const draw = (V, u, cyc, ph) => { const cy = st.cycles[PL.c] || {}, o = { uid: 'p', slice: true, ex: V.ex, u, mirror: /left/i.test(cy.side || '') }; if (V.vb) o.vb = V.vb;
-      el.innerHTML = ILLUS.svg(V.ill, V.mv ? ILLUS.animPose(V.ill, V.mv, u, cyc, ph) : null, o); };
+    /* front, top and close-up pictures come with a fixed frame: it is widened or heightened to the shape of the picture
+       area, so the whole figure is always in view (head and feet included) instead of being cropped */
+    const fitBox = () => { const sv = el.firstElementChild; if (!sv || !sv.viewBox) return; const b = sv.viewBox.baseVal; let x = b.x, y = b.y, w = b.width, h = b.height; if (!w || !h) return;
+      if (w / h < ratio) { const nw = h * ratio; x -= (nw - w) / 2; w = nw; } else { const nh = w / ratio; y -= (nh - h) * .55; h = nh; } sv.setAttribute('viewBox', `${x} ${y} ${w} ${h}`); };
+    const draw = (V, u, cyc, ph, ci) => { const cy = st.cycles[ci === undefined ? PL.c : ci] || {}, left = /left/i.test(cy.side || ''), swap = !!(V.mv && V.mv.swap), o = { uid: 'p', slice: true, ex: V.ex, u, mirror: left && !swap }; if (V.vb) o.vb = V.vb;      // moves like the bird-dog keep the same view and work the other arm and leg instead of being mirrored
+      el.innerHTML = ILLUS.svg(V.ill, V.mv ? ILLUS.animPose(V.ill, V.mv, u, cyc, ph, left && swap) : null, o); if (!V.vb) fitBox(); };
     const V0 = view(0); draw(V0, 0, 0, 0); PL.moves = !reduced && !!(V0.hold || V0.mv);
     if (reduced) return;
     let v = 0, pt = 0, tp = 0, rt = 0, last = performance.now(), drawn = 0, lastC = -1, still = false;
     const frame = now => { if (!el.isConnected || !PL || PL.steps[PL.i] !== st) return; const dt = Math.min(.1, (now - last) / 1000); last = now; raf = requestAnimationFrame(frame);
+      if (fit()) still = false;
       const cy = st.cycles[PL.c] || {}, V = view(work(PL.c)), ready = PL.phase === 'ready', resting = !ready && !!cy.rest; if (PL.c !== lastC) { lastC = PL.c; still = false; }
       if (now - drawn < 30) { if (!PL.paused) { if (ready) { pt += dt; tp += dt; } if (resting) rt += dt; } return; } const el2 = now - (drawn || now); drawn = now;
       if (!PL.paused) { if (ready) { pt += dt; tp += dt; } else { pt = 0; tp = 0; } rt = resting ? rt + dt : 0; }
-      if (resting) { el.innerHTML = ILLUS.svg('rest', null, { uid: 'p', slice: true, u: (1 - Math.cos(2 * Math.PI * rt / 4.4)) / 2 }); still = false; return; }      // rest: stand tall, breathe slowly
+      if (resting && cy.sw && st.cycles[PL.c + 1]) { if (!still) { still = true; draw(view(PL.c + 1), 0, 0, 0, PL.c + 1); } return; }      // switching sides: show the starting position of the side that comes next, so you can set up
+      if (resting) { el.innerHTML = ILLUS.svg('rest', null, { uid: 'p', slice: true, u: (1 - Math.cos(2 * Math.PI * rt / 4.4)) / 2 }); fitBox(); still = false; return; }      // rest: stand tall, breathe slowly
       if (V.hold) { if (!PL.paused) { const target = ready ? (pt > 0.6 && (pt - 0.6) % 6.4 < 4 ? 1 : 0) : PL.phase === 'work' ? 1 : 0; v += Math.sign(target - v) * Math.min(Math.abs(target - v), (el2 / 1000 || dt) / (target ? 2.2 : 1.2)); } draw(V, ease(v), 0, 0); return; }
       if (V.mv) { const t = ready ? tp : PL.el + (PL.paused ? 0 : Math.min(.25, Math.max(0, (now - PL.last) / 1000))), [up, hd, dn] = V.tempo, total = V.tempo.reduce((a, b) => a + b, 0), k = t % total;
         draw(V, k < up ? ease(k / up) : k < up + hd ? 1 : k < up + hd + dn ? 1 - ease((k - up - hd) / dn) : 0, Math.floor(t / total), k / total); return; }
@@ -637,8 +650,12 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
     PL.work = 0; COACH_AUDIO.chime(660, 0.16);
     if (PL.i < PL.steps.length - 1) beginStep(PL.i + 1); else showDone();
   }
+  function logRun(finished) {      // called when the player closes: a run counts once it has at least a minute and a half of real work in it
+    if (!PL || PL.logged || (PL.runSecs || 0) < 90) return null; PL.logged = true; const L = log(), d = new Date();
+    const run = { at: String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'), kind: PL.meta.kind === 'reset' ? 'reset' : 'session', n: PL.meta.kind === 'reset' ? PL.meta.n : 'Session', min: Math.max(1, Math.round(PL.runSecs / 60)) };
+    if (!finished) run.part = true; (L.runs = L.runs || []).push(run); save(); return run; }
   function markDone(st) {
-    const L = log(); L.minutes = (L.minutes || 0) + Math.max(0, Math.round(stepSecs(st) / 60));
+    const L = log(); L.minutes = (L.minutes || 0) + Math.max(0, Math.round(stepSecs(st) / 60)); PL.runSecs = (PL.runSecs || 0) + stepSecs(st) + 8;
     if (PL.meta.kind === 'session' && st.key && !L.done.includes(st.key)) L.done.push(st.key); save();
   }
   function tick() {
@@ -674,24 +691,24 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
     if (PL.t <= 0.3) PL.lines = null;
   }
   function showDone() {
-    clearInterval(PL.iv); cancelAnimationFrame(raf); const P = $('player'), L = log(), mins = Math.max(1, Math.round(PL.steps.reduce((a, s) => a + stepSecs(s), 0) / 60));
+    clearInterval(PL.iv); cancelAnimationFrame(raf); const P = $('player'), L = log(); let mins = Math.max(1, Math.round(PL.steps.reduce((a, s) => a + stepSecs(s), 0) / 60));
     if (PL.meta.kind === 'reset' && !L.resets.includes(PL.meta.id)) L.resets.push(PL.meta.id); save();
     COACH_AUDIO.setMood('calm'); P.classList.remove('ready', 'resting'); P.classList.add('calm', 'finished');
-    const st = streak();
+    const run = logRun(true), nToday = runsOf(L).length, st = streak(); if (run) mins = run.min;
     COACH_AUDIO.say(pick(['That is it. Well done for showing up today.', 'All done. That was great work.', 'Finished. Your body will thank you.']), { urgent: true, keep: true });
     if (st > 1) COACH_AUDIO.say(`That is ${st} days in a row.`, { keep: true }); COACH_AUDIO.say('How do you feel?', { keep: true });
-    P.innerHTML = `<div class="donebox"><div class="donecheck">${I.check}</div><h2>${PL.meta.kind === 'reset' ? esc(PL.meta.n) : 'Session'} done</h2><p>${mins} min${st > 1 ? ` · ${st} days in a row` : ''}</p>
-<p class="label">How do you feel?</p><div class="feelpick">${[['better', 'Better'], ['same', 'Same'], ['worse', 'Worse']].map(([v, n]) => `<button data-feel="${v}" class="${L.feel === v ? 'on' : ''}">${n}</button>`).join('')}</div><p class="feelnote" id="feelnote" aria-live="polite">&nbsp;</p><button class="btn ghost" id="pfin">Close</button></div>`;
+    P.innerHTML = `<div class="donebox"><div class="donecheck">${I.check}</div><h2>${PL.meta.kind === 'reset' ? esc(PL.meta.n) : 'Session'} done</h2><p>${mins} min${nToday > 1 ? ` · your ${ordinal(nToday)} today` : ''}${st > 1 ? ` · ${st} days in a row` : ''}</p>
+<p class="label">How do you feel?</p><div class="feelpick">${[['better', 'Better'], ['same', 'Same'], ['worse', 'Worse']].map(([v, n]) => `<button data-feel="${v}" aria-pressed="false">${n}</button>`).join('')}</div><p class="feelnote" id="feelnote" aria-live="polite">&nbsp;</p><button class="btn ghost" id="pfin">Close</button></div>`;
     /* the answer is saved and shown straight away (button lights up, one line says what it changes), then the screen closes */
     const FEEL = { better: ['Love to hear it.', 'Saved. Your plan keeps building.'], same: ['Good. Consistency does the work.', 'Saved. Your plan stays as it is.'], worse: ['Thanks for telling me. Tomorrow will be gentler.', 'Saved. Tomorrow will be gentler.'] };
-    P.querySelectorAll('[data-feel]').forEach(b => b.onclick = () => { L.feel = b.dataset.feel; save(); session = null;
+    P.querySelectorAll('[data-feel]').forEach(b => b.onclick = () => { L.feel = b.dataset.feel; if (run) run.feel = L.feel; save(); session = null;
       P.querySelectorAll('[data-feel]').forEach(q => { q.classList.toggle('on', q === b); q.setAttribute('aria-pressed', q === b); });
       const n = $('feelnote'); if (n) { n.textContent = FEEL[L.feel][1]; n.classList.add('on'); }
       COACH_AUDIO.say(FEEL[L.feel][0], { urgent: true }); clearTimeout(PL.closeT); PL.closeT = setTimeout(endPlayer, 2200); });
     $('pfin').onclick = endPlayer;
   }
   function endPlayer() {
-    if (!PL) return; clearInterval(PL.iv); cancelAnimationFrame(raf); PL = null; COACH_AUDIO.stop(); COACH_AUDIO.wake(false);
+    if (!PL) return; logRun(false); clearInterval(PL.iv); cancelAnimationFrame(raf); clearTimeout(PL.closeT); PL = null; COACH_AUDIO.stop(); COACH_AUDIO.wake(false);
     try { if (document.fullscreenElement) document.exitFullscreen(); } catch (e) {}
     const P = $('player'); P.classList.add('closing'); setTimeout(() => { P.className = 'player'; P.innerHTML = ''; document.body.classList.remove('playing'); }, 250); S.remind.last = Date.now(); save(); rerender();
   }
