@@ -121,13 +121,28 @@
     const L = ['Left', 'Right'];
     return `<svg class="chart" viewBox="0 -4 200 438" role="img" aria-label="Body map, ${v === 'f' ? 'front' : 'back'}">${bodyImg(v)}<text class="side" x="8" y="16" text-anchor="start">${L[0]}</text><text class="side" x="192" y="16" text-anchor="end">${L[1]}</text>${zones}</svg>`;
   }
+  /* The body map remembers which side you were looking at (front or back), how far you had zoomed in and where you had
+     scrolled to, across every redraw: after choosing a pain point you are back exactly where you were. */
+  let MAPV = 'f', MAPZ = 1, MAPP = null; const ZOOMS = [1, 1.6, 2.3], ZMAX = 2.6;
   function bodyMap(el, after, o = {}) {
-    let view = el.dataset.view || 'f';
-    const draw = () => { el.dataset.view = view;
-      el.innerHTML = `<div class="maptools">${o.head || ''}<div class="seg sm"><button class="${view === 'f' ? 'on' : ''}" data-v="f">Front</button><button class="${view === 'b' ? 'on' : ''}" data-v="b">Back</button></div></div><div class="mapwrap">${chartSvg(view)}</div>
+    const draw = () => { const pos = MAPP;
+      el.innerHTML = `<div class="maptools">${o.head || ''}<div class="seg sm"><button class="${MAPV === 'f' ? 'on' : ''}" data-v="f">Front</button><button class="${MAPV === 'b' ? 'on' : ''}" data-v="b">Back</button></div></div>
+<div class="mapwrap"><div class="mapscroll" data-z="${MAPZ}" style="--mz:${MAPZ}">${chartSvg(MAPV)}</div><div class="mapzoom"><button class="iconbtn" data-zoom="1" aria-label="Zoom in" ${MAPZ >= ZOOMS[ZOOMS.length - 1] - .01 ? 'disabled' : ''}>${P('<path d="M12 5v14M5 12h14"/>')}</button><button class="iconbtn" data-zoom="-1" aria-label="Zoom out" ${MAPZ <= 1 ? 'disabled' : ''}>${P('<path d="M5 12h14"/>')}</button></div></div>
 <div class="chips">${Object.keys(S.pain).map(id => `<button class="chip on" data-r="${id}">${esc(REGION[id].n)}${sideTxt(id)} <b style="color:${sevCol(pv(id))}">${pv(id)}</b></button>`).join('') || (o.compact ? '' : '<span class="hint">Tap a dot. Tap as many as you like.</span>')}</div>`;
-      el.querySelectorAll('[data-v]').forEach(b => b.onclick = () => { view = b.dataset.v; draw(); }); o.bind && o.bind(el);
-      el.querySelectorAll('[data-r]').forEach(z => { const go = () => painSheet(z.dataset.r, () => { draw(); after && after(); }, z.dataset.s); z.onclick = go; z.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') go(); }; }); };
+      const sc = el.querySelector('.mapscroll');
+      if (pos) { const k = MAPZ / (pos.z || 1); sc.scrollLeft = (pos.x + pos.w / 2) * k - sc.clientWidth / 2; sc.scrollTop = (pos.y + pos.h / 2) * k - sc.clientHeight / 2; }      // same spot stays in the middle, also when the zoom changes
+      else if (MAPZ > 1) { sc.scrollLeft = (sc.scrollWidth - sc.clientWidth) / 2; sc.scrollTop = (sc.scrollHeight - sc.clientHeight) * .22; }
+      const note = () => { MAPP = { x: sc.scrollLeft, y: sc.scrollTop, w: sc.clientWidth, h: sc.clientHeight, z: MAPZ }; }; sc.onscroll = note; note();
+      el.querySelectorAll('[data-v]').forEach(b => b.onclick = () => { MAPV = b.dataset.v; draw(); }); o.bind && o.bind(el);
+      el.querySelectorAll('[data-zoom]').forEach(b => b.onclick = () => { MAPZ = +b.dataset.zoom > 0 ? (ZOOMS.find(z => z > MAPZ + .05) || ZMAX) : ([...ZOOMS].reverse().find(z => z < MAPZ - .05) || 1); draw(); });
+      /* two-finger pinch: the map follows the fingers live (only its size changes, nothing is rebuilt), the point between
+         the fingers stays under them, and the result is kept when the fingers lift */
+      let pinch = null; const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+      sc.addEventListener('touchstart', e => { if (e.touches.length === 2) { const r = sc.getBoundingClientRect(); pinch = { d: dist(e.touches), z: MAPZ, cx: (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left, cy: (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top }; } }, { passive: true });
+      sc.addEventListener('touchmove', e => { if (!pinch || e.touches.length !== 2) return; e.preventDefault(); const z = Math.max(1, Math.min(ZMAX, pinch.z * dist(e.touches) / pinch.d)), k = z / MAPZ, ax = sc.scrollLeft + pinch.cx, ay = sc.scrollTop + pinch.cy;
+        MAPZ = z; sc.style.setProperty('--mz', z); sc.dataset.z = z; sc.scrollLeft = ax * k - pinch.cx; sc.scrollTop = ay * k - pinch.cy; }, { passive: false });
+      const endPinch = e => { if (pinch && e.touches.length < 2) { pinch = null; MAPZ = Math.round(MAPZ * 100) / 100; note(); el.querySelectorAll('[data-zoom]').forEach(b => { b.disabled = +b.dataset.zoom > 0 ? MAPZ >= ZMAX - .01 : MAPZ <= 1.01; }); } }; sc.addEventListener('touchend', endPinch); sc.addEventListener('touchcancel', endPinch);
+      el.querySelectorAll('[data-r]').forEach(z => { const go = () => painSheet(z.dataset.r, () => { if (el.isConnected) draw(); after && after(); }, z.dataset.s); z.onclick = go; z.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') go(); }; }); };
     draw();
   }
   function painSheet(rid, after, tapped) {
