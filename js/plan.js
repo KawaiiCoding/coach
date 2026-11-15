@@ -78,7 +78,8 @@ const PLAN = (() => {
 
   const links = (x, kind) => { const q = encodeURIComponent(x.n + ' ' + kind); return `<div class="links"><a href="https://www.google.com/search?q=${q}" target="_blank" rel="noopener">Google</a> · <a href="https://www.google.com/search?tbm=isch&q=${q}" target="_blank" rel="noopener">images</a> · <a href="https://www.youtube.com/results?search_query=${q}+how+to" target="_blank" rel="noopener">video</a></div>`; };
   function html(R, p, posture) {
-    const item = (x, kind) => `<div class="ex">${ILLUS.svg(x.ill)}<div><b>${x.n}</b> <span class="mu">${names(x.m)}</span><div class="dose">${dose(x)}${x.why ? ` · for the ${x.why.n.toLowerCase()}` : ''}</div><div>${x.how}</div><div class="cue">${x.cue}</div>${links(x, x.sets == null ? 'stretch' : 'exercise')}</div></div>`;
+    const coach = x => { const c = typeof COACH !== 'undefined' && COACH[x.id]; return c ? `<details class="small"><summary>Focus on / avoid</summary><div class="coach"><div><b>Focus on</b><ul>${c.focus.map(t => `<li>${t}</li>`).join('')}</ul></div><div><b>Avoid</b><ul>${c.avoid.map(t => `<li>${t}</li>`).join('')}</ul></div></div></details>` : ''; };
+  const item = (x, kind) => `<div class="ex">${ILLUS.svg(x.ill)}<div><b>${x.n}</b> <span class="mu">${names(x.m)}</span><div class="dose">${dose(x)}${x.why ? ` · for the ${x.why.n.toLowerCase()}` : ''}</div><div>${x.how}</div><div class="cue">${x.cue}</div>${coach(x)}${links(x, x.sets == null ? 'stretch' : 'exercise')}</div></div>`;
     const st = R.balance.map(b => `<div class="bal ${b.state}"><b>${b.n}</b> <span class="tag">${b.state}</span><div>${b.verdict}</div></div>`).join('');
     const hb = habits(p, posture).map(x => `<li>${x}</li>`).join('');
     return `<h2>Suggested routine (about ${R.minutes} min)</h2>

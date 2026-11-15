@@ -13,6 +13,16 @@ and builds a stretch-and-strength routine to rebalance them. No installation and
 On a phone: copy `tension-coach.html` to the phone (or open it from cloud storage) and open it in the browser; add it to the
 home screen for an app-like experience. Local storage is per browser, so keep using the same one.
 
+## Deploy to GitHub Pages (installable app)
+1. Create a repository on GitHub (for example `tension-coach`) and upload the contents of this folder to its root
+   (`index.html`, `explorer.html`, `manifest.webmanifest`, `sw.js`, `css/`, `js/`, `icons/`).
+2. In the repository: Settings → Pages → Source: "Deploy from a branch", branch `main`, folder `/ (root)`. Save.
+3. After a minute the app is live at `https://<your-user>.github.io/tension-coach/`.
+4. On the phone, open that address in Safari (iPhone) or Chrome (Android). iPhone: Share → "Add to Home Screen".
+   Android: the browser offers "Install app" or use the menu → "Add to Home screen". It then opens full-screen,
+   works offline, and keeps your data on the device.
+5. When you update files, change `CACHE` in `sw.js` (v1 → v2) so phones fetch the new version.
+
 ## Run it
 1. Unzip the folder.
 2. Double-click `index.html` (daily app) or `explorer.html` (3D explorer) (any modern browser: Chrome, Edge, Firefox, Safari).

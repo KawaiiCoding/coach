@@ -39,6 +39,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 .ex .ill { width: 150px; height: auto; background: var(--panel); border-radius: 6px; }
 .ex .mu { color: var(--mute); font-size: 12px; } .ex .dose { color: var(--accent); margin: 2px 0; } .ex .cue { color: var(--mute); font-style: italic; margin-top: 2px; }
 .ex.s { border-left-color: var(--chain); }
+.coach { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 6px 0; font-size: 12px; } .coach ul { margin: 2px 0 0; padding-left: 16px; } .coach b { color: var(--relax); } .coach div:last-child b { color: var(--tense); }
 .links { margin-top: 3px; font-size: 12px; }
 .bal { border-left: 3px solid var(--mute); padding: 4px 10px; margin: 5px 0; font-size: 13px; background: var(--panel2); border-radius: 0 6px 6px 0; }
 .bal.crossed { border-left-color: var(--tense); } .bal.short { border-left-color: var(--chain); } .bal.overloaded { border-left-color: #c77dff; } .bal.balanced { border-left-color: var(--relax); }

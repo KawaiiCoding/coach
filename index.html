@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f1a26">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tension Coach">
+<meta name="description" content="Daily posture, breathing, stretch and strength coach. Works offline; data stays on your device.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <title>Tension Coach</title>
 <link rel="stylesheet" href="css/today.css">
 </head>
@@ -33,8 +40,10 @@
 <script src="js/data/breathing.js"></script>
 <script src="js/data/regions.js"></script>
 <script src="js/data/stages.js"></script>
+<script src="js/data/coaching.js"></script>
 <script src="js/illus.js"></script>
 <script src="js/plan.js"></script>
 <script src="js/today.js"></script>
+<script>if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});</script>
 </body>
 </html>
