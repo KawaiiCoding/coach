@@ -40,6 +40,9 @@
     play: P('<path d="M8 5.6v12.8a1.1 1.1 0 0 0 1.68.94l10.3-6.4a1.1 1.1 0 0 0 0-1.88L9.68 4.66A1.1 1.1 0 0 0 8 5.6z" class="fill"/>'), pause: P('<rect x="6" y="4.5" width="4" height="15" rx="1" class="fill"/><rect x="14" y="4.5" width="4" height="15" rx="1" class="fill"/>'),
     next: P('<path d="M5 5v14l10-7z" class="fill"/><path d="M19 5v14"/>'), prev: P('<path d="M19 5v14L9 12z" class="fill"/><path d="M5 5v14"/>'),
     x: P('<path d="M6 6l12 12M18 6 6 18"/>'), back: P('<path d="M15 5l-7 7 7 7"/>'), chev: P('<path d="M9 5l7 7-7 7"/>'),
+    save: P('<path d="M12 3.5v11M7.5 10.5 12 15l4.5-4.5M4.5 17.5v2a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1v-2"/>'), restore: P('<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M4.5 17.5v2a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1v-2"/>'),
+    // settings cog: the "settings" icon from Tabler Icons (MIT licence)
+    cog: P('<path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/>'),
     voice: P('<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>'),
     voiceOff: P('<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/>'),
     music: P('<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>'),
@@ -187,26 +190,43 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
   function buildSession() {
     const Pf = S.profile, A = analyseDay(), items = [], regions = Object.keys(S.pain), painM = new Set(regions.flatMap(r => REGION[r].m));
     const RU = rules(), ST0 = stage(), ST = RU.gentle ? { ...STAGES[0], id: ST0.id, n: ST0.n, weeks: ST0.weeks } : ST0, dur = Pf.duration * 60, okS = x => !RU.exclude.has(x.id); let used = 0;
-    const capHold = x => x.type === 'static' && (ST.id === 1 || RU.stretchCap) ? Math.min(20, x.hold) : x.hold;
-    const secs = x => x.sets == null ? ((x.hold ? capHold(x) : 4) * x.reps * x.sides + 12) : ((x.hold || 2) * x.reps + 30) * x.sets * (x.sides > 1 ? 2 : 1);
+    /* Every item is timed by building the step the player will really run (holds, repetitions at their pace, rests
+       between sets and sides) plus the "Up next" countdown, so the length you choose is the length you get. Short
+       sessions use fewer sets and fewer stretch repetitions instead of dropping whole phases. */
+    const cap = ST.id === 1 ? 20 : 0, READY = 8, setsCap = Pf.duration <= 5 ? 1 : Pf.duration <= 10 ? 2 : 9, repsCap = Pf.duration <= 5 ? 1 : 9;
+    const time1 = it => { const st = mkStep(specOf(it, cap), RU); return (st ? stepSecs(st) : it.secs || 0) + READY; };
+    const timed = it => { if (it.kind === 'strength') it.sets = Math.min(it.ex.sets, setsCap); if (it.kind === 'stretch' && !it.primer && it.ex.hold) it.reps = Math.min(it.ex.reps, repsCap);
+      it.real = time1(it); while (it.kind === 'strength' && it.sets > 1 && it.real > oneMax) { it.sets--; it.real = time1(it); }      // no single exercise takes over the session
+      if (it.kind === 'stretch' || it.kind === 'strength') it.secs = it.real; return it; };
+    let oneMax = 1e9;
     // 1. warm-up: easy pulse raiser and joint mobility, never static holds
-    const wu = (Pf.duration <= 5 ? WARMUP.slice(0, 2) : Pf.duration <= 10 ? WARMUP.slice(0, 3) : WARMUP);
-    wu.forEach(w => { const t = Pf.duration <= 5 ? Math.round(w.secs * 0.7) : w.secs; items.push({ kind: 'move', section: 'warmup', ex: w, secs: t }); used += t; });
-    const breathT = Pf.duration <= 5 ? 75 : Pf.duration <= 10 ? 120 : Pf.duration >= 30 ? 240 : 180; used += breathT;
+    const wu = WARMUP.slice(0, Pf.duration <= 5 ? 1 : Pf.duration <= 10 ? 2 : Pf.duration <= 15 ? 3 : 4);
+    wu.forEach(w => { const it = timed({ kind: 'move', section: 'warmup', ex: w, secs: w.secs }); items.push(it); used += it.real; });
+    /* slow breathing is kept short: one to two minutes is enough to settle, and long stretches of deliberate deep breathing can leave people light-headed */
+    const breathT = Pf.duration <= 5 ? 45 : Pf.duration <= 10 ? 60 : Pf.duration <= 15 ? 75 : Pf.duration >= 30 ? 120 : 90; used += breathT + 6 + READY;
+    const scanT = Pf.duration >= 30 ? 150 : Pf.duration >= 20 ? 90 : 0; if (scanT) used += scanT + 6 + READY;      // the body scan is a short wind-down, not a second session
+    // what is left after the fixed parts is shared between strengthening and stretching
+    const fixed = used, avail = Math.max(60, dur - fixed), upTo = f => fixed + avail * f; oneMax = Math.max(150, avail * 0.42);
     // stretch targets: shortened or painful tight-prone muscles, painful regions first
     const score = m => (painM.has(m.id) ? 0.5 : 0) + A[m.id].shortening * 0.6 + A[m.id].pain * 0.4;
     const tight = MUSCLES.filter(m => m.tend !== 'weak' && (A[m.id].shortening > 0.12 || A[m.id].pain > 0.4 || painM.has(m.id))).sort((a, b) => score(b) - score(a));
     const covered = new Set(), stretches = [];
-    for (const m of tight) { if (covered.has(m.id) || A[m.id].noStretch) continue; const c = STRETCHES.filter(s => okS(s) && s.m.includes(m.id) && !stretches.some(q => q.ex === s) && !s.m.some(i => A[i] && A[i].noStretch)).sort((x, y) => (x.type === 'static' ? 0 : 1) - (y.type === 'static' ? 0 : 1) || x.m.indexOf(m.id) - y.m.indexOf(m.id));
-      if (!c.length) continue; const s = c[0], t = secs(s); if (used + t > dur * 0.75) continue; stretches.push({ kind: 'stretch', section: 'stretch', ex: s, secs: t, why: m }); used += t; s.m.forEach(i => covered.add(i)); if (stretches.length >= (ST.id === 1 ? 3 : 5) + (Pf.duration >= 30 ? 2 : 0)) break; }
+    const addStretches = (limit, maxN) => { for (const m of tight) { if (stretches.length >= maxN) break; if (covered.has(m.id) || A[m.id].noStretch) continue;
+        const c = STRETCHES.filter(q => okS(q) && q.m.includes(m.id) && !stretches.some(z => z.ex === q) && !q.m.some(i => A[i] && A[i].noStretch)).sort((x, y) => (x.type === 'static' ? 0 : 1) - (y.type === 'static' ? 0 : 1) || x.m.indexOf(m.id) - y.m.indexOf(m.id));
+        if (!c.length) continue; const it = timed({ kind: 'stretch', section: 'stretch', ex: c[0], why: m }); if (used + it.real > limit) continue; stretches.push(it); used += it.real; c[0].m.forEach(i => covered.add(i)); } };
+    const maxStretch = (ST.id === 1 ? 3 : 5) + (Pf.duration >= 30 ? 2 : 0); addStretches(upTo(0.5), maxStretch);      // half of the free time at most, so the strength work fits; spare time comes back to stretching below
     // 2. primer: a short 20 s stretch of the tightest muscle, right before strengthening its opposite
-    if (stretches.length && Pf.duration >= 10) { const pri = stretches[0], t = 20 * pri.ex.sides + 8; items.push({ kind: 'stretch', section: 'pre', ex: pri.ex, secs: t, why: pri.why, primer: true }); used += t; }
+    if (stretches.length && Pf.duration >= 10) { const it = timed({ kind: 'stretch', section: 'pre', ex: stretches[0].ex, why: stretches[0].why, primer: true }); if (used + it.real <= upTo(0.62)) { it.secs = it.real; items.push(it); used += it.real; } }
     // 3. strengthen: weak-prone muscles of painful regions and the antagonists of the tight ones
     const weak = new Map(); regions.forEach(r => REGION[r].m.forEach(id => { if (MUSCLE[id] && MUSCLE[id].tend === 'weak') weak.set(id, 1 + pv(r) / 10); }));
     tight.slice(0, 5).forEach(m => m.relax.forEach(i => { if (MUSCLE[i] && MUSCLE[i].tend !== 'tight') weak.set(i, Math.max(weak.get(i) || 0, 0.5)); }));
     const wl = [...weak.entries()].sort((a, b) => b[1] - a[1]).map(e => MUSCLE[e[0]]), sc = new Set(), str = [];
-    for (const id of RU.add) { const s = STRENGTH_BY[id]; if (!s) continue; const t = secs(s); if (used + t > dur * 1.1) continue; str.push({ kind: 'strength', section: 'strength', ex: s, secs: t, why: MUSCLE[s.m[0]] }); used += t; s.m.forEach(i => sc.add(i)); }
-    for (const m of wl) { if (sc.has(m.id)) continue; const c = STRENGTH.filter(s => okS(s) && !s.id.startsWith('pf-') && s.m.includes(m.id) && s.level <= Math.min(ST.level, RU.maxLevel) && !str.some(i => i.ex === s)).sort((x, y) => x.level - y.level); if (!c.length) continue; const s = c[0], t = secs(s); if (used + t > dur) continue; str.push({ kind: 'strength', section: 'strength', ex: s, secs: t, why: m }); used += t; s.m.forEach(i => sc.add(i)); if (str.length >= ST.strength + RU.add.length + (Pf.duration >= 30 ? 2 : 0)) break; }
+    for (const id of RU.add) { const q = STRENGTH_BY[id]; if (!q) continue; const it = timed({ kind: 'strength', section: 'strength', ex: q, why: MUSCLE[q.m[0]] }); if (used + it.real > upTo(1.1)) continue; str.push(it); used += it.real; q.m.forEach(i => sc.add(i)); }
+    for (const m of wl) { if (str.length >= ST.strength + RU.add.length + (Pf.duration >= 30 ? 2 : 0)) break; if (sc.has(m.id)) continue;
+      const c = STRENGTH.filter(q => okS(q) && !q.id.startsWith('pf-') && q.m.includes(m.id) && q.level <= Math.min(ST.level, RU.maxLevel) && !str.some(i => i.ex === q)).sort((x, y) => x.level - y.level); if (!c.length) continue;
+      const it = timed({ kind: 'strength', section: 'strength', ex: c[0], why: m }); if (used + it.real > upTo(1.04)) continue; str.push(it); used += it.real; c[0].m.forEach(i => sc.add(i)); }
+    // if there is still room, use it for more stretching rather than ending early
+    if (used < dur * 0.93) addStretches(dur * 1.03, maxStretch + 2);
     items.push(...str);
     // 4. lengthen: the main stretches, on warm tissue
     items.push(...stretches);
@@ -214,7 +234,7 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
     let br = Pf.breathless === 'yes' ? 'seated' : RU.breath || (Pf.breathless === 'mild' ? 'side' : (S.logs.length % 2 ? 'seated' : 'belly'));
     if (RU.breathAvoid.includes(br) || (br === 'belly' && RU.exclude.has('breathing'))) br = 'side';
     items.push({ kind: 'breath', section: 'breath', ex: BREATH.ex.find(e => e.id === br), secs: breathT });
-    if (Pf.duration >= 20) { const sc = Pf.duration >= 30 ? Math.max(240, Math.min(420, dur - used)) : 240; items.push({ kind: 'scan', section: 'calm', ex: { id: 'scan', n: 'Body scan' }, secs: sc }); used += sc; }
+    if (scanT) { const sc = Math.round(Math.max(scanT, Math.min(scanT + 45, scanT + dur - used))); items.push({ kind: 'scan', section: 'calm', ex: { id: 'scan', n: 'Body scan' }, secs: sc }); used += sc - scanT; }      // a long session that is still short of its length settles for longer
     return { items, minutes: Math.max(1, Math.round(used / 60)), A, tight: tight.slice(0, 5), weak: wl.slice(0, 5), stretches, strength: str, stage: ST, rules: RU };
   }
   const itemKey = it => it.ex.id + (it.primer ? '-pre' : '');
@@ -234,10 +254,14 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
     if (r === 'walk') return { ...st, kind: 'move', name: 'Easy walk', ill: 'walk', mv: ILLUS.MOVES.walk,
       intro: ['Easy walk.', 'Walk slowly, on the spot or around the room. Let your breathing settle.'], cues: ['Let the shoulders drop.', 'Breathe in through the nose, out a little longer.', 'Your heart rate is coming down. That is the point.'], cycles: [{ label: '', t: spec.t || 60 }], music: 'walk' };
     if (r.startsWith('breath:') || spec.kind === 'breath') { const x = BREATH_BY[r.replace('breath:', '')] || BREATH_BY.seated;
-      return { ...st, kind: 'breath', name: x.n.replace(/,.*$/, ''), x, ill: x.id === 'seated' ? 'seated' : 'breathing', intro: [x.n.replace(/,.*$/, '') + '.', sentences(x.pos)[0]], cues: [...sentences(x.steps.join(' ')).slice(1, 4), 'Small, quiet breaths work best.', 'Let the shoulders be heavy.'], cycles: [{ label: 'Breathe', t: spec.t || 120 }], music: 'calm' }; }
+      return { ...st, kind: 'breath', name: x.n.replace(/,.*$/, ''), x, ill: x.id === 'seated' ? 'seated' : 'breathing', intro: [x.n.replace(/,.*$/, '') + '.', sentences(x.pos)[0]], cues: [...sentences(x.steps.join(' ')).slice(1, 4), 'Small, quiet breaths work best.', 'If you feel light-headed, just breathe normally.', 'Let the shoulders be heavy.'], cycles: [{ label: 'Breathe', t: spec.t || 120 }], music: 'calm' }; }
     if (r === 'scan') return { ...st, kind: 'scan', name: 'Body scan', ill: 'breathing', intro: ['Body scan.', RU.scanNote || 'Lie down or sit back, and let your eyes close.'], cycles: [{ label: 'Scan', t: spec.t || 240 }], music: 'calm' };
     if (WARM_BY[r]) { const w = WARM_BY[r], mv = ILLUS.MOVES[r];
-      return { ...st, kind: 'move', name: w.n, ill: illOf(w), mv, feel: w.feel, intro: [w.n + '.', sentences(w.how)[0]], cues: [...sentences(w.how).slice(1), 'Easy pace. You should be able to talk.', 'Breathe through the nose.'], cycles: [{ label: '', t: spec.t || w.secs }], music: st.music || 'energy' }; }
+      /* a warm-up can have parts ("arm swings, then ten shoulder rolls"): each part is its own count of repetitions at
+         its own pace, so what is shown, what is counted and what the instruction says are the same thing */
+      const total = spec.t || w.secs, scale = total / w.secs, wcycles = (w.parts || [{ mv: r }]).map(pt => { const m = ILLUS.MOVES[pt.mv] || mv, tp = (m && m.tempo) || [1, 0, 1, 0], repT = tp.reduce((a, b) => a + b, 0), n = pt.n ? Math.max(3, Math.round(pt.n * scale)) : Math.max(1, Math.round(total / repT));
+        return { label: pt.label || '', t: n * repT, reps: n, repT, mv: m, ill: pt.ill, ex: pt.mv }; });
+      return { ...st, kind: 'move', name: w.n, ill: illOf(w), mv, feel: w.feel, intro: [w.n + '.', sentences(w.how)[0]], cues: [...sentences(w.how).slice(1), 'Easy pace. You should be able to talk.', 'Breathe through the nose.'], cycles: wcycles, music: st.music || 'energy' }; }
     const x = STRETCH_BY[r] || STRENGTH_BY[r]; if (!x) return null;
     const isStretch = x.sets == null, sides = x.sides || 1, mv0 = ILLUS.MOVES[x.id], c = COACH[x.id] || { focus: [], avoid: [] };
     const where = WHERE[(why && why.id) || x.m[0]] || '';
@@ -248,9 +272,9 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
       for (let k = 0; k < reps; k++) for (let s = 0; s < sides; s++) { if (cycles.length) cycles.push({ label: sides > 1 && s ? 'Switch sides' : 'Release', t: 4, rest: true, sw: sides > 1 && s }); cycles.push({ label: side(s) || (reps > 1 ? `Hold ${k + 1} of ${reps}` : 'Hold'), t: hold, hold: true, side: side(s) }); }
     } else {
       mv = mv0 ? { ...mv0 } : null; const reps = spec.reps || x.reps, sets = isStretch ? 1 : spec.sets || x.sets;
-      tempo = (mv && mv.tempo) || (isStretch ? [2, 0, 2, 0] : [1.5, x.hold || 0.5, 2.5, 0.5]); const repT = tempo.reduce((a, b) => a + b, 0);
+      tempo = (mv && mv.tempo) || x.tempo || (isStretch ? [2, 0, 2, 0] : [1.5, x.hold || 0.5, 2.5, 0.5]); const repT = tempo.reduce((a, b) => a + b, 0);
       if (!isStretch && x.reps === 1 && x.hold) { for (let k = 0; k < sets; k++) for (let s = 0; s < sides; s++) { if (cycles.length) cycles.push({ label: s ? 'Switch sides' : 'Rest', t: s ? 5 : 25, rest: true, sw: !!s }); cycles.push({ label: side(s) || `Set ${k + 1} of ${sets}`, t: spec.t || x.hold, hold: true, side: side(s) }); } }
-      else for (let k = 0; k < sets; k++) for (let s = 0; s < sides; s++) { if (cycles.length) cycles.push({ label: s ? 'Switch sides' : 'Rest', t: s ? 5 : 25, rest: true, sw: !!s }); cycles.push({ label: (sets > 1 ? `Set ${k + 1} of ${sets}` : '') + (sides > 1 ? (sets > 1 ? ' · ' : '') + side(s) : ''), t: Math.round(reps * repT), reps, repT, side: side(s) }); }
+      else for (let k = 0; k < sets; k++) for (let s = 0; s < sides; s++) { if (cycles.length) cycles.push({ label: s ? 'Switch sides' : 'Rest', t: s ? 5 : 25, rest: true, sw: !!s }); cycles.push({ label: (sets > 1 ? `Set ${k + 1} of ${sets}` : '') + (sides > 1 ? (sets > 1 ? ' · ' : '') + side(s) : ''), t: reps * repT, reps, repT, side: side(s) }); }
     }
     const how = sentences(x.how);
     const focus = c.focus.map(f => 'Focus on ' + low(f) + '.'), avoid = c.avoid.slice(0, 2).map(a => 'Avoid ' + low(a).replace(/^avoid /, '') + '.');
@@ -258,11 +282,9 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
     return { ...st, kind: isStretch ? 'stretch' : 'strength', name: x.n, x, ill: x.ill, mv, tempo, cycles,
       intro: [x.n + '.', how[0]], music: st.music || (isStretch ? 'flow' : 'energy'), where };
   }
-  function sessionSteps(sess) {
-    const RU = sess.rules, cap = sess.stage.id === 1 ? 20 : 0;
-    return sess.items.map(it => { const sp = { r: it.kind === 'breath' ? 'breath:' + it.ex.id : it.ex.id, section: it.section, why: it.why, primer: it.primer, key: itemKey(it), cap };
-      if (it.kind === 'breath' || it.kind === 'scan') sp.t = it.secs; return mkStep(sp, RU); }).filter(Boolean);
-  }
+  const specOf = (it, cap) => { const sp = { r: it.kind === 'breath' ? 'breath:' + it.ex.id : it.ex.id, section: it.section, why: it.why, primer: it.primer, key: itemKey(it), cap, sets: it.sets, reps: it.reps };
+    if (it.kind === 'breath' || it.kind === 'scan' || it.kind === 'move') sp.t = it.secs; return sp; };
+  function sessionSteps(sess) { const RU = sess.rules, cap = sess.stage.id === 1 ? 20 : 0; return sess.items.map(it => mkStep(specOf(it, cap), RU)).filter(Boolean); }
   function resetSteps(rs) {
     const RU = rules(), music = rs.cat === 'calm' ? 'calm' : rs.cat === 'cool' ? 'flow' : 'energy';
     return rs.steps.filter(s => !RU.exclude.has(s.r)).map(s => mkStep({ ...s, section: rs.cat, music: (s.r.startsWith('breath') || s.r === 'scan') ? 'calm' : STRETCH_BY[s.r] && STRETCH_BY[s.r].type === 'static' ? (rs.cat === 'calm' ? 'calm' : 'flow') : music }, RU)).filter(Boolean);
@@ -339,7 +361,7 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
       const m = Math.max(1, Math.round(its.reduce((a, o) => a + o.it.secs, 0) / 60)), done = its.every(o => L.done.includes(itemKey(o.it)));
       return `<details class="act ${done ? 'done' : ''}"><summary><div class="thumb">${ILLUS.svg((its.find(o => !o.it.primer) || its[0]).st?.ill || 'stand', null, { uid: 't' + k, glow: false, fit: 1.375 })}</div><div class="grow"><b>${n}</b><span>${m} min · ${its.length} ${its.length === 1 ? 'exercise' : 'exercises'}</span></div><span class="num">${done ? I.check : k + 1}</span></summary>
 <div class="exlist">${its.map(o => `<button class="exrow ${L.done.includes(itemKey(o.it)) ? 'done' : ''}" data-play="${o.i}"><div class="thumb sm">${ILLUS.svg(o.st ? o.st.ill : 'stand', null, { uid: 'e' + o.i, fit: 1.39 })}</div><span class="grow">${esc(o.st ? o.st.name : o.it.ex.n)}</span><span class="go">${I.play}</span></button>`).join('')}</div></details>`; }).join('');
-    el.innerHTML = `<header class="top"><div><h1>Today</h1>${streak() > 1 ? `<p class="kicker">${I.sun}<span>${streak()} days in a row</span></p>` : ''}</div><button class="iconbtn tint" data-go="program" aria-label="Program">${I.cal}</button></header>
+    el.innerHTML = `<header class="top"><div><h1>Today</h1>${streak() > 1 ? `<p class="kicker">${I.sun}<span>${streak()} days in a row</span></p>` : ''}</div><div class="topbtns"><button class="iconbtn tint" data-go="program" aria-label="Program">${I.cal}</button><button class="iconbtn" data-settings aria-label="Settings">${I.cog}</button></div></header>
 
 ${flagged() ? `<div class="note bad">${I.alert}<span><b>Check with a doctor first.</b> Something you ticked needs a look before training. Gentle walking and the calm resets are fine meanwhile. <a href="#" id="editflags">Change answers</a></span></div>` : ''}
 ${RU.gentle ? `<div class="note">${I.heart}<span>Gentler today, since yesterday felt worse.</span></div>` : ''}
@@ -370,7 +392,7 @@ ${chkId ? `<section class="card chk"><p><b>How is your ${esc(low(REGION[chkId].n
   let rcat = 'all';
   function renderResets() {
     const el = $('s-resets'), list = RESETS.filter(r => rcat === 'all' || r.cat === rcat);
-    el.innerHTML = `<header class="top"><div><h1>Quickies</h1><p class="kicker">${I.bolt}<span>2 to 6 minutes, fully guided</span></p></div></header>
+    el.innerHTML = `<header class="top"><div><h1>Quickies</h1><p class="kicker">${I.bolt}<span>2 to 6 minutes, fully guided</span></p></div><button class="iconbtn" data-settings aria-label="Settings">${I.cog}</button></header>
 <p class="lede">Short routines for right before or after something: a walk, a bike ride, a long sit, bedtime.</p>
 <div class="seg cats">${RESET_CATS.map(([id, n]) => `<button class="${rcat === id ? 'on' : ''}" data-cat="${id}">${n}</button>`).join('')}</div>
 <div class="grid">${list.map(r => resetCard(r, 'r')).join('')}</div>`;
@@ -392,7 +414,7 @@ ${chkId ? `<section class="card chk"><p><b>How is your ${esc(low(REGION[chkId].n
     const msg = doneW >= Pf.perWeek ? ['Week complete', 'You hit your plan. That is how habits stick.'] : st >= 2 ? ['Keep it up', `${st} days in a row. Every bit of movement counts.`] : doneW ? ['Nice start', 'You are building a great habit.'] : ['Fresh week', 'Five minutes today gets it going.'];
     const exRow = (it, k) => `<button class="exrow" data-ex="${it.ex.id}"><div class="thumb sm">${ILLUS.svg(it.ex.ill, null, { ex: it.ex.id, uid: 'g' + k + it.ex.id, fit: 1.39 })}</div><span class="grow"><b>${esc(it.ex.n)}</b><small>${esc(it.why ? cap(WHERE[it.why.id] || it.why.n) : '')}</small></span>${I.chev}</button>`;
     const hist = week.map(w => w.l).filter(active).reverse();
-    el.innerHTML = `<header class="top"><div><h1>Program</h1><p class="kicker">${I.chart}<span><b class="acc">${thisW}</b> of ${Pf.perWeek} sessions this week</span></p></div></header>
+    el.innerHTML = `<header class="top"><div><h1>Program</h1><p class="kicker">${I.chart}<span><b class="acc">${thisW}</b> of ${Pf.perWeek} sessions this week</span></p></div><button class="iconbtn" data-settings aria-label="Settings">${I.cog}</button></header>
 <section class="card"><div class="wknav"><button class="iconbtn" id="wkprev" aria-label="Previous week" ${wkOff <= startOff ? 'disabled' : ''}>${I.back}</button><p class="label">${wkLabel} · <b class="acc">${doneW}</b> of ${Pf.perWeek}</p><button class="iconbtn" id="wknext" aria-label="Next week" ${wkOff >= 0 ? 'disabled' : ''}>${I.chev}</button></div><div class="week">${week.map(w => `<div class="${w.k === today() ? 'today' : ''}"><span>${'MTWTFSS'[(w.d.getDay() + 6) % 7]}</span><span class="dn">${w.d.getDate()}</span><i class="${active(w.l) ? 'on' : ''}">${active(w.l) ? I.check : ''}</i></div>`).join('')}</div></section>
 <section class="card"><p class="label">Last 8 weeks</p><div class="weeks">${weeks.map(w => `<button class="${w.o === wkOff ? 'on' : ''}" data-wk="${w.o}" aria-label="${w.n} active days"><span class="track"><i style="height:${w.n ? Math.max(12, w.n / 7 * 100) : 0}%"></i></span><span>${w.o === 0 ? 'Now<br>&nbsp;' : w.d.getDate() + '<br>' + w.d.toLocaleDateString(undefined, { month: 'short' })}</span></button>`).join('')}</div></section>
 <section class="cheer"><span class="badge">${I.flag}</span><div><b>${msg[0]}</b><p>${msg[1]}</p></div></section>
@@ -403,14 +425,14 @@ ${ST.id < 4 ? `<div class="pbar"><i style="width:${Math.min(100, got / req * 100
 <div class="hscroll exs">${[...sess.stretches.map(it => [it, 'Lengthen', 'cool']), ...sess.strength.map(it => [it, 'Strengthen', 'energy'])].map(([it, tag, cl], k) => `<button class="xcard" data-ex="${it.ex.id}"><div class="thumb">${ILLUS.svg(it.ex.ill, null, { ex: it.ex.id, uid: 'g' + k + it.ex.id, fit: 1.375 })}</div><span class="tag ${cl}">${tag}</span><b>${esc(it.ex.n)}</b></button>`).join('') || '<p class="small">Add an area or your day to see your exercises.</p>'}</div></section>
 ${hist.length ? `<h3 class="sect">${wkLabel}</h3><section class="card flush">${hist.map(l => `<div class="hrow"><span class="grow"><b>${new Date(l.d + 'T12:00').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}</b><small>${[l.done.length >= 2 ? 'Session' : '', ...(l.resets || []).map(id => (RESETS.find(r => r.id === id) || {}).n)].filter(Boolean).join(', ')}${l.minutes ? ' · ' + l.minutes + ' min' : ''}</small></span>${l.feel ? `<span class="feel ${l.feel}">${cap(l.feel)}</span>` : ''}<i class="ok">${I.check}</i></div>`).join('')}</section>` : ''}
 <h3 class="sect">Tune your plan</h3><section class="card flush settings">
-${[['map', I.body, 'Where it bothers you', Object.keys(S.pain).length + ' areas'], ['day', I.desk, 'Your day', dayNames(Pf)], ['about', I.user, 'About you', Pf.sex === 'f' ? 'Woman' : Pf.sex === 'm' ? 'Man' : 'Not set'], ['safety', I.shield, 'Safety answers', flagged() ? 'Needs a look' : 'All clear'], ['week', I.cal, 'Sessions per week', Pf.perWeek], ['remind', I.bell, 'Move reminders', S.remind.on ? 'Every ' + S.remind.every + ' min' : 'Off'], ['voice', I.voice, 'Coach voice', COACH_AUDIO.voiceName === COACH_AUDIO.CLIPS ? 'Andrew' : COACH_AUDIO.voiceName ? COACH_AUDIO.voiceName.replace(/Microsoft |Google /, '').split(' ')[0] : 'Default'], ['music', I.music, 'Music', COACH_AUDIO.musicOn ? 'On' : 'Off'], ['theme', I.contrast, 'Appearance', cap(Pf.theme)], ['stage', I.steps, 'Stage', Pf.stage ? 'Stage ' + Pf.stage : 'Automatic']].map(([id, ic, n, v]) => `<button class="setrow" data-set="${id}">${ic}<span class="grow">${n}</span><small>${esc(String(v))}</small>${I.chev}</button>`).join('')}
+${settingRows().map(setRow).join('')}
 <button class="setrow danger" id="wipe">${I.trash}<span class="grow">Erase all my data</span></button></section>`;
     el.querySelectorAll('[data-ex]').forEach(b => b.onclick = () => exSheet(b.dataset.ex));
     el.querySelectorAll('[data-stage]').forEach(b => b.onclick = () => { const st = STAGES[+b.dataset.stage - 1]; sheet(`${st.id}. ${st.n}`, () => e => { e.innerHTML = `<div class="prose"><p class="small">${cap(st.weeks)}${st.id === ST.id ? ' · you are here' : ''}</p><p>${st.goal}</p><ul>${st.does.slice(0, 3).map(d => `<li>${d.replace(/\s*\([^)]*\)/g, '')}</li>`).join('')}</ul>${st.id === ST.id && ST.id < 4 ? `<div class="pbar"><i style="width:${Math.min(100, got / req * 100)}%"></i></div><p class="small">${got} of ${req} active days to move on.</p>` : ''}</div>`; }); });
     $('wkprev').onclick = () => { wkOff--; renderProgram(); }; $('wknext').onclick = () => { wkOff = Math.min(0, wkOff + 1); renderProgram(); };
     el.querySelectorAll('[data-wk]').forEach(b => b.onclick = () => { wkOff = +b.dataset.wk; renderProgram(); });
     el.querySelectorAll('[data-set]').forEach(b => b.onclick = () => SETTINGS[b.dataset.set]());
-    const w = $('wipe'); w.onclick = () => { if (w.dataset.arm) { localStorage.removeItem(KEY); location.reload(); } else { w.dataset.arm = 1; w.querySelector('span').textContent = 'Tap again to erase everything'; setTimeout(() => { if (w.isConnected) { delete w.dataset.arm; w.querySelector('span').textContent = 'Erase all my data'; } }, 3000); } };
+    armWipe($('wipe'));
   }
   function exSheet(id) {
     const x = STRETCH_BY[id] || STRENGTH_BY[id]; if (!x) return; const c = COACH[x.id] || { focus: [], avoid: [] };
@@ -426,6 +448,32 @@ ${[['map', I.body, 'Where it bothers you', Object.keys(S.pain).length + ' areas'
     el.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { const k = b.dataset.f; if (k === 'breath') Pf.breathless = Pf.breathless === 'yes' ? 'no' : 'yes'; else { const i = Pf.redflags.indexOf(k); i >= 0 ? Pf.redflags.splice(i, 1) : Pf.redflags.push(k); } save(); draw(el); });
     el.querySelectorAll('[data-br]').forEach(b => b.onclick = () => { Pf.breathless = b.dataset.br; save(); draw(el); });
     el.querySelector('#sdone').onclick = () => { close(); rerender(); }; }; return draw; }); }
+  const settingRows = () => { const Pf = S.profile; return [['map', I.body, 'Where it bothers you', Object.keys(S.pain).length + ' areas'], ['day', I.desk, 'Your day', dayNames(Pf)], ['about', I.user, 'About you', Pf.sex === 'f' ? 'Woman' : Pf.sex === 'm' ? 'Man' : 'Not set'], ['safety', I.shield, 'Safety answers', flagged() ? 'Needs a look' : 'All clear'], ['week', I.cal, 'Sessions per week', Pf.perWeek], ['remind', I.bell, 'Move reminders', S.remind.on ? 'Every ' + S.remind.every + ' min' : 'Off'], ['voice', I.voice, 'Coach voice', COACH_AUDIO.voiceName === COACH_AUDIO.CLIPS ? 'Andrew' : COACH_AUDIO.voiceName ? COACH_AUDIO.voiceName.replace(/Microsoft |Google /, '').split(' ')[0] : 'Default'], ['music', I.music, 'Music', COACH_AUDIO.musicOn ? 'On' : 'Off'], ['theme', I.contrast, 'Appearance', cap(Pf.theme)], ['stage', I.steps, 'Stage', Pf.stage ? 'Stage ' + Pf.stage : 'Automatic']]; };
+  const setRow = ([id, ic, n, v]) => `<button class="setrow" data-set="${id}">${ic}<span class="grow">${n}</span><small>${esc(String(v))}</small>${I.chev}</button>`;
+  /* erase everything this app has stored on the device: the profile and logs, the voice and music choices, the welcome flag */
+  function wipeAll() { try { Object.keys(localStorage).filter(k => k === KEY || k.startsWith('coach.') || k.startsWith('tension.')).forEach(k => localStorage.removeItem(k)); sessionStorage.clear(); } catch (e) {} location.reload(); }
+  const armWipe = w => { w.onclick = () => { if (w.dataset.arm) return wipeAll(); w.dataset.arm = 1; w.querySelector('span').textContent = 'Tap again to erase everything'; setTimeout(() => { if (w.isConnected) { delete w.dataset.arm; w.querySelector('span').textContent = 'Erase all my data'; } }, 3000); }; };
+  /* the installed version is the name of the offline cache the service worker created for it */
+  const appVersion = () => (window.caches ? caches.keys().then(ks => (ks.find(k => k.startsWith('tension-coach-')) || '').replace('tension-coach-', '')) : Promise.resolve('')).catch(() => '');
+  /* Backup: everything the app stores (profile, pain areas, history, voice and music choices) as one small file you keep.
+     Restore reads such a file back, after a second tap to confirm, because it replaces what is on the device. */
+  function backupData() { const prefs = {}; try { Object.keys(localStorage).filter(k => k.startsWith('coach.')).forEach(k => prefs[k] = localStorage.getItem(k)); } catch (e) {}
+    const text = JSON.stringify({ app: 'tension-coach', format: 1, saved: new Date().toISOString(), data: S, prefs }, null, 1), name = `tension-coach-backup-${today()}.json`;
+    try { const file = new File([text], name, { type: 'application/json' }); if (navigator.canShare && navigator.canShare({ files: [file] }) && /iPhone|iPad|Android/i.test(navigator.userAgent)) { navigator.share({ files: [file], title: 'Tension Coach backup' }).catch(() => {}); return; } } catch (e) {}
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000); toast('Backup saved: ' + name); }
+  const readBackup = text => { let j; try { j = JSON.parse(text); } catch (e) { return null; } return j && j.app === 'tension-coach' && j.data && typeof j.data === 'object' && j.data.profile && Array.isArray(j.data.logs) ? j : null; };
+  function restoreData(file, btn) { const rd = new FileReader(); rd.onload = () => { const j = readBackup(String(rd.result || '')); const lab = btn.querySelector('span');
+      if (!j) { toast('That file is not a Tension Coach backup'); return; }
+      const days = j.data.logs.length, when = (j.saved || '').slice(0, 10); lab.textContent = `Tap again to replace everything with the backup${when ? ' from ' + when : ''} (${days} day${days === 1 ? '' : 's'} of history)`; btn.classList.add('danger');
+      btn.onclick = () => { try { localStorage.setItem(KEY, JSON.stringify({ ...JSON.parse(JSON.stringify(DEF)), ...j.data, profile: { ...DEF.profile, ...j.data.profile } })); Object.entries(j.prefs || {}).forEach(([k, v]) => { if (k.startsWith('coach.') && typeof v === 'string') localStorage.setItem(k, v); }); } catch (e) { toast('Could not restore'); return; } location.reload(); }; };
+    rd.readAsText(file); }
+  /* settings, reachable from the cog on every screen: the same rows as "Tune your plan", erase, and the version */
+  function settingsSheet() { sheet('Settings', close => el => {
+    el.innerHTML = `<section class="card flush settings">${settingRows().map(setRow).join('')}</section><p class="label">Your data</p><section class="card flush settings"><button class="setrow" id="bkup">${I.save}<span class="grow">Back up my data<small>Everything in one file</small></span></button><button class="setrow" id="rstr">${I.restore}<span class="grow">Restore from a backup</span></button><input type="file" id="rstrfile" accept="application/json,.json" hidden><button class="setrow danger" id="wipe2">${I.trash}<span class="grow">Erase all my data</span></button></section><p class="setver" id="setver">Tension Coach</p>`;
+    el.querySelectorAll('[data-set]').forEach(b => b.onclick = () => { close(); setTimeout(() => SETTINGS[b.dataset.set](), 180); });
+    el.querySelector('#bkup').onclick = backupData; const rb = el.querySelector('#rstr'), rf = el.querySelector('#rstrfile'); rb.onclick = () => rf.click(); rf.onchange = () => { if (rf.files && rf.files[0]) restoreData(rf.files[0], rb); };
+    armWipe(el.querySelector('#wipe2')); appVersion().then(v => { const t = el.querySelector('#setver'); if (t) t.textContent = 'Tension Coach · version ' + (v || 'local'); }); }); }
+  document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-settings]'); if (b) settingsSheet(); });
   const SETTINGS = {
     map: () => mapSheet(rerender),
     safety: safetySheet,
@@ -493,7 +541,7 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
   }
   function renderLearn() {
     const el = $('s-learn'), T = learnTopics();
-    el.innerHTML = `<header class="top"><div><h1>Learn</h1><p class="kicker">${I.book}<span>Short reads. The coach covers the rest.</span></p></div></header>
+    el.innerHTML = `<header class="top"><div><h1>Learn</h1><p class="kicker">${I.book}<span>Short reads. The coach covers the rest.</span></p></div><button class="iconbtn" data-settings aria-label="Settings">${I.cog}</button></header>
 <div class="learn">${T.map(([id, ic, n, sub]) => `<button class="lcard" data-t="${id}"><span class="badge">${ic}</span><span class="grow"><b>${n}</b><small>${esc(sub)}</small></span>${I.chev}</button>`).join('')}</div>`;
     el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { const t = T.find(x => x[0] === b.dataset.t); sheet(t[2], () => e => { e.innerHTML = `<div class="prose">${t[4]}</div>`; }); });
   }
@@ -501,34 +549,33 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
   /* ---------- the full-screen player ---------- */
   let PL = null, raf = null;
   const reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const ease = u => u * u * (3 - 2 * u);
+  const ease = u => u * u * u * (u * (u * 6 - 15) + 10);      // minimum-jerk curve: starts and stops without a jolt, like a real limb
   const HOLD_MOVES = new Set(['chin-tuck', 'neck-ext']);
+  /* The figure is driven by the same clock as the rep counter (PL.el), so repetition 3 on screen is repetition 3 in the
+     count and the last one finishes as the timer reaches zero. Each cycle of a step can have its own picture and pace
+     (warm-ups in parts). During "Up next" the movement plays as a preview on its own clock; during a rest the figure
+     stands and breathes instead of freezing. */
   function animate() {
     cancelAnimationFrame(raf); if (PL) PL.moves = false; const el = $('pfig'); if (!el || !PL) return; const st = PL.steps[PL.i];
     if (st.kind === 'breath' || st.kind === 'scan') return;
-    const ex = (st.x && st.x.id) || st.key, front = ILLUS.isFront(st.ill, ex) && ex !== 'wu-hip';
-    const hold = !st.mv && (front || HOLD_MOVES.has(ex)) && st.cycles.some(c => c.hold), mv = st.mv || (HOLD_MOVES.has(ex) ? ILLUS.MOVES[ex] : null);
-    const vb = ILLUS.frame(st.ill, mv, (el.clientWidth || 4) / (el.clientHeight || 5), ex);      // one steady frame that holds the whole movement
-    const draw = (u, cyc, ph) => { const cy = st.cycles[PL.c] || {}, o = { uid: 'p', slice: true, ex, u, mirror: /left/i.test(cy.side || '') }; if (vb) o.vb = vb;
-      el.innerHTML = ILLUS.svg(st.ill, mv ? ILLUS.animPose(st.ill, mv, u, cyc, ph) : null, o); };
-    draw(hold ? 0 : 0, 0, 0);
-    if (reduced || (!st.mv && !hold)) return;
-    PL.moves = true;      // while the step is announced ('Up next'), the figure already demonstrates the movement as a preview
-    if (hold) {        // ease into the stretch over ~2 s, hold, ease back during the short release
-      let v = 0, pt = 0, last = performance.now(), drawn = 0;
-      const frame = now => { if (!el.isConnected || !PL) return; const dt = (now - last) / 1000; last = now; const cy = st.cycles[PL.c] || {};
-        if (!PL.paused) { const pre = PL.phase === 'ready'; pt = pre ? pt + dt : 0; const target = pre ? (pt > 0.6 && (pt - 0.6) % 6.4 < 4 ? 1 : 0) : PL.phase === 'work' && !cy.rest ? 1 : 0;      // preview: into the stretch, short hold, back out
-          v += Math.sign(target - v) * Math.min(Math.abs(target - v), dt / (target ? 2.2 : 1.2)); }
-        if (now - drawn > 30) { drawn = now; draw(ease(v), 0, 0); }
-        raf = requestAnimationFrame(frame); };
-      raf = requestAnimationFrame(frame); return;
-    }
-    const tempo = st.tempo || mv.tempo || [1, 0, 1, 0], total = tempo.reduce((a, b) => a + b, 0); let t = 0, last = performance.now(), drawn = 0, ph0 = PL.phase;
-    const frame = now => { if (!el.isConnected || !PL) return; const cy = st.cycles[PL.c] || {}; if (PL.phase !== ph0) { ph0 = PL.phase; t = 0; }      // the real reps start from the first position
-      if (!PL.paused && (PL.phase === 'ready' || (PL.phase === 'work' && !cy.rest))) t += (now - last) / 1000; last = now;
-      if (now - drawn > 30) { drawn = now; const [up, hd, dn] = tempo, k = t % total, u = k < up ? ease(k / up) : k < up + hd ? 1 : k < up + hd + dn ? 1 - ease((k - up - hd) / dn) : 0;
-        draw(u, Math.floor(t / total), k / total); }
-      raf = requestAnimationFrame(frame); };
+    const ratio = (el.clientWidth || 4) / (el.clientHeight || 5), views = [], work = c => { while (c > 0 && st.cycles[c] && st.cycles[c].rest) c--; return c; };
+    const view = c => { if (views[c]) return views[c]; const cy = st.cycles[c] || {}, ex = cy.ex || (st.x && st.x.id) || st.key, ill = cy.ill || st.ill, front = ILLUS.isFront(ill, ex) && ex !== 'wu-hip';
+      const hold = !st.mv && !cy.mv && (front || HOLD_MOVES.has(ex)) && st.cycles.some(q => q.hold), mv = cy.mv || st.mv || (HOLD_MOVES.has(ex) ? ILLUS.MOVES[ex] : null);
+      return views[c] = { ex, ill, hold, mv, vb: ILLUS.frame(ill, mv, ratio, ex), tempo: (cy.mv && cy.mv.tempo) || st.tempo || (mv && mv.tempo) || [1, 0, 1, 0] }; };
+    const draw = (V, u, cyc, ph) => { const cy = st.cycles[PL.c] || {}, o = { uid: 'p', slice: true, ex: V.ex, u, mirror: /left/i.test(cy.side || '') }; if (V.vb) o.vb = V.vb;
+      el.innerHTML = ILLUS.svg(V.ill, V.mv ? ILLUS.animPose(V.ill, V.mv, u, cyc, ph) : null, o); };
+    const V0 = view(0); draw(V0, 0, 0, 0); PL.moves = !reduced && !!(V0.hold || V0.mv);
+    if (reduced) return;
+    let v = 0, pt = 0, tp = 0, rt = 0, last = performance.now(), drawn = 0, lastC = -1, still = false;
+    const frame = now => { if (!el.isConnected || !PL || PL.steps[PL.i] !== st) return; const dt = Math.min(.1, (now - last) / 1000); last = now; raf = requestAnimationFrame(frame);
+      const cy = st.cycles[PL.c] || {}, V = view(work(PL.c)), ready = PL.phase === 'ready', resting = !ready && !!cy.rest; if (PL.c !== lastC) { lastC = PL.c; still = false; }
+      if (now - drawn < 30) { if (!PL.paused) { if (ready) { pt += dt; tp += dt; } if (resting) rt += dt; } return; } const el2 = now - (drawn || now); drawn = now;
+      if (!PL.paused) { if (ready) { pt += dt; tp += dt; } else { pt = 0; tp = 0; } rt = resting ? rt + dt : 0; }
+      if (resting) { el.innerHTML = ILLUS.svg('rest', null, { uid: 'p', slice: true, u: (1 - Math.cos(2 * Math.PI * rt / 4.4)) / 2 }); still = false; return; }      // rest: stand tall, breathe slowly
+      if (V.hold) { if (!PL.paused) { const target = ready ? (pt > 0.6 && (pt - 0.6) % 6.4 < 4 ? 1 : 0) : PL.phase === 'work' ? 1 : 0; v += Math.sign(target - v) * Math.min(Math.abs(target - v), (el2 / 1000 || dt) / (target ? 2.2 : 1.2)); } draw(V, ease(v), 0, 0); return; }
+      if (V.mv) { const t = ready ? tp : PL.el + (PL.paused ? 0 : Math.min(.25, Math.max(0, (now - PL.last) / 1000))), [up, hd, dn] = V.tempo, total = V.tempo.reduce((a, b) => a + b, 0), k = t % total;
+        draw(V, k < up ? ease(k / up) : k < up + hd ? 1 : k < up + hd + dn ? 1 - ease((k - up - hd) / dn) : 0, Math.floor(t / total), k / total); return; }
+      if (!still) { still = true; draw(V, 0, 0, 0); } };
     raf = requestAnimationFrame(frame);
   }
   function play(steps, meta) {
@@ -576,6 +623,7 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
   }
   function startCycle(firstC) {
     const st = PL.steps[PL.i], cy = st.cycles[PL.c]; PL.t = cy.t; PL.el = 0; PL.saidHalf = PL.said5 = false; PL.cueAt = firstC ? 9 : 6;
+    if (reduced && cy.ill) { const f = $('pfig'); if (f) f.innerHTML = ILLUS.svg(cy.ill, null, { uid: 'p', slice: true, ex: cy.ex, u: 0 }); }      // reduced motion: still switch to the picture of this part
     $('pside').textContent = cy.rest ? cy.label : cy.side || (cy.label && !/^Set 1 of 1$/.test(cy.label) ? cy.label : '');
     $('player').classList.toggle('resting', !!cy.rest);
     if (st.kind === 'breath' || st.kind === 'scan') { $('pside').textContent = ''; return; }
@@ -633,8 +681,13 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
     COACH_AUDIO.say(pick(['That is it. Well done for showing up today.', 'All done. That was great work.', 'Finished. Your body will thank you.']), { urgent: true, keep: true });
     if (st > 1) COACH_AUDIO.say(`That is ${st} days in a row.`, { keep: true }); COACH_AUDIO.say('How do you feel?', { keep: true });
     P.innerHTML = `<div class="donebox"><div class="donecheck">${I.check}</div><h2>${PL.meta.kind === 'reset' ? esc(PL.meta.n) : 'Session'} done</h2><p>${mins} min${st > 1 ? ` · ${st} days in a row` : ''}</p>
-<p class="label">How do you feel?</p><div class="feelpick">${[['better', 'Better'], ['same', 'Same'], ['worse', 'Worse']].map(([v, n]) => `<button data-feel="${v}" class="${L.feel === v ? 'on' : ''}">${n}</button>`).join('')}</div><button class="btn ghost" id="pfin">Close</button></div>`;
-    P.querySelectorAll('[data-feel]').forEach(b => b.onclick = () => { L.feel = b.dataset.feel; save(); COACH_AUDIO.say(L.feel === 'worse' ? 'Thanks for telling me. Tomorrow will be gentler.' : L.feel === 'better' ? 'Love to hear it.' : 'Good. Consistency does the work.', { urgent: true }); setTimeout(endPlayer, 1600); });
+<p class="label">How do you feel?</p><div class="feelpick">${[['better', 'Better'], ['same', 'Same'], ['worse', 'Worse']].map(([v, n]) => `<button data-feel="${v}" class="${L.feel === v ? 'on' : ''}">${n}</button>`).join('')}</div><p class="feelnote" id="feelnote" aria-live="polite">&nbsp;</p><button class="btn ghost" id="pfin">Close</button></div>`;
+    /* the answer is saved and shown straight away (button lights up, one line says what it changes), then the screen closes */
+    const FEEL = { better: ['Love to hear it.', 'Saved. Your plan keeps building.'], same: ['Good. Consistency does the work.', 'Saved. Your plan stays as it is.'], worse: ['Thanks for telling me. Tomorrow will be gentler.', 'Saved. Tomorrow will be gentler.'] };
+    P.querySelectorAll('[data-feel]').forEach(b => b.onclick = () => { L.feel = b.dataset.feel; save(); session = null;
+      P.querySelectorAll('[data-feel]').forEach(q => { q.classList.toggle('on', q === b); q.setAttribute('aria-pressed', q === b); });
+      const n = $('feelnote'); if (n) { n.textContent = FEEL[L.feel][1]; n.classList.add('on'); }
+      COACH_AUDIO.say(FEEL[L.feel][0], { urgent: true }); clearTimeout(PL.closeT); PL.closeT = setTimeout(endPlayer, 2200); });
     $('pfin').onclick = endPlayer;
   }
   function endPlayer() {
@@ -651,6 +704,7 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
     [...STRETCHES, ...STRENGTH].forEach(x => { [undefined, ...x.m.map(i => MUSCLE[i]).filter(Boolean)].forEach(why => steps.push(mkStep({ r: x.id, why }, RU))); steps.push(mkStep({ r: x.id, primer: true }, RU)); });
     BREATH.ex.forEach(e => steps.push(mkStep({ r: 'breath:' + e.id }, RU))); steps.push(mkStep({ r: 'walk' }, RU)); steps.push(mkStep({ r: 'scan' }, RU));
     steps.filter(Boolean).forEach(st => { add('First: ' + st.intro[0]); add('Next: ' + st.intro[0]); add(st.intro[1]); st.cues.forEach(add); });
+    steps.filter(Boolean).forEach(st => st.cycles.forEach((cy, i) => { if (i && cy.reps && cy.label && !cy.side) add(cy.label.replace(/ ·.*/, '') + '. Here we go.'); }));      // the second part of a warm-up is announced by name
     add('Lie on your left side with a pillow between the knees, or sit supported.');
     [...PRAISE, ...MID, ...TIPS, ...SCAN.flatMap(r => r.lines)].forEach(add);
     ['Good morning.', 'Hi there.', 'Good evening.', 'If anything does not feel good, just stop.', 'Switch sides.', 'Rest. Shake it out.', 'Good. Take a breather.', 'Nice. Short rest.', 'And hold.', 'Here we go.', 'And again. Ease in.',
@@ -695,6 +749,16 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
     const close = () => { if (el.classList.contains('out')) return; set(localStorage, 'coach.intro'); el.classList.add('out'); setTimeout(() => { el.hidden = true; el.innerHTML = ''; el.classList.remove('out'); }, 380); };
     if (first) $('spgo').onclick = close; else { el.onclick = close; setTimeout(close, 2600); }
   }
+
+  /* ---------- test hook ----------
+     tools/test-app.mjs builds sessions for many made-up people through this. It swaps the state in memory only for the
+     duration of the call and never saves, so real data is untouched. */
+  window.__coachTest = { plan(state) { const keep = S, keepSess = session; S = JSON.parse(JSON.stringify({ ...DEF, ...state, profile: { ...DEF.profile, ...(state.profile || {}) } }));
+    try { const sess = buildSession(), steps = sessionSteps(sess), ex = x => ({ id: x.id, type: x.type, level: x.level, hold: x.hold, reps: x.reps, sets: x.sets, sides: x.sides });
+      return { minutes: sess.minutes, stage: sess.stage.id, stageLevel: sess.stage.level, rules: { exclude: [...sess.rules.exclude], maxLevel: sess.rules.maxLevel, stretchCap: sess.rules.stretchCap, gentle: sess.rules.gentle, add: sess.rules.add, breath: sess.rules.breath },
+        items: sess.items.map(it => ({ kind: it.kind, section: it.section, primer: !!it.primer, secs: it.secs, ...ex(it.ex) })),
+        steps: steps.map(st => ({ kind: st.kind, section: st.section, key: st.key, name: st.name, total: stepSecs(st), cycles: st.cycles.map(c => ({ t: c.t, rest: !!c.rest, hold: !!c.hold, reps: c.reps || 0, repT: c.repT || 0 })) })) };
+    } finally { S = keep; session = keepSess; } } };
 
   /* ---------- start ---------- */
   applyTheme(); ILLUS.setFemale(isF()); welcome();

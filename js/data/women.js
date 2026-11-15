@@ -12,7 +12,7 @@ const W_PRONE = ['sphinx', 'prone-neck', 'prone-T', 'prone-Y', 'prone-W', 'super
 const W_ABLOAD = ['curl-up', 'plank', 'scap-pushup', 'pushup', 'copenhagen', 'hip-thrust', 'superman'];
 const W_DEEP = ['couch', 'pigeon', 'frog', 'supine-twist', 'seated-twist'];
 const W_PRESSURE = ['curl-up', 'plank', 'hip-thrust', 'suitcase', 'copenhagen', 'nordic'];
-const OSTEO_AVOID = ['curl-up', 'knees-chest', 'seated-ham', 'supine-twist', 'seated-twist', 'child', 'child-side', 'prayer', 'neck-ext', 'heel-step'];
+const OSTEO_AVOID = ['curl-up', 'knees-chest', 'seated-ham', 'supine-twist', 'seated-twist', 'child-side', 'prayer', 'neck-ext', 'heel-step', 'hug', 'pigeon', 'thomas', 'downdog'];      // sustained or loaded forward rounding of the spine, and end-range twists
 
 /* pelvic floor: muscle, exercises, coaching, a seated figure */
 (() => {
@@ -52,7 +52,7 @@ function adaptRules(P, L) {
   if (preg) {
     R.maxLevel = Math.min(R.maxLevel, 2); R.stretchCap = 20; R.breathAvoid.push('box', 'load', 'croc'); ex(['subocc-ball']); R.stop = WOMEN.pregStop;
     R.notes.push('Pregnancy: moderate activity is recommended (about 150 minutes a week) unless your midwife or doctor has advised otherwise. You should be able to hold a conversation while exercising. No breath-holding, no straining, and stretch gently: joints are looser in pregnancy.');
-    if (preg >= 2) { ex(W_SUPINE); ex(W_PRONE); ex(['curl-up', 'plank', 'scap-pushup', 'copenhagen', 'child', 'child-side', 'prayer']); ex(W_DEEP); R.breath = 'side'; R.scanNote = 'Lie on your left side with a pillow between the knees, or sit supported.';
+    if (preg >= 2) { ex(W_SUPINE); ex(W_PRONE); ex(['curl-up', 'plank', 'scap-pushup', 'copenhagen', 'child-side', 'prayer']); ex(W_DEEP); R.breath = 'side'; R.scanNote = 'Lie on your left side with a pillow between the knees, or sit supported.';
       R.notes.push('After about 16 weeks, exercises lying flat on your back or on your front are left out, because lying flat can reduce blood return to the heart. Side-lying, seated and standing versions are used instead.'); }
   }
   if (post) {

@@ -32,9 +32,9 @@ const RESETS = [
 
   /* ---------- unwind ---------- */
   { id: 'bed', n: 'Before bed', cat: 'calm', ill: 'knees-chest', sub: 'Slow down for sleep',
-    steps: [{ r: 'knees-chest', t: 30, reps: 1 }, { r: 'supine-twist', t: 25, reps: 1 }, { r: 'figure4', t: 25, reps: 1 }, { r: 'breath:belly', t: 120 }, { r: 'scan', t: 150 }] },
-  { id: 'calm2', n: 'Two-minute calm', cat: 'calm', ill: 'seated-twist', sub: 'Just breathe',
-    steps: [{ r: 'breath:seated', t: 120 }] },
+    steps: [{ r: 'knees-chest', t: 30, reps: 1 }, { r: 'supine-twist', t: 25, reps: 1 }, { r: 'figure4', t: 25, reps: 1 }, { r: 'breath:belly', t: 75 }, { r: 'scan', t: 90 }] },
+  { id: 'calm2', n: 'Two-minute calm', cat: 'calm', ill: 'seated', sub: 'Just breathe',
+    steps: [{ r: 'breath:seated', t: 90 }] },
   { id: 'shoulders', n: 'Tight shoulders', cat: 'calm', ill: 'uptrap', sub: 'Let them drop',
     steps: [{ r: 'wu-swing', t: 30 }, { r: 'uptrap', t: 25, reps: 1 }, { r: 'levator', t: 25, reps: 1 }, { r: 'hug', t: 25, reps: 1 }, { r: 'breath:seated', t: 60 }] }
 ];

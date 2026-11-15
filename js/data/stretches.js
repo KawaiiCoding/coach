@@ -87,7 +87,7 @@ const STRETCHES = [
   /* ---------- hip ---------- */
   { id: 'half-kneel', n: 'Half-kneeling hip flexor stretch', m: ['psoas', 'iliacus', 'rectFem', 'tfl'], hold: 30, reps: 2, sides: 2, type: 'static', ill: 'half-kneel',
     how: 'Back knee on a cushion, front foot forward. Tuck the tailbone under, squeeze the back-side buttock and shift forward until the front of the hip stretches.', cue: 'The tuck matters more than how far you shift; do not arch the lower back.' },
-  { id: 'half-kneel-reach', n: 'Half-kneeling psoas stretch with reach', m: ['psoas', 'quadlum', 'oblExt'], hold: 30, reps: 2, sides: 2, type: 'static', ill: 'half-kneel',
+  { id: 'half-kneel-reach', n: 'Half-kneeling psoas stretch with reach', m: ['psoas', 'quadlum', 'oblExt'], hold: 30, reps: 2, sides: 2, type: 'static', ill: 'half-kneel-reach',
     how: 'In the half-kneeling position, raise the arm on the kneeling side and side-bend slightly away from it.', cue: 'Adds the upper attachment of the psoas; keep the tailbone tucked.' },
   { id: 'thomas', n: 'Thomas-position hip flexor stretch', m: ['psoas', 'iliacus', 'rectFem', 'sartorius'], hold: 30, reps: 2, sides: 2, type: 'static', ill: 'thomas',
     how: 'Lie at the edge of a bed, hug one knee to the chest and let the other leg hang off the edge, relaxed.', cue: 'Let the hanging thigh drop with gravity; add a light weight on the thigh if needed.' },

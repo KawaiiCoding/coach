@@ -17,7 +17,7 @@ const ILLUS = (() => {
     'overhead-triceps': { ua: -75, fa: 135, hl: 'ua' },
     'cross-body': { ua: 10, fa: 170, hl: 'ua' },
     sleeper: { ...LY, hy: 80, ua: 0, fa: -90, th: -20, sh: 40, hl: 'fa' },
-    'door-er': { tr: -80, ua: -30, fa: -100, w: 90, hl: 'ua' },
+    'door-er': { tr: -88, ua: 88, fa: 0, w: 86, hl: 'ua' },      // elbow at the side bent 90°, forearm level against the frame
     child: { hx: 40, hy: 78, tr: 5, nk: 10, ua: 15, fa: 15, th: 30, sh: 180, hl: 'tr' },
     uptrap: { nk: -55, ua: -30, fa: -130, hl: 'nk' },
     levator: { nk: -30, ua: -60, fa: 150, hl: 'nk' },
@@ -35,9 +35,10 @@ const ILLUS = (() => {
     'seated-twist': { hx: 60, hy: 72, tr: -80, nk: -80, th: 0, sh: 90, ua: 160, fa: 40, prop: 'chair', hl: 'tr' },
     'seated-side': { hx: 60, hy: 72, tr: -60, nk: -60, th: 0, sh: 90, ua: -60, fa: -60, prop: 'chair', hl: 'tr' },
     'half-kneel': { hy: 66, th: 0, sh: 90, th2: 100, sh2: 180, hl: 'th2' },
-    thomas: { hx: 85, hy: 52, tr: 180, nk: 180, ua: 0, fa: 0, th: -105, sh: 30, th2: 85, sh2: 90, prop: 'bed', hl: 'th2' },
-    couch: { hy: 66, th: 0, sh: 90, th2: 100, sh2: 175, w: 66, hl: 'th2 sh2' },
-    'quad-stand': { th2: 100, sh2: -98, grab: ['A2', 120, 1, -1], hl: 'th2' },      // the hand holds the ankle behind
+    'half-kneel-reach': { hy: 66, tr: -93, th: 0, sh: 90, th2: 100, sh2: 180, ua: -86, fa: -98, hl: 'th2' },      // same position, the arm on the kneeling side reaching up
+    thomas: { hx: 85, hy: 52, tr: 180, nk: 180, th: -122, sh: 30, grab: ['K', 75, 0, -1], th2: 14, sh2: 96, prop: 'bed', hl: 'th2' },      // one knee hugged to the chest, the other thigh hangs just below level off the edge, shin dropping
+    couch: { hx: 76, hy: 66, th: 0, sh: 90, th2: 110, sh2: -92, w: 62, hl: 'th2 sh2' },      // back knee on the floor close to the wall, shin up the wall behind
+    'quad-stand': { th2: 100, sh2: -103, grab: ['A2', 120, 1, -1], hl: 'th2' },      // the hand holds the ankle behind
     figure4: { ...LY, th: -70, sh: 60, th2: -35, sh2: -140, hl: 'th2' },
     pigeon: { hx: 60, hy: 76, tr: -60, nk: -60, ua: 60, fa: 60, th: 150, sh: 30, th2: 170, sh2: 170, hl: 'th' },
     'seated-fig4': { hx: 60, hy: 72, tr: -55, nk: -55, th: 0, sh: 90, th2: -15, sh2: 130, prop: 'chair', hl: 'th2' },
@@ -47,8 +48,8 @@ const ILLUS = (() => {
     frog: { ...AF, hy: 72, th: 60, sh: 180, hl: 'th' },
     'side-lunge': { hx: 60, hy: 70, tr: -75, nk: -75, th: 40, sh: 110, th2: 5, sh2: 5, hl: 'th2' },
     '9090': { hx: 70, hy: 86, tr: -85, nk: -85, ua: 60, fa: 60, th: -8, sh: 25, th2: 188, sh2: 150, hl: 'th' },
-    'supine-ham': { ...LY, hx: 80, th: -80, sh: -80, th2: 0, sh2: 0, hl: 'th' },
-    'heel-step': { th2: 30, sh2: 0, tr: -75, prop: 'step', hl: 'th2' },
+    'supine-ham': { ...LY, hx: 80, th: -80, sh: -80, th2: 0, sh2: 0, ua: -52, fa: -66, hl: 'th' },      // arms reaching up the strap toward the lifted leg
+    'heel-step': { th2: 28, sh2: 28, tr: -62, nk: -66, ua: 60, fa: 40, prop: 'step', hl: 'th2' },      // front knee straight, heel on the step, hinge from the hips with a flat back
     'seated-ham': { hx: 60, hy: 88, tr: -60, nk: -50, ua: -20, fa: -20, th: 0, sh: 0, hl: 'th' },
     'wall-calf': { hx: 62, hy: 58, tr: -65, ua: 10, fa: 10, th: 60, sh: 95, th2: 115, sh2: 115, ft2: 0, w: 100, hl: 'sh2' },
     'wall-calf-bent': { hx: 62, hy: 58, tr: -65, ua: 10, fa: 10, th: 60, sh: 95, th2: 100, sh2: 120, ft2: 0, w: 100, hl: 'sh2' },
@@ -57,7 +58,7 @@ const ILLUS = (() => {
     'kneel-shin': { hx: 48, hy: 76, th: 40, sh: 180, hl: 'sh' },
     'toe-wall': { ft: -40, w: 85, hl: 'sh' },
     'peroneal': { hx: 60, hy: 72, tr: -80, nk: -80, th: 0, sh: 90, th2: -15, sh2: 130, prop: 'chair', hl: 'sh2' },
-    'foam-roll': { ...LY, tr: 170, th: -65, sh: 55, hl: 'tr' },
+    'foam-roll': { ...LY, tr: 172, nk: 168, th: -65, sh: 55, hand: [-6, .5, 150], armBack: true, roll: 0.62, hl: 'tr' },      // roll across the mid-back, hands behind the head
     /* Open book is done lying on the side, which a side-on camera cannot show, so this one pose is drawn from above
        (top: true): the profile is the person on their side, knees bent and stacked in front, both arms out in front. */
     'open-book': { top: true, hx: 98, hy: 60, tr: 180, nk: 180, th: -90, sh: 0, th2: -84, sh2: 3, ua: -90, fa: -90, ua2: -90, fa2: -90, hl: 'tr' },
@@ -74,12 +75,12 @@ const ILLUS = (() => {
     'deep-squat': { hx: 50, hy: 70, tr: -70, nk: -75, ua: 0, fa: 0, th: 20, sh: 125, hl: 'th' },
     'wall-angel': { ua: -120, fa: -120, w: 57, hl: 'ua' },
     pendulum: { hx: 50, tr: -30, nk: -30, prop: 'table', hl: 'ua' },
-    'band-row': { ua: 150, fa: 10, hl: 'ua' },
-    'face-pull': { ua: 0, fa: 160, hl: 'ua' },
+    'band-row': { ua: 150, fa: 10, band: { at: 'W', x: 116, y: 31 }, hl: 'ua' },                 // band tied in front at chest height
+    'face-pull': { ua: -20, fa: -115, band: { at: 'W', x: 116, y: 15 }, hl: 'ua' },            // band tied in front at face height
     'prone-T': { ...PR, ua: -90, fa: -90, hl: 'ua' },
     'prone-Y': { ...PR, ua: -30, fa: -30, hl: 'ua' },
     'prone-W': { ...PR, ua: -90, fa: -10, hl: 'fa' },
-    'wall-slide': { hx: 62, tr: -75, ua: -10, fa: -80, w: 88, hl: 'ua' },
+    'wall-slide': { hx: 66.4, hy: 53.3, tr: -83, nk: -83, th: 97, sh: 97, ft: 0, ua: -10, fa: -84, w: 88, hl: 'ua' },      // leaning in from the ankles, forearms upright on the wall, elbows at shoulder height
     'scap-pushup': { hx: 73.2, hy: 72.8, tr: -19.2, nk: -21, ua: 90, fa: 90, th: 160.8, sh: 160.8, toes: true, hl: 'ua' },
     deadbug: { ...LY, ua: -90, fa: -90, th: -90, sh: 0, th2: -10, sh2: -10, hl: 'tr' },
     plank: { hy: 80, tr: -8, nk: -16, ua: 90, fa: 0, th: 172, sh: 172, toes: true, hl: 'tr' },      // one straight line from shoulders to ankles, on the toes
@@ -94,9 +95,9 @@ const ILLUS = (() => {
     'split-squat': { hx: 58, hy: 66, tr: -88, nk: -88, th: 22, sh: 97, th2: 118, sh2: 165, hl: 'th' },
     squat: { hx: 50, hy: 60, tr: -70, nk: -75, ua: 0, fa: 0, th: 20, sh: 110, hl: 'th' },
     'step-up': { hx: 56, th2: 30, sh2: 90, prop: 'stair', hl: 'th2' },
-    'ham-curl': { ...PR, sh: 250, hl: 'th' },
+    'ham-curl': { ...PR, sh: 250, band: { at: 'A', x: -14, y: 89, peg: true }, hl: 'th' },      // band round the ankle, tied low behind the feet
     nordic: { hx: 72, hy: 71.4, tr: -50, nk: -50, ua: 40, fa: 0, th: 130, sh: 180, hl: 'th' },
-    tke: { th: 95, sh: 95, w: 20, hl: 'sh' },
+    tke: { band: { at: 'K', x: 112, y: 72, r: 5.8 }, hl: 'sh' },                                 // band behind the knee, tied in front at knee height
     'band-er': { ua: 90, fa: 0, hl: 'fa' },
     'band-ir': { ua: 90, fa: 25, hl: 'fa' },
     'reverse-fly': { hx: 50, tr: -25, nk: -30, ua: -90, fa: -90, hl: 'ua' },
@@ -105,11 +106,11 @@ const ILLUS = (() => {
     'calf-raise': { hy: 47, ft: 45, hl: 'sh' },
     'seated-calf': { hx: 60, hy: 72, tr: -80, nk: -80, th: -10, sh: 88, ft: 24, prop: 'chair', hl: 'sh' },       // heel lifted, toes stay on the floor
     'hammer-curl': { ua: 90, fa: -30, hl: 'fa' },
-    pushdown: { ua: 90, fa: 80, hl: 'ua' },
+    pushdown: { ua: 90, fa: 80, band: { at: 'W', x: 90, y: -5, hook: true }, hl: 'ua' },         // band tied above
     march: { th2: 0, sh2: 90, hl: 'th2' },
     superman: { hx: 60, hy: 86, tr: -15, nk: -20, ua: -5, fa: -5, th: -172, sh: -172, hl: 'tr' },
     pushup: { hx: 73.2, hy: 72.8, tr: -19.2, nk: -21, ua: 90, fa: 90, th: 160.8, sh: 160.8, toes: true, hl: 'ua' },
-    pulldown: { ua: -75, fa: -75, hl: 'ua' },
+    pulldown: { ua: -75, fa: -75, band: { at: 'W', x: 79, y: -6, hook: true }, hl: 'ua' },       // band tied overhead
     press: { ua: -90, fa: -90, hl: 'ua' },
     'lateral-raise': { ua: 0, fa: 0, hl: 'ua' },
     shrug: { hl: 'nk' },
@@ -118,11 +119,11 @@ const ILLUS = (() => {
     balance: { th2: 60, sh2: 90, hl: 'sh' },
     monster: { th: 70, sh: 105, th2: 110, sh2: 75, hl: 'th' },
     'towel': { hx: 60, hy: 72, tr: -80, nk: -80, th: 0, sh: 90, prop: 'chair', hl: 'sh' },
-    'band-foot': { hx: 60, hy: 88, tr: -60, nk: -50, ua: -20, fa: -20, th: 0, sh: 0, hl: 'sh' },
+    'band-foot': { hx: 60, hy: 88, tr: -60, nk: -50, ua: -20, fa: -20, th: 0, sh: 0, band: { at: 'T', x: 126, y: 84, peg: true, r: 4.2 }, hl: 'sh' },      // band round the front of the foot
     'curl-up': { ...LY, hy: 84, th: -60, sh: 60, th2: 0, sh2: 0, ua: 20, fa: 20, hl: 'tr' },
-    pallof: { ua: 0, fa: 0, hl: 'tr' },
+    pallof: { ua: 0, fa: 0, band: { at: 'W', x: 83, y: 31, label: 'BAND FROM THE SIDE' }, hl: 'tr' },      // tied beside you at chest height; you press straight out and resist the turn
     'hip-thrust': { hx: 92, hy: 72, tr: 180, nk: 188, ua: 0, fa: 0, th: 0, sh: 90, prop: 'benchL', wt: true, hl: 'th' },
-    breathing: { ...LY, th: -60, sh: 60, ua: 10, fa: 10, hl: 'tr' },
+    breathing: { ...LY, th: -60, sh: 60, ua: 5, fa: -60, ua2: 0, fa2: -110, hl: 'tr' },      // elbows resting beside the body, one hand on the belly, the other on the chest
     'tennis-ball': { ...LY, th: -60, sh: 60, ball: [64, 80], hl: 'nk' }
   };
   let female = false; const setFemale = v => { female = !!v; };
@@ -171,7 +172,7 @@ const ILLUS = (() => {
     if (raw || p.top) return build(false);
     if (p.prop) return build(true);
     let g = build(false);
-    for (let k = 0; k < 3; k++) { const dy = FLOOR - g.low; if (Math.abs(dy) < .05 || Math.abs(dy) > 12) break; p.hy += dy; g = build(k > 0); }
+    p.dyG = 0; for (let k = 0; k < 6; k++) { const dy = FLOOR - g.low; if (Math.abs(dy) < .05 || Math.abs(dy) > 12) break; p.hy += dy; p.dyG += dy; g = build(k > 0); }
     return Math.abs(FLOOR - g.low) < .05 ? build(true) : g;
   }
   const onFloor = p => (Math.abs(Math.sin(p.tr * Math.PI / 180)) < 0.5 && p.hy > 60) || (p.hy >= 66 && !p.prop);
@@ -244,41 +245,6 @@ const ILLUS = (() => {
   /* Shared garden scene for the front and close-up views. */
   const sceneFront = (V, F) => `<rect x="-200" y="-200" width="560" height="400" ${F(V('ill-bg', '#FBEDE1'))}/><circle cx="80" cy="42" r="50" ${F(V('ill-glow', '#FFF7F0'))}/><g ${F(V('ill-cloud', '#F4E6D9'))}><circle cx="24" cy="10" r="6"/><circle cx="32" cy="7" r="7.5"/><circle cx="40" cy="11" r="5.5"/><rect x="18" y="10" width="28" height="6" rx="3"/></g><ellipse cx="34" cy="97" rx="66" ry="13" ${F(V('ill-hill', '#CFDCBD'))}/><circle cx="18" cy="84" r="9" ${F(V('ill-bush', '#B4C7A3'))}/><circle cx="142" cy="84" r="10" ${F(V('ill-bush2', '#9DB58C'))}/><ellipse cx="80" cy="99" rx="110" ry="8" ${F(V('ill-ground', '#EFDCCB'))}/><rect x="-200" y="99" width="560" height="200" ${F(V('ill-ground', '#EFDCCB'))}/>`;
 
-  /* Seated spinal twist, from the front (a twist cannot be read from the side). u = 0 sitting square, 1 = turned.
-     The hips, knees and feet stay facing forward; the chest turns (shoulders narrow, the centre seam slides across),
-     the head follows, one hand goes to the outside of the opposite knee and the other to the chair back. */
-  function frontTwist(u, opt = {}) {
-    u = Math.max(0, Math.min(1, u));
-    const f = n => n.toFixed(1), V = (n, d) => `var(--${n},${d})`, F = c => `style="fill:${c}"`, FM = female, E = t => t * t * (3 - 2 * t), cl = t => Math.max(0, Math.min(1, t)), k = E(u), ka = E(cl(u / .55));
-    const TOP = V('fig-top', '#E8793F'), TOPd = V('fig-top2', '#CF6630'), LEG = V('fig-leg', '#2F3439'), LEGd = V('fig-leg2', '#22262A'), SK = '#F1C4A2', SKd = '#E0AB8A', HAIR = '#2E2420', PR = V('ill-prop', '#D8C7B6'), PR2 = V('ill-prop2', '#C4B09C');
-    const lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], q = p => f(p[0]) + ' ' + f(p[1]), n = v => +v.toFixed(2);
-    const hy = 68, sy = 44, c = 1 - .46 * k, cx = 80 - 2 * k, shL = [cx - 9.6 * c, sy + 2], shR = [cx + 9.6 * c, sy + 2], kneeL = [72, hy + 6.5], kneeR = [88, hy + 6.5];
-    const arm = (sh, el, ha) => { const d = `M${q(sh)}L${q(el)}L${q(ha)}`; return `<path d="${d}" style="stroke:${TOPd}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="${d}" style="stroke:${TOP}" stroke-width="4.9" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="${f(ha[0])}" cy="${f(ha[1])}" r="2.7" fill="${SK}" stroke="${SKd}" stroke-width=".4"/>`; };
-    let o = `<svg class="ill" viewBox="${opt.fit ? '40 16 80 80' : '30 8 100 92'}"${opt.fit || opt.slice ? ' preserveAspectRatio="xMidYMid slice"' : ''} role="img" aria-label="seated twist">`;
-    if (opt.scene !== false) o += sceneFront(V, F);
-    o += `<g ${opt.mirror ? 'transform="translate(160 0) scale(-1 1)"' : ''}>`;
-    // chair: back, seat, legs
-    o += `<rect x="62.5" y="36" width="35" height="36" rx="4" ${F(PR)}/><rect x="59" y="${hy + 2}" width="42" height="6" rx="3" ${F(PR)}/><rect x="61.5" y="${hy + 8}" width="4" height="${f(93.4 - hy - 8)}" rx="1" ${F(PR2)}/><rect x="94.5" y="${hy + 8}" width="4" height="${f(93.4 - hy - 8)}" rx="1" ${F(PR2)}/><ellipse cx="80" cy="94" rx="24" ry="1.6" fill="#000" opacity=".08"/>`;
-    // the hand that holds the chair back goes behind the body
-    o += arm(shL, lerp([shL[0] - 2.5, 57], [shL[0] - 7.5, 54], ka), lerp([kneeL[0] - 1, hy + 2.5], [63.2, 47], ka));
-    // legs face forward the whole time: thighs come toward the viewer, shins drop to feet flat on the floor
-    [[-1, kneeL], [1, kneeR]].forEach(([sd, kn]) => { o += `<path d="M${f(80 + sd * 4.6)} ${hy + 1}L${q(kn)}L${f(kn[0] + sd * .6)} 90.2" style="stroke:${LEG}" stroke-width="7.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><ellipse cx="${f(kn[0] + sd * 1)}" cy="92.2" rx="4.7" ry="2.5" fill="#fff" stroke="#CFC7BE" stroke-width=".8"/>`; });
-    // torso: hips square, shoulders turned
-    o += `<path d="M71 ${hy + 2.5}C72.6 ${hy - 8} ${f(shL[0] - .2)} ${sy + 12} ${f(shL[0] - .4)} ${sy + 4}Q${f(shL[0] - .2)} ${sy - .6} ${f(cx - 4)} ${sy - .8}L${f(cx + 4)} ${sy - .8}Q${f(shR[0] + .2)} ${sy - .6} ${f(shR[0] + .4)} ${sy + 4}C${f(shR[0] + .2)} ${sy + 12} 87.4 ${hy - 8} 89 ${hy + 2.5}Z" ${F(TOP)}/>`;
-    o += `<path d="M${f(cx - 6.4 * k)} ${sy + 2}Q${f(80 - 5.2 * k)} ${(sy + hy) / 2} 80 ${hy + 1.5}" style="stroke:${TOPd}" stroke-width="1" stroke-linecap="round" fill="none" opacity=".6"/><path d="M71.6 ${hy + 2}H88.4" style="stroke:${TOPd}" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>`;
-    o += `<path d="M${f(cx)} ${sy}V${sy - 6}" stroke="${SKd}" stroke-width="4.4" stroke-linecap="round"/><ellipse cx="${f(cx - 1.4 * k)}" cy="${sy + .4}" rx="${f(5.6 * (1 - .15 * k))}" ry="2" ${F(TOPd)}/>`;
-    // head turns further than the chest: the face slides across and the near ear disappears
-    const dx = -3.2 * k, sp = 1 - .3 * k, ex = 2.5 * sp;
-    o += `<g transform="translate(${f(cx - .6 * k)} ${sy - 10.6})">${FM ? `<path d="${TAIL}" fill="${HAIR}"/>` : ''}<ellipse cx="${n(-6.4 - dx * .5)}" cy="1.2" rx="1.3" ry="1.9" fill="${SK}"/><ellipse cx="${n(6.4 - dx * .5)}" cy="1.2" rx="1.3" ry="1.9" fill="${SK}"/><ellipse cx="0" cy="0" rx="6.6" ry="7.6" fill="${SK}"/><path d="${CAP}" transform="translate(${n(-dx * .14)} 0)" fill="${HAIR}"/>` +
-      `<path d="M${n(dx - ex - 1)} -1.9q1 -.6 2 -.1M${n(dx + ex - 1)} -2q1 -.5 2 .1" stroke="${HAIR}" stroke-width=".5" fill="none" stroke-linecap="round"/><circle cx="${n(dx - ex)}" cy=".1" r=".72" fill="#2A1E19"/><circle cx="${n(dx + ex)}" cy=".1" r=".72" fill="#2A1E19"/>` +
-      `<path d="M${n(dx * 1.12)} 1.1q${n(-1.3 * k)} 1.1 ${n(-.4 * k)} 1.6" stroke="${SKd}" stroke-width=".55" fill="none" stroke-linecap="round"/>${[-1, 1].map(sd => Math.abs(dx + sd * 3.9 * sp) < 5 ? `<circle cx="${n(dx + sd * 3.9 * sp)}" cy="2.7" r="1" fill="#F2A48C" opacity=".35"/>` : '').join('')}<path d="M${n(dx - 1.6)} 4.1q1.6 1.1 3.2 0" stroke="#B5745C" stroke-width=".55" fill="none" stroke-linecap="round"/></g>`;
-    // the other hand crosses to the outside of the opposite knee
-    o += arm(shR, lerp([shR[0] + 2.5, 57], [cx + 3.5, 59.5], ka), lerp([kneeR[0] + 1, hy + 2.5], [kneeL[0] - 4.2, hy + 4.5], ka));
-    const ao = 1 - cl(k * 2.2);
-    if (ao > .02 && opt.arrow !== false) o += `<path d="M90 21.5Q80 17 69.5 21.5M73.6 17.6L69.5 21.5L75 22.6" style="stroke:${TOPd}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="${ao.toFixed(2)}"/>`;
-    return o + '</g></svg>';
-  }
-
   /* Wrist stretches, as a close-up of the forearm and both hands (from across the room the hand is too small to read).
      Both bend the hand down at the wrist; what differs is which way the palm faces, so that is made unmistakable:
      kind 'ext'  = extensor stretch, PALM DOWN: knuckles, tendons and fingernails on top, thumb underneath, fingers curled.
@@ -288,39 +254,49 @@ const ILLUS = (() => {
   function wristView(kind, u, opt = {}) {
     u = Math.max(0, Math.min(1, u));
     const f = n => n.toFixed(1), V = (n, d) => `var(--${n},${d})`, F = c => `style="fill:${c}"`, E = t => t * t * (3 - 2 * t), cl = t => Math.max(0, Math.min(1, t)), R = Math.PI / 180;
-    const kin = E(cl(u / .3)), k = E(cl((u - .22) / .78));          // the helping hand arrives first, then the wrist bends
-    const TOP = V('fig-top', '#E8793F'), TOPd = V('fig-top2', '#CF6630'), SK = '#F1C4A2', SKd = '#E0AB8A', SKl = '#D69878', PALM = '#FADCC6', NAIL = '#FCEADD';
-    const up = kind === 'flex', a = 70 * k, W = [86, 50], d = (ang, l) => [Math.cos(ang * R) * l, Math.sin(ang * R) * l], ad = (p, v) => [p[0] + v[0], p[1] + v[1]], q = p => f(p[0]) + ' ' + f(p[1]);
-    const af = a + (up ? 5 : 34) * k, knu = ad(W, d(a, 13)), tip = ad(knu, d(af, 12)), mid = [(knu[0] + tip[0]) / 2, (knu[1] + tip[1]) / 2], topP = d(a - 90, 1), topF = d(af - 90, 1);      // top = the side that faces up when the hand is flat
+    const stretch = kind === 'ext' || kind === 'flex', kin = stretch ? E(cl(u / .3)) : 0, k = stretch ? E(cl((u - .22) / .78)) : E(u);          // stretches: the helping hand arrives first, then the wrist bends
+    const TOP = V('fig-top', '#E8793F'), TOPd = V('fig-top2', '#CF6630'), SK = '#F1C4A2', SKd = '#E0AB8A', SKl = '#D69878', PALM = '#FADCC6', NAIL = '#FCEADD', PR = V('ill-prop', '#D8C7B6'), PR2 = V('ill-prop2', '#C4B09C'), BAND = V('ill-stem', '#7F9A70');
+    /* kinds: ext / flex = stretches (hand bends down, other hand helps); curl / rcurl = wrist curls with a light weight, forearm
+       supported (hand lifts); grip = squeezing a rolled towel; open = opening the fingers against a rubber band */
+    const up = kind === 'flex' || kind === 'curl' || kind === 'grip' || kind === 'open', a = stretch ? 70 * k : kind === 'curl' ? 22 - 60 * k : kind === 'rcurl' ? 24 - 56 * k : 0, W = [86, 50];
+    const d = (ang, l) => [Math.cos(ang * R) * l, Math.sin(ang * R) * l], ad = (p, v) => [p[0] + v[0], p[1] + v[1]], q = p => f(p[0]) + ' ' + f(p[1]);
+    const curlF = stretch ? (up ? 5 : 34) * k : kind === 'grip' ? -(70 + 85 * k) : kind === 'open' ? -(95 - 88 * k) : kind === 'curl' ? -70 : 65;      // how far the fingers fold (negative = toward the palm when the palm faces up)
+    const af = a + curlF, knu = ad(W, d(a, 13)), tip = ad(knu, d(af, 12)), mid = [(knu[0] + tip[0]) / 2, (knu[1] + tip[1]) / 2], topP = d(a - 90, 1), topF = d(af - 90, 1);      // top = the side that faces up when the hand is flat
     const bar = (p0, p1, w, col, cap = 'round') => `<path d="M${q(p0)}L${q(p1)}" style="stroke:${col}" stroke-width="${w}" stroke-linecap="${cap}" fill="none"/>`, off = (p, v, t) => [p[0] + v[0] * t, p[1] + v[1] * t];
-    let o = `<svg class="ill" viewBox="${opt.fit ? '24 8 112 84' : '0 -8 160 108'}"${opt.fit || opt.slice ? ' preserveAspectRatio="xMidYMid slice"' : ''} role="img" aria-label="wrist stretch, palm ${up ? 'up' : 'down'}">`;
+    const label = { ext: 'PALM DOWN', flex: 'PALM UP', curl: 'PALM UP', rcurl: 'PALM DOWN', grip: 'SQUEEZE', open: 'OPEN' }[kind];
+    let o = `<svg class="ill" viewBox="${opt.fit ? '24 8 112 84' : '0 -8 160 108'}"${opt.fit || opt.slice ? ' preserveAspectRatio="xMidYMid slice"' : ''} role="img" aria-label="${label.toLowerCase()}">`;
     if (opt.scene !== false) o += sceneFront(V, F);
-    o += `<text x="80" y="17" text-anchor="middle" font-size="6.2" font-weight="700" letter-spacing=".5" font-family="system-ui,-apple-system,sans-serif" ${F(TOPd)}>${up ? 'PALM UP' : 'PALM DOWN'}</text>`;
+    o += `<text x="80" y="17" text-anchor="middle" font-size="6.2" font-weight="700" letter-spacing=".5" font-family="system-ui,-apple-system,sans-serif" ${F(TOPd)}>${label}</text>`;
     o += `<g ${opt.mirror ? 'transform="translate(160 0) scale(-1 1)"' : ''}>`;
-    // stretching arm: sleeve in from the left, straight and level; cuff; wrist; palm; fingers
+    if (!stretch) o += `<rect x="-20" y="59" width="${kind === 'curl' || kind === 'rcurl' ? 94 : 130}" height="5" rx="2.5" ${F(PR)}/><rect x="-20" y="64" width="${kind === 'curl' || kind === 'rcurl' ? 88 : 124}" height="3" ${F(PR2)} opacity=".5"/>`;      // forearm supported on a table edge
+    // the arm: sleeve in from the left, straight and level; cuff; wrist; palm; fingers
     o += bar([-20, 50], [70, 50], 17.4, TOPd) + bar([-20, 50], [70, 50], 16, TOP) + bar([67, 50], [71.5, 50], 16, TOPd, 'butt');
-    const thumb = side => { const th = ad(ad(W, d(a, 5.5)), d(a + side * 90, 6.6)); return `<ellipse cx="${f(th[0])}" cy="${f(th[1])}" rx="5" ry="2.7" transform="rotate(${f(a + side * 26)} ${q(th)})" fill="${SK}" stroke="${SKd}" stroke-width=".5"/>`; };
-    if (!up) o += thumb(1);                                          // palm down: the thumb hangs underneath
-    o += bar([72, 50], W, 11, SK) + bar(W, knu, 12.4, SKd) + bar(W, knu, 11.4, SK) + bar(knu, tip, 10.6, SKd) + bar(knu, tip, 9.6, SK);
-    if (up) {      // the palm itself: lighter skin, two creases, finger pads, thumb lying on top
-      o += bar(off(ad(W, d(a, 1.5)), topP, 2.3), off(ad(W, d(a, 11)), topP, 2.3), 5.6, PALM) + bar(off(ad(knu, d(af, 2)), topF, 1.9), off(ad(knu, d(af, 10.2)), topF, 1.9), 4.6, PALM);
-      [4, 8.6].forEach(t => { const c = off(ad(W, d(a, t)), topP, 2.4); o += `<path d="M${q(off(c, topP, 2.2))}Q${q(ad(c, d(a, 1.6)))} ${q(off(c, topP, -2.2))}" stroke="${SKl}" stroke-width=".55" fill="none" stroke-linecap="round"/>`; });
-      [3.4, 6.8].forEach(t => { const c = off(ad(knu, d(af, t)), topF, 1.9); o += `<path d="M${q(off(c, topF, 2))}L${q(off(c, topF, -2))}" stroke="${SKl}" stroke-width=".45" stroke-linecap="round" opacity=".8"/>`; });
-      o += thumb(-1);
-    } else {       // the back of the hand: knuckles, tendons, a fingernail
-      [3.6, 1.2].forEach(t => { o += `<path d="M${q(off(ad(W, d(a, 2.5)), topP, t))}L${q(off(ad(W, d(a, 10)), topP, t + 1))}" stroke="${SKl}" stroke-width=".5" stroke-linecap="round" opacity=".75"/>`; });
-      [4.6, 2.3].forEach(t => { const c = off(knu, topP, t); o += `<circle cx="${f(c[0])}" cy="${f(c[1])}" r="1.25" fill="${SKd}" stroke="${SKl}" stroke-width=".45"/>`; });
-      o += bar(off(ad(knu, d(af, 8.6)), topF, 2.6), off(ad(knu, d(af, 11.6)), topF, 2.6), 2.8, SKl) + bar(off(ad(knu, d(af, 8.8)), topF, 2.6), off(ad(knu, d(af, 11.4)), topF, 2.6), 2, NAIL);
-    }
-    o += `<path d="M${q(ad(W, d(a + 90, 4.6)))}L${q(ad(W, d(a - 90, 4.6)))}" stroke="${SKl}" stroke-width=".6" stroke-linecap="round" opacity=".6"/>`;
-    // helping hand: sleeve from the upper right, palm across the fingers; it waits just clear of them at the start
-    const hc = off(off(mid, topF, 7.4), topF, 13 * (1 - kin)), src = [150, -2], hl = Math.hypot(src[0] - hc[0], src[1] - hc[1]), hu = [(src[0] - hc[0]) / hl, (src[1] - hc[1]) / hl], hw = ad(hc, [hu[0] * 9, hu[1] * 9]);
-    o += bar(hw, src, 17.4, TOPd) + bar(hw, src, 16, TOP) + bar(hw, ad(hw, [hu[0] * 4.5, hu[1] * 4.5]), 16, TOPd, 'butt') + bar(hc, hw, 11, SKd);
-    o += `<ellipse cx="${f(hc[0])}" cy="${f(hc[1])}" rx="9.4" ry="5.4" transform="rotate(${f(af)} ${q(hc)})" fill="${SKd}" stroke="${SKl}" stroke-width=".6"/>`;
-    [-5.4, -1.8, 1.8, 5.4].forEach(t => { const b0 = off(ad(hc, d(af, t)), topF, -3), e = off(ad(hc, d(af, t)), topF, -3 - 6.5 * kin); o += bar(b0, e, 3.5, SKl) + bar(b0, e, 2.7, SKd); });     // its fingers wrap over as it lands
-    const ao = 1 - cl(k * 2.4);
-    if (ao > .02 && opt.arrow !== false) { const c0 = ad(W, d(16, 36)), c1 = ad(W, d(60, 36)), h1 = ad(c1, d(60 + 90 + 180 - 32, 4.4)), h2 = ad(c1, d(60 + 90 + 180 + 32, 4.4));
-      o += `<path d="M${q(c0)}A36 36 0 0 1 ${q(c1)}M${q(h1)}L${q(c1)}L${q(h2)}" style="stroke:${TOPd}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="${ao.toFixed(2)}"/>`; }
+    /* The hand, drawn in its own frame (x along the hand from the wrist, y across it; the side facing up is y < 0) and then
+       turned at the wrist. Four separate fingers with two joints each, a two-part thumb, and the surface that faces up:
+       the back of the hand (knuckles, tendons, nails) when the palm is down, the palm (pads, creases) when it is up. */
+    const FING = [[-4.35, 11.2], [-1.45, 12.8], [1.45, 12], [4.35, 9.6]], c1 = curlF * .55, c2 = curlF * .45 + (stretch ? 0 : Math.sign(curlF) * 8);      // [offset across the hand, length]; index finger first
+    const rr = (x, y, w, h, r, fill, extra = '') => `<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}" rx="${r}" fill="${fill}" ${extra}/>`;
+    const finger = ([y, len], i) => { const p1 = len * .52, p2 = len - p1 + .6, edge = `stroke="${SKd}" stroke-width=".45"`;
+      const tipD = up ? (stretch ? `<path d="M${f(p2 * .42)} -1V1" stroke="${SKl}" stroke-width=".4" stroke-linecap="round" opacity=".8"/>` : '') : rr(p2 - 3.1, -1.05, 2.5, 2.1, .9, NAIL, `stroke="${SKl}" stroke-width=".35"`);
+      return `<g transform="translate(0 ${y})">${rr(-1.2, -1.5, p1 + 2.2, 3, 1.5, SK, edge)}<g transform="translate(${f(p1)} 0) rotate(${f(c2)})">${rr(-1.2, -1.42, p2 + 1.2, 2.84, 1.42, SK, edge)}${tipD}</g>${up ? '' : `<path d="M-.4 -1.1Q.9 0 -.4 1.1" stroke="${SKl}" stroke-width=".45" fill="none" stroke-linecap="round"/>`}</g>`; };
+    const thumbG = side => `<g transform="translate(2.6 ${side * 4.6}) rotate(${side * (stretch ? 34 : kind === 'grip' ? 62 : 44)})">${rr(-1.6, -1.9, 7.4, 3.8, 1.9, SK, `stroke="${SKd}" stroke-width=".45"`)}<g transform="translate(5 0) rotate(${side * -16})">${rr(-1, -1.6, 5.4, 3.2, 1.6, SK, `stroke="${SKd}" stroke-width=".45"`)}${up ? '' : rr(1.9, -1, 2.2, 2, .9, NAIL, `stroke="${SKl}" stroke-width=".35"`)}</g></g>`;
+    const palmG = `<path d="M-2 -4.6C1 -5.6 5 -6.3 9.6 -6.2Q13.6 -6 13.8 -2.6V2.6Q13.6 6 9.6 6.2C5 6.3 1 5.6 -2 4.6Z" fill="${SK}" stroke="${SKd}" stroke-width=".5" stroke-linejoin="round"/>` +
+      (up ? `<ellipse cx="4.6" cy="-2.9" rx="4.3" ry="2.5" transform="rotate(-10 4.6 -2.9)" fill="${PALM}"/><ellipse cx="5.6" cy="2.9" rx="5" ry="2.3" fill="${PALM}"/><path d="M1.6 -.4Q6.4 -1.6 12.4 .5M2.4 3.9Q7.2 1.6 12.6 3.6M8.2 -5.2Q9.6 -2.4 12.8 -2.6" stroke="${SKl}" stroke-width=".5" fill="none" stroke-linecap="round" opacity=".85"/>`
+          : `<path d="M1.2 -3.4L11.6 -4.4M1 -1.1L11.8 -1.5M1 1.1L11.8 1.5M1.2 3.4L11.6 4.4" stroke="${SKl}" stroke-width=".4" stroke-linecap="round" opacity=".5"/>${FING.map(([y]) => `<ellipse cx="12.6" cy="${y}" rx="1.25" ry="1.15" fill="${SKd}" opacity=".75"/>`).join('')}`);
+    const handObj = kind === 'grip' ? `<ellipse cx="13.4" cy="-6.4" rx="${f(5.2 - 1.1 * k)}" ry="${f(5.6 - 1.4 * k)}" ${F(PR)} stroke="${PR2}" stroke-width=".8"/><path d="M11.4 -8.6Q13.6 -6.2 11.6 -4" stroke="${PR2}" stroke-width=".7" fill="none"/>`
+      : kind === 'curl' ? `<circle cx="9" cy="-6.8" r="6.6" ${F(PR2)}/><circle cx="9" cy="-6.8" r="3.7" ${F(PR)}/><circle cx="9" cy="-6.8" r="1.4" ${F(PR2)}/>` : kind === 'rcurl' ? `<circle cx="9" cy="6.8" r="6.6" ${F(PR2)}/><circle cx="9" cy="6.8" r="3.7" ${F(PR)}/><circle cx="9" cy="6.8" r="1.4" ${F(PR2)}/>` : '';
+    o += bar([72, 50], [W[0] - 1, W[1]], 10.4, SKd) + bar([72, 50], [W[0] - 1, W[1]], 9.4, SK);
+    o += `<g transform="translate(${q(W)}) rotate(${f(a)})">${up ? '' : thumbG(1)}${kind === 'rcurl' ? handObj : ''}${palmG}${kind === 'rcurl' ? '' : handObj}<g transform="translate(13 0) rotate(${f(c1)})">${FING.map(finger).join('')}</g>${up ? thumbG(-1) : ''}<path d="M-1.6 -4.2Q-.4 0 -1.6 4.2" stroke="${SKl}" stroke-width=".5" fill="none" stroke-linecap="round" opacity=".7"/></g>`;
+    if (kind === 'open') { const tt = ad(ad(W, d(a, 5.5)), d(a - 90, 9.5)), m2 = [(tip[0] + tt[0]) / 2, (tip[1] + tt[1]) / 2], L2 = Math.hypot(tip[0] - tt[0], tip[1] - tt[1]);      // rubber band from the thumb to the fingertips, stretching as the hand opens
+      o += `<ellipse cx="${f(m2[0])}" cy="${f(m2[1])}" rx="${f(L2 / 2 + 2.4)}" ry="2.6" transform="rotate(${f(Math.atan2(tip[1] - tt[1], tip[0] - tt[0]) / R)} ${q(m2)})" fill="none" style="stroke:${BAND}" stroke-width="1.6"/>`; }
+    if (stretch) {      // helping hand: sleeve from the upper right, palm across the fingers; it waits just clear of them at the start
+      const hc = off(off(mid, topF, 7.4), topF, 13 * (1 - kin)), src = [150, -2], hl = Math.hypot(src[0] - hc[0], src[1] - hc[1]), hu = [(src[0] - hc[0]) / hl, (src[1] - hc[1]) / hl], hw = ad(hc, [hu[0] * 9, hu[1] * 9]);
+      o += bar(hw, src, 17.4, TOPd) + bar(hw, src, 16, TOP) + bar(hw, ad(hw, [hu[0] * 4.5, hu[1] * 4.5]), 16, TOPd, 'butt') + bar(hc, hw, 11, SKd);
+      o += `<ellipse cx="${f(hc[0])}" cy="${f(hc[1])}" rx="9.4" ry="5.4" transform="rotate(${f(af)} ${q(hc)})" fill="${SKd}" stroke="${SKl}" stroke-width=".6"/>`;
+      [-5.4, -1.8, 1.8, 5.4].forEach(t => { const b0 = off(ad(hc, d(af, t)), topF, -3), e = off(ad(hc, d(af, t)), topF, -3 - 6.5 * kin); o += bar(b0, e, 3.5, SKl) + bar(b0, e, 2.7, SKd); }); }
+    const ao = 1 - cl(k * 2.4), dir = stretch ? 1 : -1;
+    if (ao > .02 && opt.arrow !== false && kind !== 'grip' && kind !== 'open') { const a0 = dir * 16 + (stretch ? 0 : 22), a1 = dir * 60 + (stretch ? 0 : 22), c0 = ad(W, d(a0, 36)), c1 = ad(W, d(a1, 36)), tg = a1 + dir * 90, h1 = ad(c1, d(tg + 180 - 32, 4.4)), h2 = ad(c1, d(tg + 180 + 32, 4.4));
+      o += `<path d="M${q(c0)}A36 36 0 0 ${dir > 0 ? 1 : 0} ${q(c1)}M${q(h1)}L${q(c1)}L${q(h2)}" style="stroke:${TOPd}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="${ao.toFixed(2)}"/>`; }
     return o + '</g></svg>';
   }
 
@@ -334,7 +310,9 @@ const ILLUS = (() => {
      ts = trunk length (below 1: hinged forward toward the viewer), nod = head dropped, shr = shoulders shrugged up,
      lift = arms raised off the floor toward the viewer (shown by their shadow), back = seen from behind (lying face down,
      seen from above), under = an arm that passes beneath the body, holdR = the right hand holds the left wrist. */
-  const REST = { hx: 80, hy: 57, lean: 0, rot: 0, turn: 0, ts: 1, nod: 0, lift: 0, shr: 0, aL: [97, 93, 1, 1], aR: [83, 87, 1, 1], lL: [92, 90, 1, 1], lR: [88, 90, 1, 1] };
+  const HANDS = { 'wrist-ext': 'ext', 'wrist-flex': 'flex', 'wrist-curl': 'curl', 'wrist-rcurl': 'rcurl', 'hand-grip': 'grip', 'hand-open': 'open' };      // pictures drawn as a close-up of the hand
+  const REST = { hx: 80, hy: 57, lean: 0, rot: 0, turn: 0, ts: 1, nod: 0, lift: 0, shr: 0, tw: 0, aL: [97, 93, 1, 1], aR: [83, 87, 1, 1], lL: [92, 90, 1, 1], lR: [88, 90, 1, 1] };
+  const FCHAIR = { ...REST, hy: 68, view: 'chair', lL: [94, 90, .4, .92], lR: [86, 90, .4, .92] };      // sitting tall on a chair, facing you, feet flat
   const SIDE = { ...REST, rot: -90, view: 'side', aL: [-96, -70, .9, .8], aR: [74, 106, 1, .9] };          // lying on the side, facing you: bottom arm under the head, top hand on the hip
   const RIG = {
     'lateral-raise': { a: { ...REST, wt: 'LR' }, b: { ...REST, wt: 'LR', aL: [171, 174, 1, 1], aR: [9, 6, 1, 1] } },
@@ -351,6 +329,8 @@ const ILLUS = (() => {
     'side-plank': { a: { ...SIDE, rot: -84, aL: [174, -96, .45, .55] }, b: { ...SIDE, rot: -76, aL: [166, -104, 1, .55] } },          // forearm down, hips lift into one straight line
     copenhagen: { a: { ...SIDE, rot: -84, bench: 1, aL: [174, -96, .5, .55], lR: [88, 88, 1, 1], lL: [108, 102, 1, 1] }, b: { ...SIDE, rot: -84, bench: 1, aL: [174, -96, .5, .55], lR: [88, 88, 1, 1], lL: [93, 90, 1, 1] } },
     shrug: { a: { ...REST, wt: 'LR' }, b: { ...REST, wt: 'LR', shr: 1 } },
+    'shoulder-roll': { a: REST, b: { ...REST, shr: 1 } },                                                       // warm-up: shoulders roll up and back down, no weights
+    rest: { a: { ...REST, aL: [96, 92, 1, 1], aR: [84, 88, 1, 1] }, b: { ...REST, shr: .32, aL: [99, 94, 1, 1], aR: [81, 86, 1, 1] } },      // between sets: stand tall and breathe
     'reverse-fly': { a: { ...REST, hy: 60, ts: .5, nod: .8, wt: 'LR', lL: [96, 86, .95, .95], lR: [84, 94, .95, .95], aL: [94, 92, 1, 1], aR: [86, 88, 1, 1] }, b: { ...REST, hy: 60, ts: .5, nod: .8, wt: 'LR', lL: [96, 86, .95, .95], lR: [84, 94, .95, .95], aL: [168, 172, 1, 1], aR: [12, 8, 1, 1] } },
     'prone-T': { a: { ...REST, rot: -90, view: 'top', back: 1, aL: [180, 180, 1, 1], aR: [0, 0, 1, 1] }, b: { ...REST, rot: -90, view: 'top', back: 1, lift: 1, aL: [180, 180, 1, 1], aR: [0, 0, 1, 1] } },
     'prone-W': { a: { ...REST, rot: -90, view: 'top', back: 1, aL: [158, -92, 1, .95], aR: [22, -88, 1, .95] }, b: { ...REST, rot: -90, view: 'top', back: 1, lift: 1, aL: [158, -92, 1, .95], aR: [22, -88, 1, .95] } },
@@ -362,6 +342,10 @@ const ILLUS = (() => {
     frog: { a: { ...REST, rot: -90, view: 'top', back: 1, hy: 55, lL: [158, 96, .9, .9], lR: [22, 84, .9, .9], aL: [-97, -93, .55, .55], aR: [-83, -87, .55, .55] }, b: { ...REST, rot: -90, view: 'top', back: 1, hy: 62, lL: [185, 90, .9, .9], lR: [-5, 90, .9, .9], aL: [-97, -93, .84, .84], aR: [-83, -87, .84, .84] } },
     'seated-fig4': { a: { ...REST, hy: 68, view: 'chair', lL: [94, 90, .4, .92], lR: [20, 175, .6, 1.05], aL: [84, 70, 1, .9], aR: [96, 110, 1, .9] }, b: { ...REST, hy: 68, view: 'chair', ts: .7, nod: .5, lL: [94, 90, .4, .92], lR: [20, 175, .6, 1.05], aL: [84, 70, 1, .9], aR: [96, 110, 1, .9] } },
     peroneal: { a: { ...REST, hy: 68, view: 'chair', lL: [94, 90, .4, .92], lR: [20, 175, .6, 1.05], aL: [102, 60, 1, 1.1], aR: [78, 135, 1, 1.3] }, b: { ...REST, hy: 68, view: 'chair', nod: .3, lL: [94, 90, .4, .92], lR: [20, 175, .6, 1.05], aL: [102, 60, 1, 1.1], aR: [78, 135, 1, 1.3] } },
+    /* seated on a chair, from the front. Twist: hips, knees and feet stay square while the chest turns, the head follows,
+       one hand goes to the outside of the opposite knee and the other to the chair back. */
+    'seated-twist': { a: { ...FCHAIR, aL: [95, 64, 1, 1.1], aR: [85, 116, 1, 1.1] }, b: { ...FCHAIR, tw: 1, turn: -.75, aL: [142, -108, 1, .8], aR: [115, 120, 1.15, 1.3] } },
+    'seated-side': { a: { ...FCHAIR, aL: [95, 64, 1, 1.1], aR: [85, 116, 1, 1.1] }, b: { ...FCHAIR, lean: -14, aL: [104, 88, 1, .95], aR: [-98, -138, 1, 1] } },      // one hand holds the seat, the other arm reaches up and over
     butterfly: { a: { ...REST, hy: 80, view: 'sit', lL: [196, 28, .9, .84], lR: [-16, 152, .9, .84], aL: [82, 66, 1, 1], aR: [98, 114, 1, 1] }, b: { ...REST, hy: 80, view: 'sit', lL: [174, 6, .95, .86], lR: [6, 174, .95, .86], aL: [82, 66, 1, 1], aR: [98, 114, 1, 1] } }
   };
   const RIG_ILL = { 'itb-cross': 'itb', 'side-raise-leg': 'side-leg' };
@@ -374,23 +358,38 @@ const ILLUS = (() => {
     const d = (a, l) => [Math.cos(a * R) * l, Math.sin(a * R) * l], ad = (p, v) => [p[0] + v[0], p[1] + v[1]], q = p => f(p[0]) + ' ' + f(p[1]), n = v => +v.toFixed(2);
     const hc = [P.hx, P.hy], up = d(-90 + P.lean, 1), pr = [-up[1], up[0]], at = (t, w) => [hc[0] + up[0] * t * P.ts + pr[0] * w, hc[1] + up[1] * t * P.ts + pr[1] * w], sc = at(23, 0), head = [at(23, 0)[0] + up[0] * 10.5 * (.55 + .45 * P.ts), at(23, 0)[1] + up[1] * 10.5 * (.55 + .45 * P.ts)];
     const lying = P.rot !== 0, view = P.view || 'stand';
-    const arm = (sd, a) => { const sh = ad(at(21, sd * 9.5), [up[0] * 3 * P.shr, up[1] * 3 * P.shr]), el = ad(sh, d(a[0], 12.5 * a[2])), ha = ad(el, d(a[1], 11.5 * a[3])); return { sh, el, ha }; }, L = arm(-1, P.aL); let Rr = arm(1, P.aR);
+    const tw = P.tw || 0, twc = 1 - .3 * tw, tws = -1.6 * tw, atT = (t, w) => at(t, t >= 11 ? w * twc + tws * Math.min(1, (t - 11) / 6) : w);      // tw: the chest turned (shoulders narrower and shifted), hips square
+    const arm = (sd, a) => { const sh = ad(atT(21, sd * 9.5), [up[0] * 3 * P.shr, up[1] * 3 * P.shr]), el = ad(sh, d(a[0], 12.5 * a[2])), ha = ad(el, d(a[1], 11.5 * a[3])); return { sh, el, ha }; }, L = arm(-1, P.aL); let Rr = arm(1, P.aR);
     if (P.holdR) { const l1 = 12.5 * P.aR[2], l2 = 11.5 * P.aR[3], S0 = Rr.sh, tg = L.ha, vx = tg[0] - S0[0], vy = tg[1] - S0[1], dist = Math.max(Math.abs(l1 - l2) + .1, Math.min(l1 + l2 - .1, Math.hypot(vx, vy) || 1)), ux = vx / (Math.hypot(vx, vy) || 1), uy = vy / (Math.hypot(vx, vy) || 1);
       const aa = (l1 * l1 - l2 * l2 + dist * dist) / (2 * dist), hh = Math.sqrt(Math.max(0, l1 * l1 - aa * aa)), c0 = [S0[0] + ux * aa, S0[1] + uy * aa], e1 = [c0[0] - uy * hh, c0[1] + ux * hh], e2 = [c0[0] + uy * hh, c0[1] - ux * hh], out = e => (e[0] - sc[0]) * pr[0] + (e[1] - sc[1]) * pr[1] - ((e[0] - sc[0]) * up[0] + (e[1] - sc[1]) * up[1]) * .4;
       Rr = { sh: S0, el: out(e1) > out(e2) ? e1 : e2, ha: [S0[0] + ux * dist, S0[1] + uy * dist] }; }
     const leg = (sd, a) => { const hp = at(-1, sd * 4.6), kn = ad(hp, d(a[0], 17 * a[2])), ft = ad(kn, d(a[1], 17 * a[3])); return { hp, kn, ft, sd }; }, lL = leg(-1, P.lL), lR = leg(1, P.lR);
-    const drawArm = o => { const pth = `M${q(o.sh)}L${q(o.el)}L${q(o.ha)}`, bare = o.bare ? `<path d="M${q(o.el)}L${q(o.ha)}" stroke="${SKd}" stroke-width="5.2" stroke-linecap="round" fill="none"/><path d="M${q(o.el)}L${q(o.ha)}" stroke="${SK}" stroke-width="4.2" stroke-linecap="round" fill="none"/>` : ''; return `<path d="${pth}" style="stroke:${TOPd}" stroke-width="5.9" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="${pth}" style="stroke:${TOP}" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>${bare}<circle cx="${f(o.ha[0])}" cy="${f(o.ha[1])}" r="2.6" fill="${SK}" stroke="${SKd}" stroke-width=".4"/>`; };
+    const SOLE = '#BFC5CC', pts = Pp => Pp.map(v => f(v[0]) + ',' + f(v[1])).join(' '), mix = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+    // tapered limb with rounded ends, the same construction as the side-on figure, so both figures look like one person
+    const limb = (a, b, wa, wb, col) => { const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l;
+      return `<circle cx="${f(a[0])}" cy="${f(a[1])}" r="${f(wa / 2)}" ${F(col)}/><circle cx="${f(b[0])}" cy="${f(b[1])}" r="${f(wb / 2)}" ${F(col)}/><polygon points="${pts([[a[0] + nx * wa / 2, a[1] + ny * wa / 2], [b[0] + nx * wb / 2, b[1] + ny * wb / 2], [b[0] - nx * wb / 2, b[1] - ny * wb / 2], [a[0] - nx * wa / 2, a[1] - ny * wa / 2]])}" ${F(col)}/>`; };
     if (P.bare === 'L') L.bare = true;      // sleeve pushed up, so a forearm lying across the body stands out from it
-    const drawLeg = o => { const fa = lying || view === 'sit' ? Math.atan2(o.ft[1] - o.kn[1], o.ft[0] - o.kn[0]) / R + 90 : 0, fo = lying || view === 'sit' ? [0, 0] : [o.sd * 1.5, 1.4];
-      return `<path d="M${q(o.hp)}L${q(o.kn)}L${q(o.ft)}" style="stroke:${LEG}" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><ellipse cx="${f(o.ft[0] + fo[0])}" cy="${f(o.ft[1] + fo[1])}" rx="4.6" ry="2.4" transform="rotate(${f(fa)} ${f(o.ft[0] + fo[0])} ${f(o.ft[1] + fo[1])})" fill="#fff" stroke="#CFC7BE" stroke-width=".8"/>`; };
+    // arm: sleeve with a darker edge so it reads against the body, ribbed cuff, hand
+    const drawArm = o => { const dx = o.ha[0] - o.el[0], dy = o.ha[1] - o.el[1], l = Math.hypot(dx, dy) || 1, hp = [o.ha[0] + dx / l * 2.1, o.ha[1] + dy / l * 2.1], ang = Math.atan2(dy, dx) / R, short = l < 3;
+      const hand = `<ellipse cx="${f(hp[0])}" cy="${f(hp[1])}" rx="${short ? 2.9 : 3.1}" ry="2.6" transform="rotate(${f(ang)} ${q(hp)})" fill="${SK}" stroke="${SKd}" stroke-width=".45"/>`;
+      if (o.bare) return limb(o.sh, o.el, 8, 6.9, TOPd) + limb(o.sh, o.el, 6.8, 5.7, TOP) + limb(o.el, o.ha, 5.6, 4.8, SKd) + limb(o.el, o.ha, 4.7, 4, SK) + hand;
+      return hand + limb(o.sh, o.el, 8, 6.9, TOPd) + limb(o.el, o.ha, 6.9, 5.9, TOPd) + limb(o.sh, o.el, 6.8, 5.7, TOP) + limb(o.el, o.ha, 5.7, 4.8, TOP) + (short ? '' : limb(mix(o.el, o.ha, .84), o.ha, 4.9, 4.8, TOPd)); };
+    // leg: thigh and shin taper, a little bare ankle, then a trainer drawn for the way the foot is seen
+    const drawLeg = o => { const dx = o.ft[0] - o.kn[0], dy = o.ft[1] - o.kn[1], l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l, free = lying || view === 'sit';
+      let sh = limb(o.hp, o.kn, 9.8, 7.9, LEG) + limb(o.kn, mix(o.kn, o.ft, .84), 7.9, 5.6, LEG) + limb(mix(o.kn, o.ft, .8), o.ft, 4.5, 4.2, SK);
+      if (free) { const c = [o.ft[0] + ux * 2.6, o.ft[1] + uy * 2.6], a = Math.atan2(uy, ux) / R;      // lying or sitting on the floor: the sole or the top of the shoe faces you
+        sh += `<ellipse cx="${f(c[0])}" cy="${f(c[1])}" rx="3.5" ry="5.2" transform="rotate(${f(a)} ${q(c)})" fill="#CFC7BE"/><ellipse cx="${f(c[0])}" cy="${f(c[1])}" rx="2.9" ry="4.6" transform="rotate(${f(a)} ${q(c)})" fill="#fff"/><path d="M${f(c[0] - uy * 1.6)} ${f(c[1] + ux * 1.6)}L${f(c[0] + uy * 1.6)} ${f(c[1] - ux * 1.6)}" stroke="#D8D1C9" stroke-width=".6" stroke-linecap="round"/>`; }
+      else { const cx = o.ft[0] + o.sd * 1.3, cy = o.ft[1] + 1.9;      // standing or on a chair: the toe of the trainer points at you
+        sh += `<path d="M${f(cx - 4.9)} ${f(cy + 2.3)}Q${f(cx - 5.3)} ${f(cy - 2.9)} ${f(cx)} ${f(cy - 3.2)}Q${f(cx + 5.3)} ${f(cy - 2.9)} ${f(cx + 4.9)} ${f(cy + 2.3)}Z" fill="#fff" stroke="#CFC7BE" stroke-width=".8" stroke-linejoin="round"/><path d="M${f(cx - 4.9)} ${f(cy + 2.3)}H${f(cx + 4.9)}" stroke="${SOLE}" stroke-width="1.4" stroke-linecap="round"/><path d="M${f(cx - 1.5)} ${f(cy - 1.4)}h3M${f(cx - 1.7)} ${f(cy - .1)}h3.4" stroke="#C9C2BA" stroke-width=".5" stroke-linecap="round"/>`; }
+      return sh; };
     const box = view === 'top' || view === 'side' ? (opt.fit ? '26 26 108 72' : '24 -14 112 138') : view === 'sit' || view === 'chair' ? (opt.fit ? '40 30 80 68' : '30 12 100 88') : (opt.fit ? '34 0 92 98' : '18 -6 124 106');
     let o = `<svg class="ill" viewBox="${box}"${opt.fit || opt.slice ? ' preserveAspectRatio="xMidYMid slice"' : ''} role="img" aria-label="exercise">`;
-    if (opt.scene !== false) o += view === 'top' ? `<rect x="-200" y="-200" width="560" height="400" ${F(V('ill-bg', '#FBEDE1'))}/><rect x="28" y="22" width="104" height="80" rx="8" ${F(V('ill-mat', '#F4B48D'))} opacity=".4"/><text x="80" y="17.5" text-anchor="middle" font-size="5.2" font-weight="600" letter-spacing=".3" font-family="system-ui,-apple-system,sans-serif" ${F(V('fig-top2', '#CF6630'))} opacity=".85">SEEN FROM ABOVE</text>`
+    if (opt.scene !== false) o += view === 'top' ? `<rect x="-200" y="-200" width="560" height="400" ${F(V('ill-bg', '#FBEDE1'))}/><rect x="28" y="23.2" width="104" height="80" rx="8" fill="#000" opacity=".05"/><rect x="28" y="22" width="104" height="80" rx="8" ${F(V('ill-bg', '#FBEDE1'))}/><rect x="28" y="22" width="104" height="80" rx="8" ${F(V('ill-mat', '#F4B48D'))} opacity=".42"/><rect x="30.6" y="24.6" width="98.8" height="74.8" rx="6" fill="none" style="stroke:${V('ill-mat', '#F4B48D')}" stroke-width=".7" opacity=".7"/><rect x="56.5" y="10.6" width="47" height="8.2" rx="4.1" ${F(V('ill-glow', '#FFF7F0'))}/><text x="80" y="16.4" text-anchor="middle" font-size="4.6" font-weight="700" letter-spacing=".5" font-family="system-ui,-apple-system,sans-serif" ${F(V('fig-top2', '#CF6630'))}>SEEN FROM ABOVE</text>`
       : sceneFront(V, F) + (view === 'side' || view === 'sit' ? `<rect x="22" y="89.5" width="116" height="4" rx="2" ${F(V('ill-mat', '#F4B48D'))}/>` : '');
     o += `<g ${opt.mirror ? 'transform="translate(160 0) scale(-1 1)"' : ''}>`;
     // the lowest point of the posed figure is put on the floor (standing and sitting) or the mat (lying on the side)
     const rp = p => { const r = P.rot * R, x = p[0] - 80, y = p[1] - 60; return [80 + x * Math.cos(r) - y * Math.sin(r), 60 + x * Math.sin(r) + y * Math.cos(r)]; };
-    const lows = [lL.ft, lR.ft, lL.kn, lR.kn].filter((p, i) => !(P.bench && (i === 1 || i === 3))).map(p => rp(p)[1] + (lying ? 4 : 2.6)).concat(lying ? [L.el, L.ha, Rr.el, Rr.ha].map(p => rp(p)[1] + 3) : []).concat([rp(at(0, -9))[1] + (lying ? 1 : 0), rp(at(0, 9))[1], rp(at(22, -10))[1] + (lying ? 1 : 0), rp([hc[0], hc[1] + (view === 'sit' ? 8.4 : 0)])[1]]);
+    const lows = [lL.ft, lR.ft, lL.kn, lR.kn].filter((p, i) => !(P.bench && (i === 1 || i === 3))).map((p, i) => rp(p)[1] + (lying ? 4 : i < 2 ? 4.3 : 2.6)).concat(lying ? [L.el, L.ha, Rr.el, Rr.ha].map(p => rp(p)[1] + 3) : []).concat([rp(at(0, -9))[1] + (lying ? 1 : 0), rp(at(0, 9))[1], rp(at(22, -10))[1] + (lying ? 1 : 0), rp([hc[0], hc[1] + (view === 'sit' ? 8.4 : 0)])[1]]);
     const dyv = view === 'top' ? 2 : (view === 'side' ? 92.6 : 93.7) - Math.max(...lows);
     if (view !== 'top' && opt.scene !== false) o += `<ellipse cx="${f(lying ? 80 : (lL.ft[0] + lR.ft[0]) / 2)}" cy="94.2" rx="${lying ? 40 : f(Math.max(14, Math.abs(lR.ft[0] - lL.ft[0]) / 2 + 9))}" ry="1.6" fill="#000" opacity=".08"/>`;
     if (view === 'chair') o += `<rect x="62.5" y="${f(hc[1] - 32 + dyv)}" width="35" height="36" rx="4" ${F(V('ill-prop', '#D8C7B6'))}/><rect x="59" y="${f(hc[1] + 2 + dyv)}" width="42" height="6" rx="3" ${F(V('ill-prop', '#D8C7B6'))}/><rect x="61.5" y="${f(hc[1] + 8 + dyv)}" width="4" height="${f(93.4 - hc[1] - 8 - dyv)}" rx="1" ${F(PR2)}/><rect x="94.5" y="${f(hc[1] + 8 + dyv)}" width="4" height="${f(93.4 - hc[1] - 8 - dyv)}" rx="1" ${F(PR2)}/>`;
@@ -404,13 +403,15 @@ const ILLUS = (() => {
     o += drawLeg(lL) + drawLeg(lR);
     if (P.band === 'knees') { const m = [(lL.kn[0] + lR.kn[0]) / 2, (lL.kn[1] + lR.kn[1]) / 2], dxk = lR.kn[0] - lL.kn[0], dyk = lR.kn[1] - lL.kn[1];      // a loop band round both legs, just above the knees
       o += `<ellipse cx="${f(m[0])}" cy="${f(m[1] - 2.5)}" rx="${f(Math.hypot(dxk, dyk) / 2 + 4.6)}" ry="2.7" transform="rotate(${f(Math.atan2(dyk, dxk) / R)} ${f(m[0])} ${f(m[1] - 2.5)})" fill="none" style="stroke:${BAND}" stroke-width="2"/>`; }
-    o += `<path d="M${q(at(-1.5, -9))} C${q(at(8, -7.4))} ${q(at(14, -9.6))} ${q(at(20, -9.8))} Q${q(at(25, -9.6))} ${q(at(24.5, -4))} L${q(at(24.5, 4))} Q${q(at(25, 9.6))} ${q(at(20, 9.8))} C${q(at(14, 9.6))} ${q(at(8, 7.4))} ${q(at(-1.5, 9))} Z" ${F(TOP)}/><path d="M${q(at(-1.6, -8.2))}L${q(at(-1.6, 8.2))}" style="stroke:${TOPd}" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>`;
-    o += `<path d="M${q(at(23, 0))}L${q(at(29, 0))}" stroke="${SKd}" stroke-width="4.4" stroke-linecap="round"/><ellipse cx="${f(sc[0])}" cy="${f(sc[1] + .6)}" rx="5.6" ry="2" transform="rotate(${f(P.lean)} ${q(sc)})" ${F(TOPd)}/>`;
+    if (!P.back) o += `<ellipse cx="${f(atT(24.6, 0)[0])}" cy="${f(atT(24.6, 0)[1])}" rx="${f(7.4 * twc)}" ry="3.3" transform="rotate(${f(P.lean)} ${q(atT(24.6, 0))})" ${F(TOPd)}/>`;      // hood resting behind the neck
+    o += `<path d="M${q(at(-1.5, -9))} C${q(at(8, -7.4))} ${q(atT(14, -9.6))} ${q(atT(20, -9.8))} Q${q(atT(25, -9.6))} ${q(atT(24.5, -4))} L${q(atT(24.5, 4))} Q${q(atT(25, 9.6))} ${q(atT(20, 9.8))} C${q(atT(14, 9.6))} ${q(at(8, 7.4))} ${q(at(-1.5, 9))} Z" ${F(TOP)}/>${tw > .02 ? `<path d="M${q(at(22, tws - 5.6 * tw))}Q${q(at(11, -4.4 * tw))} ${q(at(0, 0))}" style="stroke:${TOPd}" stroke-width="1" stroke-linecap="round" fill="none" opacity=".6"/>` : ''}<path d="M${q(at(-1.6, -8.2))}L${q(at(-1.6, 8.2))}" style="stroke:${TOPd}" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>`;
+    const scT = atT(23, 0), hdT = [head[0] + (scT[0] - sc[0]), head[1] + (scT[1] - sc[1])];
+    o += `<path d="M${q(scT)}L${q([scT[0] + up[0] * 6, scT[1] + up[1] * 6])}" stroke="${SKd}" stroke-width="4.4" stroke-linecap="round"/><ellipse cx="${f(scT[0] + pr[0] * -1.4 * tw)}" cy="${f(scT[1] + .6)}" rx="${f(5.6 * (1 - .15 * tw))}" ry="2" transform="rotate(${f(P.lean)} ${q(scT)})" ${F(TOPd)}/>`;
     if (P.shr > .02) [L, Rr].forEach(a => { o += `<circle cx="${f(a.sh[0])}" cy="${f(a.sh[1] + .6)}" r="4.1" ${F(TOP)}/>`; });      // shoulders riding up
     if (P.back) o += `<path d="M${q(at(19.5, -4.6 + 2 * P.lift))}L${q(at(12.5, -4 + 2 * P.lift))}M${q(at(19.5, 4.6 - 2 * P.lift))}L${q(at(12.5, 4 - 2 * P.lift))}" style="stroke:${TOPd}" stroke-width="1.1" stroke-linecap="round" fill="none" opacity=".7"/>`;      // shoulder blades, drawing together as the arms lift
     const dx = P.turn * 4.2, sp = 1 - Math.abs(P.turn) * .3, ex = 2.5 * sp, ndy = 1.7 * P.nod;
-    if (P.back) o += `<g transform="translate(${q(head)}) rotate(${f(P.lean)})">${FM ? `<path d="${TAIL}" fill="${HAIR}"/>` : ''}<ellipse cx="-6.4" cy="1.2" rx="1.3" ry="1.9" fill="${SK}"/><ellipse cx="6.4" cy="1.2" rx="1.3" ry="1.9" fill="${SK}"/><ellipse cx="0" cy="0" rx="6.6" ry="7.6" fill="${SK}"/><path d="M-6.95 1C-7.7 -11.6 7.7 -11.6 6.95 1C6.6 5.4 3.6 7 0 7C-3.6 7 -6.6 5.4 -6.95 1Z" fill="${HAIR}"/></g>`;
-    else o += `<g transform="translate(${q(head)}) rotate(${f(P.lean)})">${FM ? `<path d="${TAIL}" fill="${HAIR}"/>` : ''}<ellipse cx="${n(-6.4 - dx * .5)}" cy="1.2" rx="1.3" ry="1.9" fill="${SK}"/><ellipse cx="${n(6.4 - dx * .5)}" cy="1.2" rx="1.3" ry="1.9" fill="${SK}"/><ellipse cx="0" cy="0" rx="6.6" ry="7.6" fill="${SK}"/><path d="${CAP}" transform="translate(${n(-dx * .14)} ${n(ndy * .55)})" fill="${HAIR}"/><g transform="translate(0 ${n(ndy)})">` +
+    if (P.back) o += `<g transform="translate(${q(hdT)}) rotate(${f(P.lean)})">${FM ? `<path d="${TAIL}" fill="${HAIR}"/>` : ''}<ellipse cx="-6.4" cy="1.2" rx="1.3" ry="1.9" fill="${SK}"/><ellipse cx="6.4" cy="1.2" rx="1.3" ry="1.9" fill="${SK}"/><ellipse cx="0" cy="0" rx="6.6" ry="7.6" fill="${SK}"/><path d="M-6.95 1C-7.7 -11.6 7.7 -11.6 6.95 1C6.6 5.4 3.6 7 0 7C-3.6 7 -6.6 5.4 -6.95 1Z" fill="${HAIR}"/></g>`;
+    else o += `<g transform="translate(${q(hdT)}) rotate(${f(P.lean)})">${FM ? `<path d="${TAIL}" fill="${HAIR}"/>` : ''}<ellipse cx="${n(-6.4 - dx * .5)}" cy="1.2" rx="1.3" ry="1.9" fill="${SK}"/><ellipse cx="${n(6.4 - dx * .5)}" cy="1.2" rx="1.3" ry="1.9" fill="${SK}"/><ellipse cx="0" cy="0" rx="6.6" ry="7.6" fill="${SK}"/><path d="${CAP}" transform="translate(${n(-dx * .14)} ${n(ndy * .55)})" fill="${HAIR}"/><g transform="translate(0 ${n(ndy)})">` +
       `<path d="M${n(dx - ex - 1)} -1.9q1 -.6 2 -.1M${n(dx + ex - 1)} -2q1 -.5 2 .1" stroke="${HAIR}" stroke-width=".5" fill="none" stroke-linecap="round"/><circle cx="${n(dx - ex)}" cy=".1" r=".72" fill="#2A1E19"/><circle cx="${n(dx + ex)}" cy=".1" r=".72" fill="#2A1E19"/>` +
       `<path d="M${n(dx * 1.12)} 1.1q${n(P.turn * 1.4)} 1.1 ${n(P.turn * .4)} 1.6" stroke="${SKd}" stroke-width=".55" fill="none" stroke-linecap="round"/>${[-1, 1].map(sd => Math.abs(dx + sd * 3.9 * sp) < 5 ? `<circle cx="${n(dx + sd * 3.9 * sp)}" cy="2.7" r="1" fill="#F2A48C" opacity=".35"/>` : '').join('')}<path d="M${n(dx - 1.6)} 4.1q1.6 1.1 3.2 0" stroke="#B5745C" stroke-width=".55" fill="none" stroke-linecap="round"/></g></g>`;
     if (P.band === 1) o += `<path d="M${q(L.ha)}L${q(Rr.ha)}" style="stroke:${BAND}" stroke-width="2" stroke-linecap="round"/>`;
@@ -463,8 +464,7 @@ const ILLUS = (() => {
   if (opt.front !== false && (opt.ex === 'wu-hip' || key === 'hipcircle')) return frontBody('hip', pose && pose._phase !== undefined ? pose._phase : .25, opt);
   if (opt.front !== false && (key === 'side-bend' || opt.ex === 'side-bend')) return frontBody('bend', opt.u ?? 1, opt);
   if (opt.front !== false && key === 'side-lunge') return frontBody('lunge', opt.u ?? 1, opt);
-  if (opt.front !== false && key === 'seated-twist') return frontTwist(opt.u ?? 1, opt);
-  if (opt.front !== false && (key === 'wrist-ext' || key === 'wrist-flex')) return wristView(key === 'wrist-ext' ? 'ext' : 'flex', opt.u ?? 1, opt);
+  if (opt.front !== false && HANDS[key]) return wristView(HANDS[key], opt.u ?? 1, opt);
   const o = pose || T[key] || T.stand, g = geo(o), p = g.p, f = v => v.toFixed(1), R = Math.PI / 180, FM = female;
   const V = (n, d) => `var(--${n},${d})`, F = c => `style="fill:${c}"`, ST = (c, w) => `style="stroke:${c}" stroke-width="${w}" stroke-linecap="round" fill="none"`;
   const TOP = V('fig-top', '#E8793F'), TOPd = V('fig-top2', '#CF6630'), LEG = V('fig-leg', '#2F3439'), LEGd = V('fig-leg2', '#22262A');
@@ -507,7 +507,7 @@ const ILLUS = (() => {
   let vb = '0 -8 160 108';
   if (opt.vb) vb = opt.vb;
   else if (opt.fit) { let x0 = Math.min(...xs) - 8, x1 = Math.max(...xs) + 8, y0 = Math.min(...body.map(q => q[1])) - 15, y1 = 98;
-    if (p.prop === 'chair') { x0 = Math.min(x0, 32); x1 = Math.max(x1, 92); } if (p.w) { x0 = Math.min(x0, p.w - 6); x1 = Math.max(x1, p.w + 6); }
+    if (p.band) { x0 = Math.min(x0, p.band.x - 6); x1 = Math.max(x1, p.band.x + 6); y0 = Math.min(y0, p.band.y - 10); } if (p.prop === 'chair') { x0 = Math.min(x0, 32); x1 = Math.max(x1, 92); } if (p.w) { x0 = Math.min(x0, p.w - 6); x1 = Math.max(x1, p.w + 6); }
     let w = x1 - x0, h = Math.max(46, y1 - y0); y0 = y1 - h; if (w / h < opt.fit) { const nw = h * opt.fit; x0 -= (nw - w) / 2; w = nw; } else { const nh = w / opt.fit; y0 -= nh - h; h = nh; }
     vb = [x0, y0, w, h].map(f).join(' '); }
   let out = `<svg class="ill" viewBox="${vb}"${opt.fit || opt.slice ? ' preserveAspectRatio="xMidYMid slice"' : ''} role="img" aria-label="${key}"><defs><linearGradient id="sh${id}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".7"/></linearGradient></defs>`;
@@ -534,7 +534,11 @@ const ILLUS = (() => {
     bench: `<rect x="100" y="58" width="52" height="35" rx="3" ${F(PR)}/>`, benchL: `<rect x="10" y="78" width="56" height="15" rx="3" ${F(PR)}/>`, table: `<rect x="82" y="42" width="36" height="5" rx="2" ${F(PR)}/><rect x="110" y="47" width="5" height="46" rx="1" ${F(PR2)}/>` };
   if (p.prop && props[p.prop]) out += props[p.prop];
   (p.ln || []).forEach(l => out += `<line x1="${l[0]}" y1="${l[1]}" x2="${l[2]}" y2="${l[3]}" style="stroke:${PR2}" stroke-width="5" stroke-linecap="round"/>`);
+  const BD = p.band ? { ...p.band, y: p.band.y + (p.band.hook ? 0 : (p.dyG || 0)) } : null, BAND = V('ill-stem', '#7F9A70');
+  if (BD) out += BD.hook ? `<rect x="${f(BD.x - 9)}" y="${f(BD.y - 4)}" width="18" height="3.4" rx="1.7" ${F(PR2)}/><rect x="${f(BD.x - 1.2)}" y="${f(BD.y - 1)}" width="2.4" height="3" ${F(PR2)}/>`
+    : BD.peg ? `<rect x="${f(BD.x - 2)}" y="${f(BD.y - 5)}" width="4" height="${f(93.4 - BD.y + 5)}" rx="1.5" ${F(PR2)}/>` : `<rect x="${f(BD.x - 2)}" y="${f(BD.y - 9)}" width="4" height="${f(93.4 - BD.y + 9)}" rx="1.5" ${F(PR2)}/>`;
   if (p.ball) out += `<circle cx="${p.ball[0]}" cy="${p.ball[1]}" r="6" ${F(PR2)}/>`;
+  if (p.roll) { const rx = g.H[0] + (g.S[0] - g.H[0]) * p.roll, ry = 93.7 - 5.2; out += `<circle cx="${f(rx)}" cy="${f(ry)}" r="5.2" ${F(PR)}/><circle cx="${f(rx)}" cy="${f(ry)}" r="2" ${F(PR2)}/>`; }
   // soft contact shadow under the body
   if (opt.scene !== false && !p.prop && !p.top) { const lo = body.filter(q => q[1] > 80).map(q => q[0]), a = lo.length ? Math.min(...lo) : g.H[0] - 8, b = lo.length ? Math.max(...lo) : g.H[0] + 8; out += `<ellipse cx="${f((a + b) / 2)}" cy="${floor ? 94.4 : 94.6}" rx="${f(Math.max(9, (b - a) / 2 + 3))}" ry="1.5" fill="#000" opacity=".09"/>`; }
   // back to front: far arm, far leg, neck, torso with hood, near leg, head, near arm
@@ -555,6 +559,10 @@ const ILLUS = (() => {
   const ex = FM ? -1.6 : -2.4;   // ear sits on the hairline, skin coloured with one soft inner curve
   out += `<ellipse cx="${ex}" cy="1.1" rx="1.15" ry="1.55" fill="${SK}"/><path d="M${ex + .35} .4Q${ex - .45} 1.1 ${ex + .25} 1.9" stroke="#D69878" stroke-width=".35" fill="none" stroke-linecap="round"/><path d="M2.7 -2.3Q3.4 -2.7 4.1 -2.35" stroke="${HAIR}" stroke-width=".45" fill="none" stroke-linecap="round"/><circle cx="3.4" cy="-.6" r=".6" fill="#2A1E19"/><circle cx="4.2" cy="1.5" r=".85" fill="#F2A48C" opacity=".35"/><path d="M2.9 3Q3.8 3.6 4.7 2.9" stroke="#B5745C" stroke-width=".55" fill="none" stroke-linecap="round"/></g>`;
   if (!p.armBack) out += arm(g.S, g.E, g.W, TOP, TOPd);
+  if (BD) { const J = { W: g.W, K: g.K, A: g.A, T: g.T }[BD.at] || g.W, an = [BD.x, BD.y + (BD.hook ? 2 : 0)], mx = (an[0] + J[0]) / 2, my = (an[1] + J[1]) / 2, lab = BD.label || 'BAND', lw = lab.length * 2.75 + 6;
+    out += `<path d="M${f(an[0])} ${f(an[1])}L${f(J[0])} ${f(J[1])}" style="stroke:${BAND}" stroke-width="2.1" stroke-linecap="round"/><circle cx="${f(an[0])}" cy="${f(an[1])}" r="2.3" style="fill:${V('ill-glow', '#FFF7F0')};stroke:${BAND}" stroke-width="1.5"/>`;
+    out += BD.at === 'W' ? `<circle cx="${f(J[0])}" cy="${f(J[1])}" r="1.9" style="fill:${BAND}"/>` : `<circle cx="${f(J[0])}" cy="${f(J[1])}" r="${BD.r || 4.6}" fill="none" style="stroke:${BAND}" stroke-width="2"/>`;      // gripped in the hand, or looped round the limb
+    const ly = Math.max(-2, Math.min(my - 6.5, 84)); out += `<rect x="${f(mx - lw / 2)}" y="${f(ly - 4.3)}" width="${f(lw)}" height="6.4" rx="3.2" style="fill:${V('ill-glow', '#FFF7F0')};stroke:${BAND}" stroke-width=".6"/><text x="${f(mx)}" y="${f(ly + .5)}" text-anchor="middle" font-size="4" font-weight="700" letter-spacing=".4" font-family="system-ui,-apple-system,sans-serif" style="fill:${BAND}">${lab}</text>`; }
   if (p.wt) out += `<rect x="${f(g.W[0] - 5)}" y="${f(g.W[1])}" width="10" height="8" rx="2" ${F(PR2)}/>`;
   return out + '</svg>';
 }
@@ -566,25 +574,26 @@ const ILLUS = (() => {
   const SQ = { hx: 58, tr: -88, nk: -88, th: 60, sh: 100, th2: 125, sh2: 140, ua: 90, fa: 90 };
   const MOVES = {
     'prone-T': { rig: true, a: {}, b: {}, tempo: [1.5, 2, 2, 0.5] }, 'prone-W': { rig: true, a: {}, b: {}, tempo: [1.5, 2, 2, 0.5] }, 'reverse-fly': { rig: true, a: {}, b: {}, tempo: [1.5, 0.5, 2.5, 0.5] }, shrug: { rig: true, a: {}, b: {}, tempo: [1.5, 2, 2.5, 0.5] }, copenhagen: { rig: true, a: {}, b: {}, tempo: [1.5, 5, 2, 1] },
+    'shoulder-roll': { rig: true, a: {}, b: {}, tempo: [1, 0.25, 1, 0.25] }, 'wrist-curl': { rig: true, a: {}, b: {} }, 'reverse-wrist': { rig: true, a: {}, b: {} }, grip: { rig: true, a: {}, b: {} }, 'finger-ext': { rig: true, a: {}, b: {} },
     'lateral-raise': { rig: true, a: {}, b: {}, tempo: [1.5, 0.5, 2.5, 0.5] }, 'pull-apart': { rig: true, a: {}, b: {}, tempo: [1.5, 1, 2, 0.5] }, 'band-er': { rig: true, a: {}, b: {}, tempo: [1.5, 0.5, 2.5, 0.5] }, 'band-ir': { rig: true, a: {}, b: {}, tempo: [1.5, 0.5, 2.5, 0.5] }, monster: { rig: true, a: {}, b: {}, tempo: [0.9, 0.2, 0.9, 0.2] },
     'wu-march': { ill: 'stand', a: { th2: 90, sh2: 90 }, b: { th2: -5, sh2: 90 }, tempo: [0.45, 0.05, 0.45, 0], alt: true, armSwing: true },
     walk: { ill: 'walk', a: {}, b: { th: 118, sh: 130, th2: 62, sh2: 72, ua: 62, fa: 12, ua2: 112, fa2: 92 }, tempo: [0.6, 0, 0.6, 0] },
     'chin-tuck': { ill: 'chintuck', a: { nk: -88 }, b: { nk: -106 }, tempo: [1.5, 2, 1.5, .5] },
     'neck-ext': { ill: 'neck-ext', a: { nk: -84 }, b: {}, tempo: [2, 2, 2, .5] },
-    'wu-swing': { ill: 'stand', a: { ua: 140, fa: 150 }, b: { ua: -150, fa: -150 }, tempo: [1, 0, 1, 0] },
-    'wu-hip': { ill: 'stand', a: {}, b: {}, circle: true, tempo: [3.2, 0, 0, 0] },
+    'wu-swing': { ill: 'stand', a: { ua: 126, fa: 132 }, b: { ua: -84, fa: -88 }, tempo: [1, 0, 1, 0] },      // from a little behind the body, forward and up to overhead: never past what a shoulder can do
+    'wu-hip': { ill: 'stand', a: {}, b: {}, circle: true, flipAt: 5, tempo: [3.2, 0, 0, 0] },      // five circles one way, then the other way
     'wu-cat': { ill: 'allfours', a: { nk: -46, curl: 4.5 }, b: { nk: 26, curl: -7 }, tempo: [2.4, 0.4, 2.4, 0.4] },      // cow: back sags, head up; cat: back rounds up, head drops
     'cat-cow': { a: { nk: -46, curl: 4.5 }, b: { nk: 26, curl: -7 }, tempo: [2.4, 0.4, 2.4, 0.4] },
     pendulum: { a: { ua: 72, fa: 72 }, b: { ua: 108, fa: 108 }, tempo: [1, 0, 1, 0] },
-    'arm-circles': { spin: true, tempo: [3, 0, 0, 0] },
+    'arm-circles': { spin: true, small: true, tempo: [2.4, 0, 0, 0] },      // arms out to the sides (toward you), circles growing from small to large
     'leg-swing': { a: { th2: 128, sh2: 140 }, b: { th2: 22, sh2: 30 }, tempo: [0.9, 0, 0.9, 0] },
-    'knee-wall': { a: { hx: 66 }, b: { hx: 76 }, pin: ['foot', 'foot2'], tempo: [2, 1, 2, 0] },
+    'knee-wall': { a: { th2: 104 }, b: { th2: 121 }, pin: ['knee2', 'foot'], tempo: [2, 1, 2, 0] },      // back knee stays on the floor, the hips glide forward, the front knee travels over the toes
     'open-book': { book: true, a: {}, b: {}, tempo: [3, 1, 3, 0] },
     'supine-chin': { a: { nk: 180 }, b: { nk: 187 } }, 'chin-lift': { a: { nk: 180 }, b: { nk: 200 } },      // lying head-left: angles above 180 lift the head off the mat 'prone-neck': { a: { nk: 8 }, b: { nk: -22 } },
     'band-row': { a: { ua: 15, fa: 5 }, b: { ua: 150, fa: 10 } }, 'face-pull': { a: { ua: 5, fa: 0 }, b: { ua: -20, fa: -115 } },
-    'prone-Y': { a: { ua: 6, fa: 6 }, b: { ua: -28, fa: -28 } }, 'wall-slide': { a: { ua: -10, fa: -80 }, b: { ua: -62, fa: -84 } },
+    'prone-Y': { a: { ua: 6, fa: 6 }, b: { ua: -28, fa: -28 } }, 'wall-slide': { a: { ua: -10, fa: -84 }, b: { ua: -62, fa: -88 }, wall: true, tempo: [2, 0.5, 2.5, 0.5] },
     pulldown: { a: { ua: -80, fa: -85 }, b: { ua: 55, fa: -65 } }, press: { a: { ua: 35, fa: -80 }, b: { ua: -85, fa: -88 } },
-    pushup: { a: {}, b: { hx: 76.6, hy: 83.6, tr: -10, nk: -12, ua: 150 }, pin: ['foot', 'hand'] },
+    pushup: { a: {}, b: { hx: 75.2, hy: 83.6, tr: -10, nk: -12, ua: 150 }, pin: ['foot', 'hand'] },
     'hammer-curl': { a: { fa: 85 }, b: { fa: -55 } }, pushdown: { a: { fa: -25 }, b: { fa: 88 } },
     deadbug: { a: { ua: -90, fa: -90, th2: -90, sh2: 0 }, b: { ua: -172, fa: -172, th2: -8, sh2: -8 } },
     'curl-up': { a: { tr: 180, nk: 180 }, b: { tr: 192, nk: 205 } },
@@ -598,11 +607,12 @@ const ILLUS = (() => {
     clam: { rig: true, a: {}, b: {}, tempo: [1.5, 1, 2, 0.5] }, 'side-leg': { rig: true, a: {}, b: {}, tempo: [1.5, 0.5, 2.5, 0.5] },
     march: { a: { th2: 90, sh2: 90 }, b: { th2: -10, sh2: 90 } },
     'split-squat': { a: { ...SQ, hy: 56 }, b: { ...SQ, hy: 70 }, pin: ['foot', 'foot2'] },
-    'sit-stand': { ill: 'squat', a: { hx: 62, hy: 53, tr: -88, nk: -88, ua: 90, fa: 90, th: 90, sh: 90 }, b: { hx: 46, hy: 70, tr: -58, nk: -62, ua: 10, fa: 5, th: 20, sh: 110 }, pin: ['foot'] },
+    'sit-stand': { ill: 'squat', a: { hx: 62, hy: 53, tr: -88, nk: -88, ua: 90, fa: 90, th: 90, sh: 90 }, b: { hx: 46, hy: 70, tr: -58, nk: -62, ua: 10, fa: 5, th: 20, sh: 110 }, pin: ['foot'] , tempo: [3, 0.5, 1.5, 0.5] },      // sit back down over three seconds, stand up briskly
     'step-up': { a: { hx: 56, hy: 53, th: 90, sh: 90, th2: 30, sh2: 90 }, b: { hx: 72, hy: 44, th: 92, sh: 92, th2: 88, sh2: 90 }, pin: ['foot2'] },
     'ham-curl': { a: { sh: 180 }, b: { sh: 255 } },
+    tke: { a: { hy: 54.8, hx: 71.6, th: 74 }, b: {}, pin: ['foot'], pinFrom: 'b', tempo: [1.5, 1, 1.5, 0.5] },      // knee slightly bent against the band, then pressed fully straight and held
     nordic: { a: { hx: 60, hy: 67, tr: -90, nk: -90, th: 90, sh: 180, ua: 70, fa: 10 }, b: {}, tempo: [4, 0, 2, 1] },
-    'calf-raise': { ill: 'stand', a: { hy: 53, ft: 0 }, b: { hy: 47.4, ft: 40 } },
+    'calf-raise': { ill: 'stand', a: { hy: 53, ft: 0 }, b: { hy: 47.4, ft: 40 }, tempo: [1.5, 0.5, 3, 0.5] },      // rise, pause, lower over three seconds, as the instruction says
     'seated-calf': { a: { ft: 0 }, b: { th: -10, sh: 88, ft: 24 } }, 'toe-raise': { a: { ft: 0 }, b: { ft: -32 } }
   };
   const DEF = { hx: 70, hy: 53, tr: -90, nk: -90, ua: 90, fa: 90, th: 90, sh: 90 }, RD = Math.PI / 180;
@@ -616,18 +626,26 @@ const ILLUS = (() => {
     const base = T[mv.ill || key] || T.stand, A = { ...DEF, ...base, ...(mv.a || {}) }, B = { ...DEF, ...base, ...(mv.b || {}) };
     for (const X of [A, B]) { const Y = X === A ? B : A; if (X.ft === undefined && Y.ft !== undefined) X.ft = X.sh - 90; }
     const P = { ...A }; for (const k in B) if (typeof B[k] === 'number' && typeof A[k] === 'number') P[k] = A[k] + (B[k] - A[k]) * u;
-    if (mv.spin) { P.ua = P.fa = -90 + 360 * phase; }
+    if (mv.spin) { P.ua = P.fa = -90 + 360 * phase; if (mv.small) P.al = Math.min(.62, .2 + .045 * (cycle + phase)); }
     /* open book, seen from above: the top arm lifts off the bottom one, points at the ceiling (toward the viewer, so it
        shortens to nothing) and opens down behind the back, while the head turns after it. Knees and bottom arm stay put. */
-    if (mv.book) { const c = Math.cos(u * 165 * RD); P.al = Math.max(.12, Math.abs(c)); P.ua = P.fa = c >= 0 ? -90 : 90; P.nk = 180 - 16 * u; }
+    if (mv.book) { const c = Math.cos(u * 165 * RD); P.al = Math.max(.03, Math.abs(c)); P.ua = P.fa = c >= 0 ? -90 : 90; P.nk = 180 - 16 * u; }
     /* hip circles: the pelvis traces an ellipse (forward, side, back, side), the trunk counter-tilts so the head stays
        over the feet, both feet stay planted, hands rest on the hips. One continuous loop per cycle. */
-    if (mv.circle) { P._phase = phase; const a = 2 * Math.PI * phase, c = Math.cos(a), sn = Math.sin(a);
+    if (mv.circle) { const back = mv.flipAt && cycle >= mv.flipAt; if (back) phase = (1 - phase) % 1; P._phase = phase; const a = 2 * Math.PI * phase, c = Math.cos(a), sn = Math.sin(a);
       P.hx = 70 + 5 * c; P.hy = 54 + 1.3 * sn; P.tr = -90 - 9 * c; P.nk = -90 - 4 * c;
       [P.th, P.sh] = ik([P.hx, P.hy], [71, 89.5], 19, 18, 80); [P.th2, P.sh2] = ik([P.hx, P.hy], [68.5, 89.5], 19, 18, 80); P.ft = 0;
       const S = [P.hx + Math.cos(P.tr * RD) * 28, P.hy + Math.sin(P.tr * RD) * 28];
       [P.ua, P.fa] = ik(S, [P.hx + 4.5, P.hy - 4], 14, 12, 125); [P.ua2, P.fa2] = ik(S, [P.hx - 3.5, P.hy - 4], 14, 12, 135); }
-    if (mv.pin) { const g0 = geo(mv.pinFrom === 'b' ? B : A, true), H = [P.hx, P.hy], S = [H[0] + Math.cos(P.tr * RD) * 28, H[1] + Math.sin(P.tr * RD) * 28];
+    /* forearms sliding up a wall: the feet stay put and the body leans in from the ankles exactly as far as it takes to keep
+       the forearms on the wall, so the hands never drift off it */
+    if (mv.wall) { const g0 = geo(A, true), ax = g0.A[0], ay = g0.A[1], wallX = (base.w || 88) - 3.2; let best = 0, err = 1e9;
+      for (let dl = 0; dl <= 30; dl += .25) { const wx = ax + 37 * Math.sin(dl * RD) + 28 * Math.cos((-90 + dl) * RD) + 14 * Math.cos(P.ua * RD) + 12 * Math.cos(P.fa * RD), e = Math.abs(wx - wallX); if (e < err) { err = e; best = dl; } }
+      P.hx = ax + 37 * Math.sin(best * RD); P.hy = ay - 37 * Math.cos(best * RD); P.tr = P.nk = -90 + best; P.th = P.sh = 90 + best; P.ft = 0; }
+    if (mv.pin) { const g0 = geo(mv.pinFrom === 'b' ? B : A, true);
+      // a kneeling knee stays where it is: the thigh pivots on it and carries the hips
+      if (mv.pin.includes('knee2') && g0.K2) { P.hx = g0.K2[0] - Math.cos(P.th2 * RD) * 19; P.hy = g0.K2[1] - Math.sin(P.th2 * RD) * 19; }
+      const H = [P.hx, P.hy], S = [H[0] + Math.cos(P.tr * RD) * 28, H[1] + Math.sin(P.tr * RD) * 28];
       // a planted foot keeps the angle it was planted at: it never tips into the floor as the shin leans over it
       const X = g0.p, flat = a => Math.abs(((a % 360) + 540) % 360 - 180) < 25;
       if (mv.pin.includes('foot')) { [P.th, P.sh] = ik(H, g0.A, 19, 18, P.th); const a = X.ft !== undefined ? X.ft : X.sh - 90; if (flat(a)) P.ft = a; }
@@ -642,7 +660,7 @@ const ILLUS = (() => {
   }
   /* One steady frame for a whole exercise in the player: the box that holds the figure through the entire movement, at the
      stage's own shape. Nothing is cropped (floor work is wide, standing work is tall) and the camera never jumps. */
-  const isFront = (key, ex) => !!rigOf(key, ex) || !!FRONT[key] || key === 'side-bend' || key === 'side-lunge' || key === 'seated-twist' || key === 'wrist-ext' || key === 'wrist-flex' || key === 'hipcircle' || ex === 'side-bend' || ex === 'wu-hip';
+  const isFront = (key, ex) => !!rigOf(key, ex) || !!FRONT[key] || !!HANDS[key] || key === 'side-bend' || key === 'side-lunge' || key === 'hipcircle' || ex === 'side-bend' || ex === 'wu-hip';
   function frame(key, mv, ratio, ex) {
     if (isFront(key, ex)) return null;
     const poses = mv ? [0, .25, .5, .75, 1].flatMap(u => [0, 1].map(c => animPose(key, mv, u, c, u))) : [T[key] || T.stand];
@@ -650,7 +668,7 @@ const ILLUS = (() => {
     for (const o of poses) { const g = geo({ ...o }), p = g.p, c = [g.S[0] + Math.cos(p.nk * RD) * 11.4, g.S[1] + Math.sin(p.nk * RD) * 11.4];
       for (const q of [g.H, g.S, g.E, g.W, g.K, g.A, g.T, g.K2, g.A2, g.T2, g.E2, g.W2, [c[0] - 9, c[1]], [c[0] + 9, c[1]], [c[0], c[1] - 9]]) if (q) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); }
       if (p.prop === 'chair') { x0 = Math.min(x0, 34); x1 = Math.max(x1, 90); } else if (p.prop) { x0 = Math.min(x0, p.hx - 34); x1 = Math.max(x1, p.hx + 34); }
-      if (p.w) { x0 = Math.min(x0, p.w - 4); x1 = Math.max(x1, p.w + 4); } if (p.top) { x0 = Math.min(x0, 46); x1 = Math.max(x1, 128); y0 = Math.min(y0, 26); } }
+      if (p.w) { x0 = Math.min(x0, p.w - 4); x1 = Math.max(x1, p.w + 4); } if (p.top) { x0 = Math.min(x0, 46); x1 = Math.max(x1, 128); y0 = Math.min(y0, 26); } if (p.band) { x0 = Math.min(x0, p.band.x - 4); x1 = Math.max(x1, p.band.x + 4); y0 = Math.min(y0, p.band.y - 2); } }
     x0 -= 11; x1 += 11; y0 -= 8; const y1 = 100; let w = x1 - x0, h = Math.max(62, y1 - y0); y0 = y1 - h;
     if (w / h < ratio) { const nw = h * ratio; x0 -= (nw - w) / 2; w = nw; } else { const nh = w / ratio; y0 -= (nh - h) * .72; h = nh; }
     return [x0, y0, w, h].map(v => v.toFixed(1)).join(' ');

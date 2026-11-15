@@ -15,8 +15,8 @@ const STAGES = [
 ];
 const WARMUP = [
   { id: 'wu-march', n: 'March on the spot', secs: 60, feel: ['psoas', 'rectFem', 'gastroc'], how: 'Lift the knees to hip height, swing the arms, breathe through the nose.' },
-  { id: 'wu-swing', n: 'Arm swings and shoulder rolls', secs: 45, feel: ['deltAnt', 'deltPost', 'pecMajor', 'upTrap'], how: 'Swing both arms forward and back, then roll the shoulders backwards ten times.' },
-  { id: 'wu-hip', n: 'Hip circles', secs: 45, feel: ['gmed', 'oblExt', 'quadlum'], how: 'Hands on the hips, circle the pelvis slowly, five each way, then standing leg swings.' },
+  { id: 'wu-swing', n: 'Arm swings and shoulder rolls', secs: 45, parts: [{ mv: 'wu-swing', n: 10, label: 'Arm swings' }, { mv: 'shoulder-roll', ill: 'shoulder-roll', n: 10, label: 'Shoulder rolls' }], feel: ['deltAnt', 'deltPost', 'pecMajor', 'upTrap'], how: 'Swing both arms forward and back, then roll the shoulders backwards ten times.' },
+  { id: 'wu-hip', n: 'Hip circles', secs: 46, parts: [{ mv: 'wu-hip', n: 10, label: 'Hip circles' }, { mv: 'leg-swing', ill: 'leg-swing', n: 8, label: 'Leg swings' }], feel: ['gmed', 'oblExt', 'quadlum'], how: 'Hands on the hips, circle the pelvis slowly, five each way, then standing leg swings.' },
   { id: 'wu-cat', n: 'Cat-cow', secs: 45, feel: ['erector', 'abs', 'multifidus'], how: 'On hands and knees, round and arch the spine with the breath, slowly through every segment.' }
 ];
 const SECTION_WHY = {

@@ -93,7 +93,9 @@ const COACH_AUDIO = (() => {
   /* in the calm mood the music only dips a little under the voice, and slowly, so breathing cues never make it pump */
   function duck(on) { if (!ctx) return; const c = mood === 'calm', t = ctx.currentTime, target = musicOn && !paused && mood !== 'off' ? (on ? (c ? 0.72 : 0.35) : 1) * level() : 0; music.gain.cancelScheduledValues(t); music.gain.setTargetAtTime(target, t, c ? (on ? 0.6 : 1.4) : on ? 0.12 : 0.7); }
   function softVoice() { if (!ctx) return; const c = isCalm(), t = ctx.currentTime; voiceOut.gain.setTargetAtTime(c ? 0.6 : 1, t, 0.2); vTone.gain.setTargetAtTime(c ? -9 : -4, t, 0.2); vVerb.gain.setTargetAtTime(c ? 0.2 : 0.07, t, 0.2); }   // exercise: a touch softer; calm: clearly softer
-  function utter(text, v, rate) { const u = new SpeechSynthesisUtterance(text.replace(/\s*\([^)]*\)/g, '')); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'en-GB';
+  /* device voices read abbreviations letter by letter ("20 s"), so units are spelled out before speaking */
+  const speakable = t => t.replace(/\s*\([^)]*\)/g, '').replace(/(\d)\s?s\b(?!')/g, '$1 seconds').replace(/(\d)\s?min\b/g, '$1 minutes').replace(/(\d)\s?cm\b/g, '$1 centimetres').replace(/(\d)\s?°/g, '$1 degrees').replace(/(\d)\/10\b/g, '$1 out of 10');
+  function utter(text, v, rate) { const u = new SpeechSynthesisUtterance(speakable(text)); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'en-GB';
     const male = v && gender(v) === 'm'; const c = isCalm(); u.rate = (rate || (male ? 0.95 : 0.93)) * (c ? 0.94 : 1); u.pitch = (male ? 0.92 : 1) * (c ? 0.96 : 1); u.volume = c ? 0.55 : 1; return u; }
   /* one queue for recorded clips and device speech */
   const queue = []; let cur = null;

@@ -362,8 +362,8 @@ body.onb { padding-bottom: 0; }
 
 /* which side hurts: three equal buttons, each with a figure showing the half it means */
 .seg.sides { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
-.seg.sides button { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px 10px; border-radius: 18px; font-size: 15px; }
-.sideic { width: 46px; height: 43px; display: block; }
+.seg.sides button { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px; padding: 10px 8px; border-radius: 16px; font-size: 15px; }
+.sideic { width: 30px; height: 28px; display: block; }
 .sideic .hd { fill: none; stroke: currentColor; stroke-width: 2; opacity: .55; }
 .sideic .fillh { fill: var(--acc); stroke: var(--acc); stroke-width: 2; stroke-linejoin: round; }
 .sideic .off { fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; opacity: .3; }
@@ -376,3 +376,12 @@ body.onb { padding-bottom: 0; }
 /* privacy reassurance on the welcome screen */
 .spsafe { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 18px 0 0; font-size: 13.5px; font-weight: 550; color: var(--mute); }
 .spsafe .ic { width: 17px; height: 17px; flex: none; color: var(--ok); }
+
+/* header buttons and the settings sheet footer */
+.topbtns { display: flex; align-items: center; gap: 2px; }
+.setver { text-align: center; font-size: 12.5px; color: var(--mute); margin: 16px 0 4px; }
+
+/* end of session: the chosen answer and what it changes */
+.feelpick button.on { background: var(--acc); border-color: var(--acc); color: #fff; }
+.feelnote { min-height: 1.4em; margin: 10px 0 0; font-size: 14.5px; font-weight: 550; opacity: 0; transition: opacity .25s; } .feelnote.on { opacity: 1; }
+.setrow .grow small { display: block; font-weight: 450; font-size: 12.5px; color: var(--mute); margin-top: 1px; }
