@@ -49,20 +49,22 @@ const ILLUS = (() => {
     'supine-ham': { ...LY, hx: 80, th: -80, sh: -80, th2: 0, sh2: 0, hl: 'th' },
     'heel-step': { th2: 30, sh2: 0, tr: -75, prop: 'step', hl: 'th2' },
     'seated-ham': { hx: 60, hy: 88, tr: -60, nk: -50, ua: -20, fa: -20, th: 0, sh: 0, hl: 'th' },
-    'wall-calf': { hx: 62, hy: 58, tr: -65, ua: 10, fa: 10, th: 60, sh: 95, th2: 115, sh2: 115, w: 100, hl: 'sh2' },
-    'wall-calf-bent': { hx: 62, hy: 58, tr: -65, ua: 10, fa: 10, th: 60, sh: 95, th2: 100, sh2: 120, w: 100, hl: 'sh2' },
+    'wall-calf': { hx: 62, hy: 58, tr: -65, ua: 10, fa: 10, th: 60, sh: 95, th2: 115, sh2: 115, ft2: 0, w: 100, hl: 'sh2' },
+    'wall-calf-bent': { hx: 62, hy: 58, tr: -65, ua: 10, fa: 10, th: 60, sh: 95, th2: 100, sh2: 120, ft2: 0, w: 100, hl: 'sh2' },
     'heel-drop': { hy: 40, ft: 30, prop: 'stair', hl: 'sh' },
     'knee-wall': { hx: 70, hy: 66, th: 10, sh: 70, th2: 100, sh2: 180, w: 104, hl: 'sh' },
     'kneel-shin': { hx: 48, hy: 76, th: 40, sh: 180, hl: 'sh' },
     'toe-wall': { ft: -40, w: 85, hl: 'sh' },
     'peroneal': { hx: 60, hy: 72, tr: -80, nk: -80, th: 0, sh: 90, th2: -15, sh2: 130, prop: 'chair', hl: 'sh2' },
     'foam-roll': { ...LY, tr: 170, th: -65, sh: 55, hl: 'tr' },
-    'open-book': { ...LY, hy: 86, th: -30, sh: 120, ua: -80, fa: -80, hl: 'tr' },
+    /* Open book is done lying on the side, which a side-on camera cannot show, so this one pose is drawn from above
+       (top: true): the profile is the person on their side, knees bent and stacked in front, both arms out in front. */
+    'open-book': { top: true, hx: 98, hy: 60, tr: 180, nk: 180, th: -90, sh: 0, th2: -84, sh2: 3, ua: -90, fa: -90, ua2: -90, fa2: -90, hl: 'tr' },
     'thread': { ...AF, ua: 180, fa: 180, hl: 'tr' },
     hug: { ua: 20, fa: 170, hl: 'tr' },
     'wall-lat': { hx: 40, tr: -5, nk: -5, ua: 0, fa: 0, w: 96, hl: 'tr' },
-    'downdog': { hx: 72, hy: 56, tr: 138, nk: 138, ua: 138, fa: 138, th: 74, sh: 74, ft: 0, hl: 'sh' },      // hands and feet both on the floor, hips high
-    'wgs': { hx: 55, hy: 70, tr: -40, nk: -40, ua: 60, fa: 60, th: 40, sh: 120, th2: 160, sh2: 160, hl: 'th2' },
+    'downdog': { hx: 86, hy: 56, tr: 42, nk: 42, ua: 42, fa: 42, th: 113, sh: 113, ft: 0, hl: 'sh' },      // folded forward from the hips (belly toward the thighs), hands in front, heels back
+    'wgs': { hx: 55, hy: 68.5, tr: -40, nk: -40, ua: 60, fa: 60, th: 10, sh: 90, th2: 152, sh2: 152, hl: 'th2' },      // long lunge: front shin upright, back leg straight on its toes
     'leg-swing': { th2: 20, sh2: 20, ua: -170, fa: -170, hl: 'th2' },
     'arm-circle': { ua: -60, fa: -60, hl: 'ua' },
     'wrist-flex': { ua: 0, fa: 0, hl: 'fa' },
@@ -77,11 +79,11 @@ const ILLUS = (() => {
     'prone-Y': { ...PR, ua: -30, fa: -30, hl: 'ua' },
     'prone-W': { ...PR, ua: -90, fa: -10, hl: 'fa' },
     'wall-slide': { hx: 62, tr: -75, ua: -10, fa: -80, w: 88, hl: 'ua' },
-    'scap-pushup': { hx: 74, hy: 75, tr: -24, nk: -25, ua: 90, fa: 90, th: 156, sh: 156, hl: 'ua' },
+    'scap-pushup': { hx: 73.2, hy: 72.8, tr: -19.2, nk: -21, ua: 90, fa: 90, th: 160.8, sh: 160.8, toes: true, hl: 'ua' },
     deadbug: { ...LY, ua: -90, fa: -90, th: -90, sh: 0, th2: -10, sh2: -10, hl: 'tr' },
-    plank: { hy: 82, tr: -12, nk: -20, ua: 90, fa: 0, th: 168, sh: 168, hl: 'tr' },
-    'side-plank': { hy: 82, tr: -12, nk: -20, ua: -90, fa: -90, th: 168, sh: 168, hl: 'tr' },
-    copenhagen: { hy: 82, tr: -12, nk: -20, ua: -90, fa: -90, th: 168, sh: 168, th2: 175, sh2: 175, prop: 'bench', hl: 'th2' },
+    plank: { hy: 80, tr: -8, nk: -16, ua: 90, fa: 0, th: 172, sh: 172, toes: true, hl: 'tr' },      // one straight line from shoulders to ankles, on the toes
+    'side-plank': { hy: 80, tr: -8, nk: -16, ua: -90, fa: -90, th: 172, sh: 172, toes: true, hl: 'tr' },
+    copenhagen: { hy: 82, tr: -12, nk: -20, ua: -90, fa: -90, th: 172.5, sh: 172.5, toes: true, th2: 175, sh2: 175, prop: 'bench', hl: 'th2' },
     birddog: { ...AF, ua: 0, fa: 0, th2: -175, sh2: -175, hl: 'tr' },
     bridge: { hx: 92, hy: 72, tr: 145, nk: 175, ua: 0, fa: 0, th: -5, sh: 95, hl: 'th' },
     'sl-bridge': { hx: 92, hy: 72, tr: 145, nk: 175, ua: 0, fa: 0, th: -5, sh: 95, th2: -50, sh2: -50, hl: 'th' },
@@ -100,12 +102,12 @@ const ILLUS = (() => {
     'pull-apart': { ua: 0, fa: 0, hl: 'ua' },
     'toe-raise': { ft: -35, hl: 'sh' },
     'calf-raise': { hy: 47, ft: 45, hl: 'sh' },
-    'seated-calf': { hx: 60, hy: 72, tr: -80, nk: -80, th: 0, sh: 90, ft: 45, prop: 'chair', hl: 'sh' },
+    'seated-calf': { hx: 60, hy: 72, tr: -80, nk: -80, th: -10, sh: 88, ft: 24, prop: 'chair', hl: 'sh' },       // heel lifted, toes stay on the floor
     'hammer-curl': { ua: 90, fa: -30, hl: 'fa' },
     pushdown: { ua: 90, fa: 80, hl: 'ua' },
     march: { th2: 0, sh2: 90, hl: 'th2' },
     superman: { hx: 60, hy: 86, tr: -15, nk: -20, ua: -5, fa: -5, th: -172, sh: -172, hl: 'tr' },
-    pushup: { hx: 74, hy: 75, tr: -24, nk: -25, ua: 90, fa: 90, th: 156, sh: 156, hl: 'ua' },
+    pushup: { hx: 73.2, hy: 72.8, tr: -19.2, nk: -21, ua: 90, fa: 90, th: 160.8, sh: 160.8, toes: true, hl: 'ua' },
     pulldown: { ua: -75, fa: -75, hl: 'ua' },
     press: { ua: -90, fa: -90, hl: 'ua' },
     'lateral-raise': { ua: 0, fa: 0, hl: 'ua' },
@@ -123,20 +125,50 @@ const ILLUS = (() => {
     'tennis-ball': { ...LY, th: -60, sh: 60, ball: [64, 80], hl: 'nk' }
   };
   let female = false; const setFemale = v => { female = !!v; };
-  function geo(o) {
+  /* FLOOR is where the sole of a standing shoe rests. Every pose is grounded on it: geo() finds the lowest thing that
+     carries weight (a shoe, knee, hip, shoulder, head, elbow or hand) and moves the whole figure up or down until that
+     touches the floor. So nothing floats and nothing sinks, whatever numbers a pose was written with. Poses on a prop
+     (chair, bed, step, bench) keep their written height, because the prop is drawn at a fixed place. */
+  const FLOOR = 93.7;
+  function geo(o, raw) {
     const p = { hx: 70, hy: 53, tr: -90, nk: -90, ua: 90, fa: 90, th: 90, sh: 90, ...o }, R = Math.PI / 180;
+    if (p.mat === undefined || p.top) p.mat = !p.top && onFloor(p);          // decided from the pose as written, before grounding moves it
     const d = (a, l) => [Math.cos(a * R) * l, Math.sin(a * R) * l], ad = (q, v) => [q[0] + v[0], q[1] + v[1]];
-    const H = [p.hx, p.hy], S = ad(H, d(p.tr, 28)), K = ad(H, d(p.th, 19)), A = ad(K, d(p.sh, 18)), N = ad(S, d(p.nk, 10));
-    const two = p.th2 !== undefined, K2 = two ? ad(H, d(p.th2, 19)) : null, A2 = two ? ad(K2, d(p.sh2, 18)) : null;
-    const T = ad(A, d(p.ft !== undefined ? p.ft : p.sh - 90, 7)), T2 = two ? ad(A2, d(p.ft2 !== undefined ? p.ft2 : p.sh2 - 90, 7)) : null;
-    /* hand: [forward, up, elbow hint] puts the wrist on a spot of the head, in the head's own frame (centre of the skull,
-       forward = the way the face looks). grab: [joint, elbow hint, dx, dy] puts it on a knee or ankle. The arm is solved
-       from there, so the hand stays where it holds however the body moves. */
-    if (p.hand) { const up = d(p.nk, 1), c = ad(S, d(p.nk, 11.4)), Q = [c[0] - up[1] * p.hand[0] + up[0] * p.hand[1], c[1] + up[0] * p.hand[0] + up[1] * p.hand[1]]; [p.ua, p.fa] = ik(S, Q, 14, 12, p.hand[2]); }
-    if (p.grab) { const q = { K, A, K2, A2 }[p.grab[0]]; if (q) [p.ua, p.fa] = ik(S, [q[0] + (p.grab[2] || 0), q[1] + (p.grab[3] || 0)], 14, 12, p.grab[1]); }
-    const E = ad(S, d(p.ua, 14)), W = ad(E, d(p.fa, 12));
-    const E2 = p.ua2 !== undefined ? ad(S, d(p.ua2, 14)) : null, W2 = E2 ? ad(E2, d(p.fa2 !== undefined ? p.fa2 : p.ua2, 12)) : null;
-    return { p, H, S, E, W, K, A, N, K2, A2, T, T2, E2, W2, seg: { tr: [H, S], nk: [S, N], ua: [S, E], fa: [E, W], th: [H, K], sh: [K, A], th2: [H, K2], sh2: [K2, A2] } };
+    const cl = v => Math.max(0, Math.min(1, v)), turn = (from, to, w) => from + ((((to - from) % 360) + 540) % 360 - 180) * w;
+    // lowest point of a shoe outline (same shape the renderer draws) for an ankle A, toe direction a, knee K
+    const shoeLow = (K, A, a) => { const ux = Math.cos(a * R), uy = Math.sin(a * R); let ny = ux; if (-uy * (K[0] - A[0]) + ux * (K[1] - A[1]) > 0) ny = -ny;
+      const q = (t, n) => A[1] + uy * t + ny * n; return Math.max(q(-1.9, -2), q(-3.3, .4), q(-3, 2.7), q(9.4, 2.7), q(10.3, 1.5), q(8.4, -.5), q(2.6, -2.4), q(1, -2.5)) + 1; };
+    /* Foot angle. Unless a pose sets it, a foot sits square to its shin. Three things override that:
+       1. a foot standing on the floor or mat lies flat on it (ankle at floor height, shin fairly upright). The exception is
+          a trailing leg, thigh and shin both angled back, which is on its toes: walking, the back leg of a lunge.
+       2. when the shin itself lies on the floor (kneeling, all fours, lying face down), the foot continues the line of the
+          shin, the top of the foot resting on the floor. Poses marked toes: true (planks, push-ups) stay on the toes.
+       3. if the shoe would still go through the floor, it is turned just far enough to rest on it.
+       1 and 2 are blended over the last few units of height, so a foot that lands or lifts during a movement never snaps. */
+    const footA = (set, th, sh, K, A, solve) => { if (set !== undefined) return set; if (p.top) return sh - 90; const def = sh - 90, sn = Math.abs(Math.sin(sh * R)), trail = cl((-Math.cos(th * R) - .1) / .15) * cl((-Math.cos(sh * R) - .1) / .15);
+      const w1 = cl((A[1] - 83.5) / 3) * cl((sn - .42) / .15) * (1 - trail), w2 = p.toes ? 0 : cl((A[1] - 83) / 2) * cl((.4 - sn) / .1) * (Math.sin(def * R) > 0 ? 1 : 0);
+      let a = w2 ? turn(def, sh, w2) : w1 ? turn(def, Math.cos(def * R) >= 0 ? 0 : 180, w1) : def;
+      if (solve && shoeLow(K, A, a) > FLOOR + .3) { let best = a, bl = shoeLow(K, A, a); for (let k = 2; k <= 40 && bl > FLOOR + .3; k += 2) for (const sg of [1, -1]) { const l = shoeLow(K, A, a + sg * k); if (l < bl) { bl = l; best = a + sg * k; } } a = best; }
+      return a; };
+    const build = solve => {
+      const H = [p.hx, p.hy], S = ad(H, d(p.tr, 28)), K = ad(H, d(p.th, 19)), A = ad(K, d(p.sh, 18)), N = ad(S, d(p.nk, 10));
+      const two = p.th2 !== undefined, K2 = two ? ad(H, d(p.th2, 19)) : null, A2 = two ? ad(K2, d(p.sh2, 18)) : null;
+      const fa1 = footA(p.ft, p.th, p.sh, K, A, solve), fa2 = two ? footA(p.ft2, p.th2, p.sh2, K2, A2, solve) : 0, T = ad(A, d(fa1, 7)), T2 = two ? ad(A2, d(fa2, 7)) : null;
+      /* hand: [forward, up, elbow hint] puts the wrist on a spot of the head, in the head's own frame (centre of the skull,
+         forward = the way the face looks). grab: [joint, elbow hint, dx, dy] puts it on a knee or ankle. The arm is solved
+         from there, so the hand stays where it holds however the body moves. */
+      if (p.hand) { const up = d(p.nk, 1), c = ad(S, d(p.nk, 11.4)), Q = [c[0] - up[1] * p.hand[0] + up[0] * p.hand[1], c[1] + up[0] * p.hand[0] + up[1] * p.hand[1]]; [p.ua, p.fa] = ik(S, Q, 14, 12, p.hand[2]); }
+      if (p.grab) { const q = { K, A, K2, A2 }[p.grab[0]]; if (q) [p.ua, p.fa] = ik(S, [q[0] + (p.grab[2] || 0), q[1] + (p.grab[3] || 0)], 14, 12, p.grab[1]); }
+      const al = p.al === undefined ? 1 : p.al, E = ad(S, d(p.ua, 14 * al)), W = ad(E, d(p.fa, 12 * al));      // al < 1: arm pointing toward the viewer
+      const E2 = p.ua2 !== undefined ? ad(S, d(p.ua2, 14)) : null, W2 = E2 ? ad(E2, d(p.fa2 !== undefined ? p.fa2 : p.ua2, 12)) : null;
+      const hand = (e, w) => w ? w[1] + 2.2 * (w[1] - e[1]) / 12 + 2.5 : -99, c = ad(S, d(p.nk, 11.4));
+      const low = Math.max(shoeLow(K, A, fa1), two ? shoeLow(K2, A2, fa2) : -99, K[1] + 4.5, two ? K2[1] + 4.5 : -99, H[1] + 7.7, S[1] + 6.4, c[1] + 6.8, E[1] + 3.2, E2 ? E2[1] + 3.2 : -99, hand(E, W), hand(E2, W2));
+      return { p, H, S, E, W, K, A, N, K2, A2, T, T2, E2, W2, low, seg: { tr: [H, S], nk: [S, N], ua: [S, E], fa: [E, W], th: [H, K], sh: [K, A], th2: [H, K2], sh2: [K2, A2] } }; };
+    if (raw || p.top) return build(false);
+    if (p.prop) return build(true);
+    let g = build(false);
+    for (let k = 0; k < 3; k++) { const dy = FLOOR - g.low; if (Math.abs(dy) < .05 || Math.abs(dy) > 12) break; p.hy += dy; g = build(k > 0); }
+    return Math.abs(FLOOR - g.low) < .05 ? build(true) : g;
   }
   const onFloor = p => (Math.abs(Math.sin(p.tr * Math.PI / 180)) < 0.5 && p.hy > 60) || (p.hy >= 66 && !p.prop);
   /* Front-view close-up for neck stretches: a head tilt or turn cannot be seen from the side.
@@ -281,7 +313,7 @@ const ILLUS = (() => {
     const hem = `M${q(pt(.05, fr[0] - .3))} L${q(pt(.05, -bk[0] + .3))}`, hc = pt(1.07, -3.4), ang = Math.atan2(dy, dx) / R;
     return `<path d="${d}" ${F(TOP)}/><path d="${d}" fill="url(#sh${id})" opacity=".16"/>` +
       (hood ? `<ellipse cx="${f(hc[0])}" cy="${f(hc[1])}" rx="3.4" ry="5.6" transform="rotate(${f(ang)} ${f(hc[0])} ${f(hc[1])})" ${F(TOPd)}/>` : ''); };
-  const floor = p.mat !== undefined ? p.mat : onFloor(p), nk = p.nk * R, c = [g.S[0] + Math.cos(nk) * 11.4, g.S[1] + Math.sin(nk) * 11.4];
+  const floor = p.mat, nk = p.nk * R, c = [g.S[0] + Math.cos(nk) * 11.4, g.S[1] + Math.sin(nk) * 11.4];
   const body = [g.H, g.S, g.E, g.W, g.K, g.A, g.T, g.K2, g.A2, g.T2, g.E2, g.W2, [c[0] - 9, c[1]], [c[0] + 9, c[1]]].filter(Boolean), xs = body.map(q => q[0]);
   // framing: opt.fit = width/height ratio crops the view around the figure (thumbnails, hero); opt.slice fills the box
   let vb = '0 -8 160 108';
@@ -291,7 +323,9 @@ const ILLUS = (() => {
     let w = x1 - x0, h = Math.max(46, y1 - y0); y0 = y1 - h; if (w / h < opt.fit) { const nw = h * opt.fit; x0 -= (nw - w) / 2; w = nw; } else { const nh = w / opt.fit; y0 -= nh - h; h = nh; }
     vb = [x0, y0, w, h].map(f).join(' '); }
   let out = `<svg class="ill" viewBox="${vb}"${opt.fit || opt.slice ? ' preserveAspectRatio="xMidYMid slice"' : ''} role="img" aria-label="${key}"><defs><linearGradient id="sh${id}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".7"/></linearGradient></defs>`;
-  if (opt.scene !== false) {
+  if (opt.scene !== false && p.top) {      // seen from above: just the mat
+    out += `<rect x="-200" y="-200" width="560" height="400" ${F(V('ill-bg', '#FBEDE1'))}/><rect x="38" y="20" width="98" height="78" rx="8" ${F(V('ill-mat', '#F4B48D'))} opacity=".4"/><text x="44" y="29.5" font-size="5.2" font-weight="600" letter-spacing=".3" font-family="system-ui,-apple-system,sans-serif" ${F(V('fig-top2', '#CF6630'))} opacity=".85">SEEN FROM ABOVE</text>`;
+  } else if (opt.scene !== false) {
     const B1 = V('ill-bush', '#B4C7A3'), B2 = V('ill-bush2', '#9DB58C'), STEM = V('ill-stem', '#7F9A70'), GLOW = V('ill-glow', '#FFF7F0'), GR = V('ill-ground', '#EFDCCB');
     out += `<rect x="-200" y="-200" width="560" height="400" ${F(V('ill-bg', '#FBEDE1'))}/>`;
     {
@@ -314,7 +348,7 @@ const ILLUS = (() => {
   (p.ln || []).forEach(l => out += `<line x1="${l[0]}" y1="${l[1]}" x2="${l[2]}" y2="${l[3]}" style="stroke:${PR2}" stroke-width="5" stroke-linecap="round"/>`);
   if (p.ball) out += `<circle cx="${p.ball[0]}" cy="${p.ball[1]}" r="6" ${F(PR2)}/>`;
   // soft contact shadow under the body
-  if (opt.scene !== false && !p.prop) { const lo = body.filter(q => q[1] > 80).map(q => q[0]), a = lo.length ? Math.min(...lo) : g.H[0] - 8, b = lo.length ? Math.max(...lo) : g.H[0] + 8; out += `<ellipse cx="${f((a + b) / 2)}" cy="${floor ? 94.4 : 94.6}" rx="${f(Math.max(9, (b - a) / 2 + 3))}" ry="1.5" fill="#000" opacity=".09"/>`; }
+  if (opt.scene !== false && !p.prop && !p.top) { const lo = body.filter(q => q[1] > 80).map(q => q[0]), a = lo.length ? Math.min(...lo) : g.H[0] - 8, b = lo.length ? Math.max(...lo) : g.H[0] + 8; out += `<ellipse cx="${f((a + b) / 2)}" cy="${floor ? 94.4 : 94.6}" rx="${f(Math.max(9, (b - a) / 2 + 3))}" ry="1.5" fill="#000" opacity=".09"/>`; }
   // back to front: far arm, far leg, neck, torso with hood, near leg, head, near arm
   const E2 = g.E2 || g.E, W2 = g.W2 || g.W;
   out += arm(g.S, E2, W2, TOPd, TOPd, true);
@@ -355,7 +389,7 @@ const ILLUS = (() => {
     'arm-circles': { spin: true, tempo: [3, 0, 0, 0] },
     'leg-swing': { a: { th2: 128, sh2: 140 }, b: { th2: 22, sh2: 30 }, tempo: [0.9, 0, 0.9, 0] },
     'knee-wall': { a: { hx: 66 }, b: { hx: 76 }, pin: ['foot', 'foot2'], tempo: [2, 1, 2, 0] },
-    'open-book': { a: { ua: -20, fa: -20 }, b: { ua: -160, fa: -160 }, tempo: [3, 1, 3, 0] },
+    'open-book': { book: true, a: {}, b: {}, tempo: [3, 1, 3, 0] },
     'supine-chin': { a: { nk: 180 }, b: { nk: 187 } }, 'chin-lift': { a: { nk: 180 }, b: { nk: 200 } },      // lying head-left: angles above 180 lift the head off the mat 'prone-neck': { a: { nk: 8 }, b: { nk: -22 } },
     'band-row': { a: { ua: 15, fa: 5 }, b: { ua: 150, fa: 10 } }, 'face-pull': { a: { ua: 5, fa: 0 }, b: { ua: -20, fa: -115 } },
     'prone-Y': { a: { ua: 6, fa: 6 }, b: { ua: -28, fa: -28 } }, 'wall-slide': { a: { ua: -10, fa: -80 }, b: { ua: -62, fa: -84 } },
@@ -379,7 +413,7 @@ const ILLUS = (() => {
     'ham-curl': { a: { sh: 180 }, b: { sh: 255 } },
     nordic: { a: { hx: 60, hy: 67, tr: -90, nk: -90, th: 90, sh: 180, ua: 70, fa: 10 }, b: {}, tempo: [4, 0, 2, 1] },
     'calf-raise': { ill: 'stand', a: { hy: 53, ft: 0 }, b: { hy: 47.4, ft: 40 } },
-    'seated-calf': { a: { ft: 0 }, b: { th: -10, sh: 88, ft: 38 } }, 'toe-raise': { a: { ft: 0 }, b: { ft: -32 } }
+    'seated-calf': { a: { ft: 0 }, b: { th: -10, sh: 88, ft: 24 } }, 'toe-raise': { a: { ft: 0 }, b: { ft: -32 } }
   };
   const DEF = { hx: 70, hy: 53, tr: -90, nk: -90, ua: 90, fa: 90, th: 90, sh: 90 }, RD = Math.PI / 180;
   function ik(P, Q, l1, l2, hint) {   // two-bone IK: angles (degrees) of both segments so that the chain from P ends at Q
@@ -393,6 +427,9 @@ const ILLUS = (() => {
     for (const X of [A, B]) { const Y = X === A ? B : A; if (X.ft === undefined && Y.ft !== undefined) X.ft = X.sh - 90; }
     const P = { ...A }; for (const k in B) if (typeof B[k] === 'number' && typeof A[k] === 'number') P[k] = A[k] + (B[k] - A[k]) * u;
     if (mv.spin) { P.ua = P.fa = -90 + 360 * phase; }
+    /* open book, seen from above: the top arm lifts off the bottom one, points at the ceiling (toward the viewer, so it
+       shortens to nothing) and opens down behind the back, while the head turns after it. Knees and bottom arm stay put. */
+    if (mv.book) { const c = Math.cos(u * 165 * RD); P.al = Math.max(.12, Math.abs(c)); P.ua = P.fa = c >= 0 ? -90 : 90; P.nk = 180 - 16 * u; }
     /* hip circles: the pelvis traces an ellipse (forward, side, back, side), the trunk counter-tilts so the head stays
        over the feet, both feet stay planted, hands rest on the hips. One continuous loop per cycle. */
     if (mv.circle) { P._phase = phase; const a = 2 * Math.PI * phase, c = Math.cos(a), sn = Math.sin(a);
@@ -400,7 +437,7 @@ const ILLUS = (() => {
       [P.th, P.sh] = ik([P.hx, P.hy], [71, 89.5], 19, 18, 80); [P.th2, P.sh2] = ik([P.hx, P.hy], [68.5, 89.5], 19, 18, 80); P.ft = 0;
       const S = [P.hx + Math.cos(P.tr * RD) * 28, P.hy + Math.sin(P.tr * RD) * 28];
       [P.ua, P.fa] = ik(S, [P.hx + 4.5, P.hy - 4], 14, 12, 125); [P.ua2, P.fa2] = ik(S, [P.hx - 3.5, P.hy - 4], 14, 12, 135); }
-    if (mv.pin) { const g0 = geo(mv.pinFrom === 'b' ? B : A), H = [P.hx, P.hy], S = [H[0] + Math.cos(P.tr * RD) * 28, H[1] + Math.sin(P.tr * RD) * 28];
+    if (mv.pin) { const g0 = geo(mv.pinFrom === 'b' ? B : A, true), H = [P.hx, P.hy], S = [H[0] + Math.cos(P.tr * RD) * 28, H[1] + Math.sin(P.tr * RD) * 28];
       // a planted foot keeps the angle it was planted at: it never tips into the floor as the shin leans over it
       const X = g0.p, flat = a => Math.abs(((a % 360) + 540) % 360 - 180) < 25;
       if (mv.pin.includes('foot')) { [P.th, P.sh] = ik(H, g0.A, 19, 18, P.th); const a = X.ft !== undefined ? X.ft : X.sh - 90; if (flat(a)) P.ft = a; }
@@ -423,7 +460,7 @@ const ILLUS = (() => {
     for (const o of poses) { const g = geo({ ...o }), p = g.p, c = [g.S[0] + Math.cos(p.nk * RD) * 11.4, g.S[1] + Math.sin(p.nk * RD) * 11.4];
       for (const q of [g.H, g.S, g.E, g.W, g.K, g.A, g.T, g.K2, g.A2, g.T2, g.E2, g.W2, [c[0] - 9, c[1]], [c[0] + 9, c[1]], [c[0], c[1] - 9]]) if (q) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); }
       if (p.prop === 'chair') { x0 = Math.min(x0, 34); x1 = Math.max(x1, 90); } else if (p.prop) { x0 = Math.min(x0, p.hx - 34); x1 = Math.max(x1, p.hx + 34); }
-      if (p.w) { x0 = Math.min(x0, p.w - 4); x1 = Math.max(x1, p.w + 4); } }
+      if (p.w) { x0 = Math.min(x0, p.w - 4); x1 = Math.max(x1, p.w + 4); } if (p.top) { x0 = Math.min(x0, 46); x1 = Math.max(x1, 128); y0 = Math.min(y0, 26); } }
     x0 -= 11; x1 += 11; y0 -= 8; const y1 = 100; let w = x1 - x0, h = Math.max(62, y1 - y0); y0 = y1 - h;
     if (w / h < ratio) { const nw = h * ratio; x0 -= (nw - w) / 2; w = nw; } else { const nh = w / ratio; y0 -= (nh - h) * .72; h = nh; }
     return [x0, y0, w, h].map(v => v.toFixed(1)).join(' ');

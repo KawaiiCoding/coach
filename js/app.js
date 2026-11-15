@@ -464,7 +464,7 @@ ${chipRow([['0', 'Off'], ['30', '30 min'], ['45', '45 min'], ['60', '60 min'], [
       el.querySelector('#vdone').onclick = () => { COACH_AUDIO.hush(); close(); rerender(); };
       if (!COACH_AUDIO.hasClips) COACH_AUDIO.onClips(() => el.isConnected && draw(el)); }; return draw; }),
     music: () => sheet('Music', close => { const draw = el => { el.innerHTML = `<p class="small">Original music made live on your phone. It gets quieter when the coach speaks.</p>
-<div class="list">${[['energy', 'Upbeat', 'Warm-ups and strength'], ['flow', 'Groove', 'Stretching'], ['walk', 'Walk', 'Easy walking'], ['calm', 'Calm', 'Breathing and the body scan']].map(([m, n, d]) => `<div class="vrow"><span class="grow vpick"><b>${n}</b><small>${d}</small></span><button class="iconbtn tint" data-mp="${m}" aria-label="Preview ${n}">${I.play2}</button></div>`).join('')}</div>
+<div class="list">${[['energy', 'Funk', 'Warm-ups and strength'], ['flow', 'Acoustic', 'Stretching and easy walking'], ['calm', 'Piano', 'Breathing and the body scan']].map(([m, n, d]) => `<div class="vrow"><span class="grow vpick"><b>${n}</b><small>${d}</small></span><button class="iconbtn tint" data-mp="${m}" aria-label="Preview ${n}">${I.play2}</button></div>`).join('')}</div>
 ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '0', 'mon')}<button class="btn" id="mdone">Done</button>`;
       el.querySelectorAll('[data-mp]').forEach(b => b.onclick = () => COACH_AUDIO.preview(b.dataset.mp));
       el.querySelectorAll('[data-mon]').forEach(b => b.onclick = () => { COACH_AUDIO.musicOn = b.dataset.mon === '1'; draw(el); });
@@ -516,14 +516,14 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
       const frame = now => { if (!el.isConnected || !PL) return; const dt = (now - last) / 1000; last = now; const cy = st.cycles[PL.c] || {};
         if (!PL.paused) { const pre = PL.phase === 'ready'; pt = pre ? pt + dt : 0; const target = pre ? (pt > 0.6 && (pt - 0.6) % 6.4 < 4 ? 1 : 0) : PL.phase === 'work' && !cy.rest ? 1 : 0;      // preview: into the stretch, short hold, back out
           v += Math.sign(target - v) * Math.min(Math.abs(target - v), dt / (target ? 2.2 : 1.2)); }
-        if (now - drawn > 15) { drawn = now; draw(ease(v), 0, 0); }
+        if (now - drawn > 30) { drawn = now; draw(ease(v), 0, 0); }
         raf = requestAnimationFrame(frame); };
       raf = requestAnimationFrame(frame); return;
     }
     const tempo = st.tempo || mv.tempo || [1, 0, 1, 0], total = tempo.reduce((a, b) => a + b, 0); let t = 0, last = performance.now(), drawn = 0, ph0 = PL.phase;
     const frame = now => { if (!el.isConnected || !PL) return; const cy = st.cycles[PL.c] || {}; if (PL.phase !== ph0) { ph0 = PL.phase; t = 0; }      // the real reps start from the first position
       if (!PL.paused && (PL.phase === 'ready' || (PL.phase === 'work' && !cy.rest))) t += (now - last) / 1000; last = now;
-      if (now - drawn > 15) { drawn = now; const [up, hd, dn] = tempo, k = t % total, u = k < up ? ease(k / up) : k < up + hd ? 1 : k < up + hd + dn ? 1 - ease((k - up - hd) / dn) : 0;
+      if (now - drawn > 30) { drawn = now; const [up, hd, dn] = tempo, k = t % total, u = k < up ? ease(k / up) : k < up + hd ? 1 : k < up + hd + dn ? 1 - ease((k - up - hd) / dn) : 0;
         draw(u, Math.floor(t / total), k / total); }
       raf = requestAnimationFrame(frame); };
     raf = requestAnimationFrame(frame);
