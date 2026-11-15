@@ -1,9 +1,8 @@
 /* Offline cache for GitHub Pages. Bump CACHE when files change. */
-const CACHE = 'tension-coach-v1';
-const FILES = ['./', './index.html', './explorer.html', './manifest.webmanifest', './css/today.css', './css/style.css',
+const CACHE = 'tension-coach-v4';
+const FILES = ['./', './index.html', './manifest.webmanifest', './css/today.css',
   './js/data/bodyimg.js', './js/kinematics.js', './js/data/muscles.js', './js/data/postures.js', './js/data/stretches.js', './js/data/strength.js',
-  './js/data/breathing.js', './js/data/regions.js', './js/data/stages.js', './js/data/coaching.js', './js/illus.js', './js/plan.js', './js/today.js',
-  './js/gl.js', './js/glb.js', './js/skinning.js', './js/scene3d.js', './js/chart.js', './js/app.js',
+  './js/data/breathing.js', './js/data/regions.js', './js/data/stages.js', './js/data/coaching.js', './js/data/mindful.js', './js/illus.js', './js/data/women.js', './js/plan.js', './js/today.js',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-180.png', './icons/icon-maskable-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
