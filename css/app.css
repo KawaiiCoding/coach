@@ -393,11 +393,14 @@ body.onb { padding-bottom: 0; }
 .hrow.run time { flex: none; width: 46px; font-size: 13px; font-weight: 600; color: var(--mute); font-variant-numeric: tabular-nums; }
 .hrow.run b { font-weight: 550; } .hrow.day + .hrow.run { padding-top: 0; }
 
-/* body map zoom: the map scrolls inside its own box when zoomed in; + and - sit in the corner */
+/* body map as a small canvas: drag to move, pinch or wheel to zoom, three buttons for in, out and reset */
 .mapwrap { position: relative; }
-.mapscroll { touch-action: pan-x pan-y; width: 100%; max-height: min(58vh, 520px); overflow: auto; text-align: center; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; border-radius: 14px; }
-.mapscroll .chart { display: inline-block; height: calc(min(58vh, 520px) * var(--mz, 1)); max-width: none; vertical-align: top; }
-.mapzoom { position: absolute; right: 2px; bottom: 6px; display: flex; flex-direction: column; gap: 6px; }
-.mapzoom .iconbtn { width: 40px; height: 40px; background: var(--card); border: 1.5px solid var(--line2); box-shadow: 0 1px 4px rgba(30, 36, 48, .12); color: var(--ink); } .mapzoom .iconbtn:disabled { opacity: .35; }
-.mapzoom .ic { width: 20px; height: 20px; stroke-width: 2.2; }
-#s-onboard.fit .mapwrap { display: block; } #s-onboard.fit .mapscroll { height: 100%; max-height: none; } #s-onboard.fit .mapscroll .chart { height: calc(100% * var(--mz, 1)); max-height: none; }
+.mapscroll { width: 100%; height: min(58vh, 520px); overflow: hidden; text-align: center; border-radius: 14px; touch-action: pan-y; cursor: default; user-select: none; -webkit-user-select: none; }
+.mapscroll.zoomed { touch-action: none; cursor: grab; background: color-mix(in srgb, var(--ill-bg) 45%, transparent); } .mapscroll.zoomed:active { cursor: grabbing; }
+.mapscroll .chart { display: inline-block; height: 100%; max-width: 100%; transform-origin: 50% 50%; will-change: transform; }
+.mapscroll .chart.anim { transition: transform .28s cubic-bezier(.2, .8, .2, 1); }
+@media (prefers-reduced-motion: reduce) { .mapscroll .chart.anim { transition: none; } }
+.mapzoom { position: absolute; right: 0; top: 4px; display: flex; flex-direction: column; background: var(--card); border: 1.5px solid var(--line2); border-radius: 14px; box-shadow: 0 2px 8px rgba(30, 36, 48, .12); overflow: hidden; }
+.mapzoom button { width: 44px; height: 44px; display: grid; place-items: center; color: var(--acc); } .mapzoom button + button { border-top: 1px solid var(--line); }
+.mapzoom button:disabled { color: var(--mute); opacity: .4; } .mapzoom .ic { width: 22px; height: 22px; stroke-width: 2.3; }
+#s-onboard.fit .mapwrap { display: block; } #s-onboard.fit .mapscroll { height: 100%; }
