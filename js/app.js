@@ -757,15 +757,14 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
   const qp = new URLSearchParams(location.search), qr = qp.get('reset'), qgo = qp.get('go');
 
   /* ---------- welcome screen ----------
-     Says in a few words what the app is. On the very first visit it waits for a tap on the button. When the installed
-     app is opened from the home screen it shows briefly and fades by itself (a tap skips it). Never on a deep link
-     (shortcut or reminder), and only once per app launch. */
+     Says in a few words what the app is. Shown once, on the very first visit, and waits for a tap on the button. Once the app
+     has been set up it never appears again, also not when the installed app is opened. */
   function welcome() {
     const el = $('splash'); if (!el || qr || qgo) return;
     const get = k => { try { return localStorage.getItem(k); } catch (e) { return '1'; } }, set = (st, k) => { try { st.setItem(k, '1'); } catch (e) {} };
     const first = !get('coach.intro'), pwa = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
     let shown = false; try { shown = !!sessionStorage.getItem('coach.splash'); } catch (e) {}
-    if (!first && (!pwa || shown)) return;
+    if (!first || S.onboarded) return;      // only before the app has been set up; never again after that
     try { set(sessionStorage, 'coach.splash'); } catch (e) {}
     // what you get out of it, in three short lines
     const rows = [
