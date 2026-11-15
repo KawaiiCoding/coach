@@ -131,58 +131,76 @@ const ILLUS = (() => {
     return { p, H, S, E, W, K, A, N, K2, A2, T, T2, seg: { tr: [H, S], nk: [S, N], ua: [S, E], fa: [E, W], th: [H, K], sh: [K, A], th2: [H, K2], sh2: [K2, A2] } };
   }
   const onFloor = p => (Math.abs(Math.sin(p.tr * Math.PI / 180)) < 0.5 && p.hy > 60) || (p.hy >= 66 && !p.prop);
-  function svg(key, pose) {
-  const o = pose || T[key] || T.stand, g = geo(o), p = g.p, f = v => v.toFixed(1), R = Math.PI / 180;
-  const SK = '#edc9ab', SK2 = '#c39b7c', SKd = '#d9b494', HL = '#ff5a3d', PR = '#4d6782', PR2 = '#3a5068', FM = female;
-  const CL = FM ? '#b0527a' : '#3f6fa8', CLd = FM ? '#8f3f62' : '#2f5a8c', CL2 = FM ? '#3d3768' : '#2a4c78', LG = FM ? '#3d3768' : SK, LGd = FM ? '#2c2850' : SKd, LG2 = FM ? '#2c2850' : SK2;
-  const id = key.replace(/[^a-z0-9]/gi, '');
-  // tapered limb: quad from a (width wa) to b (width wb), rounded ends
-  const limb = (a, b, wa, wb, c, c2) => { const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l;
+  /* Figure renderer: a friendly, rounded person (orange long-sleeve top, charcoal leggings, white trainers) drawn from
+     the joint angles, on a soft garden scene. Scene colours come from CSS variables so they follow light and dark mode. */
+  function svg(key, pose, opt = {}) {
+  const o = pose || T[key] || T.stand, g = geo(o), p = g.p, f = v => v.toFixed(1), R = Math.PI / 180, FM = female;
+  const V = (n, d) => `var(--${n},${d})`, F = c => `style="fill:${c}"`;
+  const TOP = V('fig-top', '#E8793F'), TOPd = V('fig-top2', '#C9622C'), LEG = V('fig-leg', '#2F3439'), LEGd = V('fig-leg2', '#1F2326');
+  const SK = '#F1C4A2', SKd = '#DDA685', HAIR = '#3A2A24', SOLE = '#C8CDD3';
+  const PR = V('ill-prop', '#D8C7B6'), PR2 = V('ill-prop2', '#C4B09C');
+  const id = key.replace(/[^a-z0-9]/gi, '') + (opt.uid || '');
+  const pts = P => P.map(q => f(q[0]) + ',' + f(q[1])).join(' ');
+  // tapered limb with rounded ends
+  const limb = (a, b, wa, wb, c) => { const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l;
     const P = [[a[0] + nx * wa / 2, a[1] + ny * wa / 2], [b[0] + nx * wb / 2, b[1] + ny * wb / 2], [b[0] - nx * wb / 2, b[1] - ny * wb / 2], [a[0] - nx * wa / 2, a[1] - ny * wa / 2]];
-    return `<circle cx="${f(a[0])}" cy="${f(a[1])}" r="${wa / 2}" fill="${c}"/><circle cx="${f(b[0])}" cy="${f(b[1])}" r="${wb / 2}" fill="${c}"/><polygon points="${P.map(q => f(q[0]) + ',' + f(q[1])).join(' ')}" fill="${c}"/>` +
-      (c2 ? `<polygon points="${[P[1], P[2], [P[2][0] * .5 + P[3][0] * .5, P[2][1] * .5 + P[3][1] * .5]].map(q => f(q[0]) + ',' + f(q[1])).join(' ')}" fill="${c2}" opacity=".5"/>` : ''); };
-  const foot = (A, T, c) => { const dx = T[0] - A[0], dy = T[1] - A[1], l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l, nx = -uy, ny = ux;
-    const P = [[A[0] - ux * 2 + nx * 3, A[1] - uy * 2 + ny * 3], [T[0] + ux * 2 + nx * 1.5, T[1] + uy * 2 + ny * 1.5], [T[0] + ux * 3 - nx * 1.5, T[1] + uy * 3 - ny * 1.5], [A[0] - ux * 3 - nx * 3.5, A[1] - uy * 3 - ny * 3.5]];
-    return `<polygon points="${P.map(q => f(q[0]) + ',' + f(q[1])).join(' ')}" fill="${c}" stroke="${c}" stroke-width="1.5" stroke-linejoin="round"/>`; };
-  const hand = (E, W, c) => { const dx = W[0] - E[0], dy = W[1] - E[1], l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l; return `<ellipse cx="${f(W[0] + ux * 2.5)}" cy="${f(W[1] + uy * 2.5)}" rx="3.6" ry="2.4" transform="rotate(${f(Math.atan2(dy, dx) / R)} ${f(W[0] + ux * 2.5)} ${f(W[1] + uy * 2.5)})" fill="${c}"/>`; };
-  // torso: shoulders wider than hips, slight chest curve; built from hip H to shoulder S
+    return `<circle cx="${f(a[0])}" cy="${f(a[1])}" r="${wa / 2}" ${F(c)}/><circle cx="${f(b[0])}" cy="${f(b[1])}" r="${wb / 2}" ${F(c)}/><polygon points="${pts(P)}" ${F(c)}/>`; };
+  // white trainer with a grey sole, sole on the side away from the knee
+  const shoe = (K, A, T) => { const dx = T[0] - A[0], dy = T[1] - A[1], l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l; let nx = -uy, ny = ux;
+    if (nx * (K[0] - A[0]) + ny * (K[1] - A[1]) > 0) { nx = -nx; ny = -ny; }
+    const q = (b, t, n) => [b[0] + ux * t + nx * n, b[1] + uy * t + ny * n];
+    const P = [q(A, -0.6, -1.6), q(A, -3, 0.6), q(A, -2.6, 2.8), q(T, 2.4, 2.6), q(T, 2.6, 0.8), q(T, 0.4, -1.3)];
+    return `<polygon points="${pts(P)}" fill="#fff" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/><path d="M${f(P[2][0])} ${f(P[2][1])}L${f(P[3][0])} ${f(P[3][1])}" stroke="${SOLE}" stroke-width="1.5" stroke-linecap="round"/>`; };
+  const hand = (E, W) => { const dx = W[0] - E[0], dy = W[1] - E[1], l = Math.hypot(dx, dy) || 1; return `<circle cx="${f(W[0] + dx / l * 1.8)}" cy="${f(W[1] + dy / l * 1.8)}" r="2.9" fill="${SK}"/>`; };
+  // torso: shoulders wider than hips, soft curves, hem band at the hip
   const torso = (H, S) => { const dx = S[0] - H[0], dy = S[1] - H[1], l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l, ux = dx / l, uy = dy / l;
-    const pt = (t, w) => [H[0] + ux * l * t + nx * w, H[1] + uy * l * t + ny * w];
-    const front = FM ? [pt(0, 7.2), pt(.32, 5.2), pt(.62, 7.4), pt(.9, 6.6), pt(1.02, 5.8)] : [pt(0, 6.5), pt(.3, 6), pt(.6, 7), pt(.9, 8), pt(1.02, 7)], back = FM ? [pt(1.02, -5.8), pt(.85, -7), pt(.55, -6), pt(.32, -5.4), pt(0, -7.4)] : [pt(1.02, -7), pt(.85, -8.5), pt(.55, -7.5), pt(.3, -6.5), pt(0, -6.5)];
-    const path = 'M' + [...front, ...back].map(q => f(q[0]) + ' ' + f(q[1])).join(' L') + ' Z';
-    const waist = 'M' + [pt(.42, 6.3), pt(.42, -7)].map(q => f(q[0]) + ' ' + f(q[1])).join(' L');
-    return `<path d="${path}" fill="${CL}"/><path d="${path}" fill="url(#sh${id})" opacity=".35"/><path d="${waist}" stroke="${CLd}" stroke-width="1.2" opacity=".6"/>`; };
+    const pt = (t, w) => [H[0] + ux * l * t + nx * w, H[1] + uy * l * t + ny * w], q = v => f(v[0]) + ' ' + f(v[1]);
+    const w = FM ? [7.6, 6.6, 8, 7.8, 6] : [7.6, 7.6, 8.6, 9.2, 6.8];
+    const d = `M${q(pt(0, w[0]))} C${q(pt(.3, w[1]))} ${q(pt(.6, w[2]))} ${q(pt(.86, w[3]))} Q${q(pt(1.06, w[4]))} ${q(pt(1.08, 0))} Q${q(pt(1.06, -w[4]))} ${q(pt(.86, -w[3]))} C${q(pt(.6, -w[2]))} ${q(pt(.3, -w[1]))} ${q(pt(0, -w[0]))} Z`;
+    const hem = `M${q(pt(.08, w[0] - .2))} L${q(pt(.08, -w[0] + .2))}`;
+    return `<path d="${d}" ${F(TOP)}/><path d="${d}" fill="url(#sh${id})" opacity=".22"/><path d="${hem}" style="stroke:${TOPd}" stroke-width="2.4" stroke-linecap="round"/>`; };
   const hl = (p.hl || '').split(' ').map(k => g.seg[k]).filter(s => s && s[0] && s[1]);
   const floor = p.mat !== undefined ? p.mat : onFloor(p);
-  let out = `<svg class="ill" viewBox="0 -8 160 108" role="img" aria-label="${key}"><defs><filter id="gl${id}"><feGaussianBlur stdDeviation="2.5"/></filter><linearGradient id="sh${id}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".6"/></linearGradient></defs>`;
-  out += `<rect x="0" y="92" width="160" height="8" fill="#2b4257"/>`;
-  if (p.w) out += `<rect x="${p.w - 2}" y="0" width="4" height="92" fill="${PR2}"/>`;
-  if (floor) out += `<rect x="14" y="89" width="132" height="4" rx="2" fill="#6a4e7a"/>`;
-  const props = { chair: `<rect x="36" y="74" width="52" height="6" rx="2" fill="${PR}"/><rect x="36" y="36" width="6" height="40" rx="2" fill="${PR}"/><rect x="40" y="80" width="5" height="12" fill="${PR2}"/><rect x="80" y="80" width="5" height="12" fill="${PR2}"/>`,
-    step: `<rect x="70" y="68" width="42" height="24" fill="${PR}"/>`, box: `<rect x="86" y="58" width="46" height="34" fill="${PR}"/>`, stair: `<rect x="60" y="83" width="44" height="9" fill="${PR}"/>`,
-    bed: `<rect x="14" y="54" width="78" height="38" rx="3" fill="${PR}"/><rect x="14" y="54" width="78" height="6" rx="3" fill="#6a4e7a"/>`,
-    bench: `<rect x="100" y="58" width="52" height="34" fill="${PR}"/>`, benchL: `<rect x="10" y="78" width="56" height="14" rx="2" fill="${PR}"/>`, table: `<rect x="82" y="42" width="36" height="5" fill="${PR}"/><rect x="110" y="47" width="5" height="45" fill="${PR2}"/>` };
+  // framing: opt.fit = width/height ratio crops the view around the figure (thumbnails, hero); opt.slice fills the box
+  let vb = '0 -8 160 108';
+  if (opt.fit) { const hc = [g.N[0] + Math.cos(p.nk * R) * 4.6, g.N[1] + Math.sin(p.nk * R) * 4.6], P = [g.H, g.S, g.E, g.W, g.K, g.A, g.N, g.T, g.K2, g.A2, g.T2, [hc[0] - 9, hc[1]], [hc[0] + 9, hc[1]]].filter(Boolean); let x0 = Math.min(...P.map(q => q[0])) - 8, x1 = Math.max(...P.map(q => q[0])) + 8, y0 = Math.min(...P.map(q => q[1])) - 17, y1 = 97;
+    if (p.prop === 'chair') { x0 = Math.min(x0, 32); x1 = Math.max(x1, 92); } if (p.w) { x0 = Math.min(x0, p.w - 6); x1 = Math.max(x1, p.w + 6); }
+    let w = x1 - x0, h = Math.max(46, y1 - y0); y0 = y1 - h; if (w / h < opt.fit) { const nw = h * opt.fit; x0 -= (nw - w) / 2; w = nw; } else { const nh = w / opt.fit; y0 -= nh - h; h = nh; }
+    vb = [x0, y0, w, h].map(f).join(' '); }
+  let out = `<svg class="ill" viewBox="${vb}"${opt.fit || opt.slice ? ' preserveAspectRatio="xMidYMid slice"' : ''} role="img" aria-label="${key}"><defs><filter id="gl${id}" filterUnits="userSpaceOnUse" x="-200" y="-200" width="560" height="400"><feGaussianBlur stdDeviation="3"/></filter><linearGradient id="sh${id}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".7"/></linearGradient></defs>`;
+  if (opt.scene !== false) {
+    const B1 = V('ill-bush', '#A9BE98'), B2 = V('ill-bush2', '#8FA97E');
+    out += `<rect x="-200" y="-200" width="560" height="400" ${F(V('ill-bg', '#FBEDE1'))}/>`;
+    out += `<g opacity=".95"><circle cx="14" cy="82" r="9" ${F(B2)}/><circle cx="25" cy="77" r="11" ${F(B1)}/><circle cx="35" cy="85" r="7" ${F(B2)}/><circle cx="128" cy="84" r="7" ${F(B1)}/><circle cx="140" cy="77" r="11" ${F(B2)}/><circle cx="151" cy="83" r="8" ${F(B1)}/></g>`;
+    out += `<ellipse cx="80" cy="97" rx="150" ry="8" ${F(V('ill-ground', '#EFDCCB'))}/><rect x="-200" y="97" width="560" height="200" ${F(V('ill-ground', '#EFDCCB'))}/>`;
+  }
+  if (p.w) out += `<rect x="${p.w - 2}" y="-8" width="4" height="100" rx="1" ${F(PR2)}/>`;
+  if (floor) out += `<rect x="14" y="89" width="132" height="4" rx="2" ${F(V('ill-mat', '#F4B48D'))}/>`;
+  const props = { chair: `<rect x="36" y="74" width="52" height="6" rx="3" ${F(PR)}/><rect x="36" y="36" width="6" height="40" rx="3" ${F(PR)}/><rect x="40" y="80" width="4" height="12" rx="1" ${F(PR2)}/><rect x="80" y="80" width="4" height="12" rx="1" ${F(PR2)}/>`,
+    step: `<rect x="70" y="68" width="42" height="24" rx="3" ${F(PR)}/>`, box: `<rect x="86" y="58" width="46" height="34" rx="3" ${F(PR)}/>`, stair: `<rect x="60" y="83" width="44" height="9" rx="2" ${F(PR)}/>`,
+    bed: `<rect x="14" y="54" width="78" height="38" rx="4" ${F(PR)}/><rect x="14" y="54" width="78" height="6" rx="3" ${F(V('ill-mat', '#F4B48D'))}/>`,
+    bench: `<rect x="100" y="58" width="52" height="34" rx="3" ${F(PR)}/>`, benchL: `<rect x="10" y="78" width="56" height="14" rx="3" ${F(PR)}/>`, table: `<rect x="82" y="42" width="36" height="5" rx="2" ${F(PR)}/><rect x="110" y="47" width="5" height="45" rx="1" ${F(PR2)}/>` };
   if (p.prop && props[p.prop]) out += props[p.prop];
-  (p.ln || []).forEach(l => out += `<line x1="${l[0]}" y1="${l[1]}" x2="${l[2]}" y2="${l[3]}" stroke="${PR}" stroke-width="5" stroke-linecap="round"/>`);
-  if (p.ball) out += `<circle cx="${p.ball[0]}" cy="${p.ball[1]}" r="6" fill="${PR}"/>`;
-  hl.forEach(s => out += `<line x1="${f(s[0][0])}" y1="${f(s[0][1])}" x2="${f(s[1][0])}" y2="${f(s[1][1])}" stroke="${HL}" stroke-width="16" stroke-linecap="round" opacity=".5" filter="url(#gl${id})"/>`);
-  // far leg (darker, drawn first)
-  if (g.K2) out += limb(g.H, g.K2, 11, 8, CL2) + limb(g.K2, g.A2, 7.5, 5, LG2) + foot(g.A2, g.T2, '#4a3a34');
-  // shorts + torso
-  out += limb(g.H, [g.H[0] + (g.K[0] - g.H[0]) * .28, g.H[1] + (g.K[1] - g.H[1]) * .28], 14, 11, CL2);
+  (p.ln || []).forEach(l => out += `<line x1="${l[0]}" y1="${l[1]}" x2="${l[2]}" y2="${l[3]}" style="stroke:${PR2}" stroke-width="5" stroke-linecap="round"/>`);
+  if (p.ball) out += `<circle cx="${p.ball[0]}" cy="${p.ball[1]}" r="6" ${F(PR2)}/>`;
+  if (opt.glow !== false) hl.forEach(s => out += `<line x1="${f(s[0][0])}" y1="${f(s[0][1])}" x2="${f(s[1][0])}" y2="${f(s[1][1])}" stroke="#FF5B3A" stroke-width="15" stroke-linecap="round" opacity=".32" filter="url(#gl${id})"/>`);
+  // far leg (darker), then torso and neck, then near leg, head and arm
+  if (g.K2) out += limb(g.H, g.K2, 12, 8.6, LEGd) + limb(g.K2, g.A2, 8.6, 5.6, LEGd) + shoe(g.K2, g.A2, g.T2);
+  out += limb(g.S, g.N, 5, 4.6, SKd);
+  out += limb(g.H, [g.H[0] + (g.K[0] - g.H[0]) * .3, g.H[1] + (g.K[1] - g.H[1]) * .3], 15, 12, LEG);
   out += torso(g.H, g.S);
-  // near leg
-  out += limb(g.H, g.K, 11, 8, CL2, '#1e3a5c') + limb(g.K, g.A, 7.5, 5, LG, LGd) + foot(g.A, g.T, '#5a4a44');
-  // arm
-  out += limb(g.S, g.E, 7, 5.5, SK, SKd) + limb(g.E, g.W, 5.5, 4, SK, SKd) + hand(g.E, g.W, SK);
-  if (p.wt) out += `<rect x="${f(g.W[0] - 5)}" y="${f(g.W[1])}" width="10" height="8" rx="2" fill="#8fa5b6"/>`;
-  hl.forEach(s => out += `<line x1="${f(s[0][0])}" y1="${f(s[0][1])}" x2="${f(s[1][0])}" y2="${f(s[1][1])}" stroke="${HL}" stroke-width="2" stroke-linecap="round" opacity=".9" stroke-dasharray="1 4"/>`);
-  // neck, head with jaw, hair
-  const nk = p.nk * R, c = [g.N[0] + Math.cos(nk) * 4.5, g.N[1] + Math.sin(nk) * 4.5];
-  out += limb(g.S, g.N, 5, 4.5, SK) + `<ellipse cx="${f(c[0])}" cy="${f(c[1])}" rx="6" ry="7" transform="rotate(${f(p.nk + 90)} ${f(c[0])} ${f(c[1])})" fill="${SK}"/>`;
-  out += `<path d="M${f(c[0] - 6)} ${f(c[1])} a6 7 0 0 1 12 0 l-1 -2 l-10 0 Z" fill="#3b2a22" transform="rotate(${f(p.nk + 90)} ${f(c[0])} ${f(c[1])})"/>`;
-  if (FM) { const bx = Math.sin(nk), by = -Math.cos(nk); out += `<circle cx="${f(c[0] + bx * 6 + Math.cos(nk) * 3.5)}" cy="${f(c[1] + by * 6 + Math.sin(nk) * 3.5)}" r="3.4" fill="#3b2a22"/>`; }
-  // ear + facing hint: a small dot for the eye on the facing side
+  out += limb(g.H, g.K, 12.4, 8.8, LEG) + limb(g.K, g.A, 8.8, 5.8, LEG) + shoe(g.K, g.A, g.T);
+  // head in its own frame: up = from neck to crown, forward = the way the face looks
+  const nk = p.nk * R, c = [g.N[0] + Math.cos(nk) * 4.6, g.N[1] + Math.sin(nk) * 4.6];
+  out += `<g transform="translate(${f(c[0])} ${f(c[1])}) rotate(${f(p.nk + 90)})">`;
+  if (FM) out += `<path d="M-3.8 -4.9C-10.6 -5.6 -12.6 1.8 -9.8 8.4C-9.4 6.6 -8.2 6 -8.4 4.2C-8.2 1.6 -6.8 -.4 -3.2 -.9Z" fill="${HAIR}"/><circle cx="-4.8" cy="-3.8" r="1.35" fill="${V('fig-top', '#E8793F')}"/>`;
+  out += `<ellipse cx="0" cy="0" rx="5.5" ry="6.3" fill="${SK}"/><path d="M5.1 -.8L6.6 1.5L5.1 2.1Z" fill="${SK}"/>`;
+  out += FM ? `<path d="M-5.9 1.8C-7.2 -6 -1 -8.8 3.6 -6.9C5.7 -5.9 6.3 -4 5.7 -2.6C3 -4.3 .2 -4.1 -1.5 -2.3C-2.6 -.6 -3.4 1.6 -5.9 1.8Z" fill="${HAIR}"/>`
+    : `<path d="M-5.7 .6C-6.6 -5.8 -1.2 -8.2 3.4 -6.8C5.4 -6 6 -4.4 5.6 -3.3C3 -4.4 .4 -4.2 -1.4 -3C-2.6 -1.8 -3.6 -.2 -5.7 .6Z" fill="${HAIR}"/>`;
+  out += `<ellipse cx="-.8" cy=".9" rx="1.25" ry="1.75" fill="#E7AF8F"/><path d="M-.5 .1Q-1.2 .9 -.6 1.8" stroke="#CC9171" stroke-width=".4" fill="none" stroke-linecap="round"/><path d="M2.1 -2.3Q3.3 -3.1 4.6 -2.4" stroke="${HAIR}" stroke-width=".75" fill="none" stroke-linecap="round"/><circle cx="3.3" cy="-.5" r=".72" fill="#3A2A24"/><circle cx="4.4" cy="1.6" r=".9" fill="#F2A48C" opacity=".45"/><path d="M2.5 3.2Q3.7 4 4.8 3.1" stroke="#B5745C" stroke-width=".7" fill="none" stroke-linecap="round"/></g>`;
+  // arm: orange sleeve to the wrist, skin hand
+  out += limb(g.S, g.E, 7.6, 6.2, TOP) + limb(g.E, g.W, 6.2, 4.8, TOP) + hand(g.E, g.W);
+  if (p.wt) out += `<rect x="${f(g.W[0] - 5)}" y="${f(g.W[1])}" width="10" height="8" rx="2" ${F(PR2)}/>`;
   return out + '</svg>';
 }
   /* ---------- movement ----------

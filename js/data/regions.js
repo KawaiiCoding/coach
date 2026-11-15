@@ -6,7 +6,7 @@ const REGIONS = [
     why: 'Clenching, screen posture and stress keep the jaw closers and the muscles at the base of the skull working. Headaches that start at the back of the head or temples often come from here.',
     ev: 'Jaw relaxation, gentle self-massage and stress reduction help most people with tension-type jaw and head pain; forceful stretching does not.',
     red: 'Jaw locking, clicking with pain that limits opening, or a headache that is sudden and severe, or worst-ever: see a dentist or doctor.' },
-  { id: 'neckF', n: 'Front and side of the neck', v: 'f', zone: [100, 80, 16, 16], m: ['scm', 'scalenes', 'longus', 'upTrap'],
+  { id: 'neckF', n: 'Front of the neck', v: 'f', zone: [100, 90, 12, 10], m: ['scm', 'scalenes', 'longus', 'upTrap'],
     why: 'Forward-head posture and upper-chest breathing overwork the sternocleidomastoid and scalenes while the deep neck flexors switch off.',
     ev: 'Deep neck flexor training (chin tucks) plus scapular strengthening reduces chronic neck pain; this is the best-supported exercise approach for neck pain.',
     red: 'Numbness, tingling or weakness in the arms, dizziness with neck movement, or pain after an accident: get assessed before exercising.' },
@@ -105,7 +105,27 @@ const REGIONS = [
   { id: 'wrist', n: 'Wrist and hand', v: 'f', zone: [162, 218, 9, 14], m: ['wristFlex', 'wristExt'],
     why: 'Phone grip and typing with the wrist bent load the flexor tendons and compress the carpal tunnel.',
     ev: 'Neutral wrist positions, tendon gliding and night splints for carpal tunnel symptoms; see a clinician if numbness persists.',
-    red: 'Numbness in the thumb, index and middle fingers that wakes you, or hand weakness: see a doctor.' }
+    red: 'Numbness in the thumb, index and middle fingers that wakes you, or hand weakness: see a doctor.' },
+  { id: 'neckSide', n: 'Side of the neck', v: 'f', zone: [113, 84, 8, 10], m: ['scalenes', 'scm', 'upTrap', 'levator'],
+    why: 'Upper-chest breathing, a phone held to the ear and a head that drifts forward keep the side-neck muscles working all day.',
+    ev: 'Belly breathing plus gentle side stretches and deep neck flexor work eases most side-neck tightness within a few weeks.',
+    red: 'Tingling or weakness down the arm, a lump that does not go away, or dizziness when you turn the head: see a doctor.' },
+  { id: 'shoulderF', n: 'Front of the shoulder', v: 'f', zone: [142, 106, 12, 12], m: ['deltAnt', 'pecMinor', 'subscap', 'supra', 'biceps'],
+    why: 'Rounded shoulders tip the shoulder blade forward, so the front of the shoulder carries load it was not built for.',
+    ev: 'Opening the chest and strengthening the upper back and rotator cuff helps most front-of-shoulder pain.',
+    red: 'Sudden loss of arm lift, a dislocation, or pain spreading from the chest into the arm: get assessed urgently.' },
+  { id: 'midBack', n: 'Middle back', v: 'b', zone: [100, 152, 14, 16], m: ['erector', 'trapLow', 'lats', 'multifidus', 'rhomboid'],
+    why: 'Long slumped sitting stiffens the middle back, so the neck and lower back have to move more to make up for it.',
+    ev: 'Upper-back mobility (rotations, extension over a roll) and back strengthening reduce mid-back stiffness well.',
+    red: 'Pain with fever, weight loss, or pain that wakes you at night or follows a fall: see a doctor.' },
+  { id: 'sacrum', n: 'Base of the spine', v: 'b', zone: [100, 212, 12, 10], m: ['multifidus', 'erector', 'gmax', 'pirif', 'quadlum'],
+    why: 'Sofa slouching rolls the pelvis back onto the base of the spine and switches off the deep back and buttock muscles.',
+    ev: 'Staying active, glute bridges and gentle hip mobility are the best-supported self-care for this area.',
+    red: 'Numbness around the groin, new bladder or bowel problems, or leg weakness: urgent care.' },
+  { id: 'hipSide', n: 'Side of the hip', v: 'f', zone: [134, 228, 10, 12], m: ['gmed', 'gmin', 'tfl'],
+    why: 'Standing on one leg, crossing the legs and sleeping on one side squeeze the tendons on the outside of the hip.',
+    ev: 'Progressive side-hip strengthening and avoiding crossed-leg postures is the first-line treatment for side-hip pain.',
+    red: 'A hot swollen hip, pain after a fall, or being unable to put weight on the leg: see a doctor.' }
 ];
 /* Symptom types. Each changes the advice; 'click' only exists for joints. */
 const SYMPTOMS = [
