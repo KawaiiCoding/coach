@@ -4,7 +4,7 @@ import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promi
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 
-const OUT = 'dist', INCLUDE = ['index.html', 'manifest.webmanifest', 'sw.js', 'css', 'js', 'icons', 'audio'];
+const OUT = 'dist', INCLUDE = ['index.html', 'fig3d.html', 'manifest.webmanifest', 'sw.js', 'css', 'js', 'icons', 'audio'];
 await rm(OUT, { recursive: true, force: true }); await mkdir(OUT);
 for (const p of INCLUDE) await cp(p, join(OUT, p), { recursive: true, filter: s => !s.endsWith('.DS_Store') });
 

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>3D Coach Figure</title>
+<script>document.documentElement.style.colorScheme = new URLSearchParams(location.search).get('cs') === 'dark' ? 'dark' : 'light';</script>
+<style>
+  html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; font: 15px -apple-system, system-ui, sans-serif; }
+  canvas { position: fixed; inset: 0; touch-action: none; cursor: grab; }
+  canvas:active { cursor: grabbing; }
+  body.lab { background: #FBEDE1; }
+  nav { display: none; }
+  body.lab nav { position: fixed; z-index: 2; left: 8px; right: 8px; bottom: 8px; display: flex; flex-wrap: wrap; gap: 5px; max-height: 30vh; overflow-y: auto; }
+  nav button { border: 0; border-radius: 999px; padding: 6px 11px; background: #fff; color: #3B2A20; font: 600 12px -apple-system, system-ui, sans-serif; cursor: pointer; }
+  nav button.on { background: #E8793F; color: #fff; }
+</style>
+</head><body>
+<nav id="nav"></nav>
+<script src="js/fig3d/three.min.js"></script>
+<script src="js/fig3d/look.js"></script>
+<script src="js/fig3d/body.js"></script>
+<script src="js/fig3d/props.js"></script>
+<script src="js/fig3d/moves.js"></script>
+<script src="js/fig3d/catalog.js"></script>
+<script src="js/fig3d/limits.js"></script>
+<script src="js/fig3d/solve.js"></script>
+<script src="js/fig3d/host.js"></script>
+<script src="js/fig3d/test.js"></script>
+</body></html>

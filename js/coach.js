@@ -17,8 +17,11 @@ const COACH_AUDIO = (() => {
   const LSset = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
   musicOn = LS('coach.music') !== '0'; voiceOn = LS('coach.voice') !== '0';
 
+  const ensure = () => { if (ctx && ctx.state !== 'running' && ctx.state !== 'closed') { try { const r = ctx.resume(); if (r && r.catch) r.catch(() => {}); } catch (e) {} } };
   function init() {
-    if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
+    // iPhone: play through the silent switch like a music app, instead of being muted by it
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+    if (ctx) { ensure(); return; }
     try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
     master = ctx.createGain(); master.gain.value = 0.9; master.connect(ctx.destination);
     comp = ctx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 3.5; comp.attack.value = 0.01; comp.release.value = 0.25; comp.connect(master);
@@ -35,6 +38,9 @@ const COACH_AUDIO = (() => {
     vTone = ctx.createBiquadFilter(); vTone.type = 'highshelf'; vTone.frequency.value = 3000; vTone.gain.value = 0; voiceOut.connect(vTone); vTone.connect(master);
     vVerb = ctx.createGain(); vVerb.gain.value = 0; voiceOut.connect(vVerb); vVerb.connect(verbIn);
     try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) {}   // unlock speech on iOS
+    ctx.onstatechange = () => { if (ctx.state !== 'running' && mood !== 'off' && document.visibilityState === 'visible') setTimeout(ensure, 300); };
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') ensure(); });
+    ['pointerdown', 'touchend', 'keydown'].forEach(ev => document.addEventListener(ev, ensure, { passive: true }));
   }
 
   /* ---------- voice ---------- */
@@ -91,7 +97,7 @@ const COACH_AUDIO = (() => {
       .then(b => { if (my !== tload) return; tbuf = b; trackPlay(); }).catch(() => { if (my === tload) tkey = null; }); }
   const isCalm = () => want === 'calm' || mood === 'calm';
   /* in the calm mood the music only dips a little under the voice, and slowly, so breathing cues never make it pump */
-  function duck(on) { if (!ctx) return; const c = mood === 'calm', t = ctx.currentTime, target = musicOn && !paused && mood !== 'off' ? (on ? (c ? 0.72 : 0.35) : 1) * level() : 0; music.gain.cancelScheduledValues(t); music.gain.setTargetAtTime(target, t, c ? (on ? 0.6 : 1.4) : on ? 0.12 : 0.7); }
+  function duck(on) { if (!ctx) return; const c = mood === 'calm', t = ctx.currentTime, target = musicOn && !paused && mood !== 'off' ? (on ? (c ? 0.72 : 0.35) : 1) * level() : 0; music.gain.cancelScheduledValues(t); music.gain.setTargetAtTime(target, t, !musicOn || paused ? 0.12 : c ? (on ? 0.6 : 1.4) : on ? 0.12 : 0.7); }      // muting or pausing is quick; ducking under the voice is gentle
   function softVoice() { if (!ctx) return; const c = isCalm(), t = ctx.currentTime; voiceOut.gain.setTargetAtTime(c ? 0.6 : 1, t, 0.2); vTone.gain.setTargetAtTime(c ? -9 : -4, t, 0.2); vVerb.gain.setTargetAtTime(c ? 0.2 : 0.07, t, 0.2); }   // exercise: a touch softer; calm: clearly softer
   /* device voices read abbreviations letter by letter ("20 s"), so units are spelled out before speaking */
   const speakable = t => t.replace(/\s*\([^)]*\)/g, '').replace(/(\d)\s?s\b(?!')/g, '$1 seconds').replace(/(\d)\s?min\b/g, '$1 minutes').replace(/(\d)\s?cm\b/g, '$1 centimetres').replace(/(\d)\s?°/g, '$1 degrees').replace(/(\d)\/10\b/g, '$1 out of 10');
@@ -102,10 +108,11 @@ const COACH_AUDIO = (() => {
   function next() { if (cur) return; if (!queue.length || paused) { duck(false); return; } cur = start(queue.shift()); }
   function start(it) {
     let done = false, src = null; const h = clipId(it.text);
-    const fin = () => { if (done) return; done = true; cur = null; next(); };
-    const tts = () => { if (done) return; if (!('speechSynthesis' in window)) return fin(); const u = utter(it.text, voice, it.o.rate); u.onend = u.onerror = fin; try { speechSynthesis.speak(u); } catch (e) { fin(); } };
-    duck(true); softVoice();
-    if (ctx && useClips() && clips.has(h)) load(h).then(b => { if (done) return; src = ctx.createBufferSource(); src.buffer = b; src.connect(voiceOut); src.onended = fin; src.start(); }).catch(() => { bufs.delete(h); tts(); });
+    let dog = null; const fin = () => { if (done) return; done = true; clearTimeout(dog); cur = null; next(); };
+    const guard = ms => { clearTimeout(dog); dog = setTimeout(fin, ms); };      // safety net: some browsers never report the end of speech
+    const tts = () => { if (done) return; if (!('speechSynthesis' in window)) return fin(); const u = utter(it.text, voice, it.o.rate); u.onend = u.onerror = fin; guard(4000 + it.text.length * 110); try { speechSynthesis.speak(u); } catch (e) { fin(); } };
+    ensure(); duck(true); softVoice(); guard(15000);
+    if (ctx && useClips() && clips.has(h)) load(h).then(b => { if (done) return; src = ctx.createBufferSource(); src.buffer = b; src.connect(voiceOut); src.onended = fin; guard(b.duration * 1000 + 1500); src.start(); }).catch(() => { bufs.delete(h); tts(); });
     else tts();
     return { stop() { done = true; try { src && src.stop(); } catch (e) {} try { speechSynthesis.cancel(); } catch (e) {} } };
   }
@@ -122,16 +129,17 @@ const COACH_AUDIO = (() => {
   const busy = () => !!cur || queue.length > 0;
   function hush() { queue.length = 0; if (cur) { cur.stop(); cur = null; } duck(false); }
 
-  function setMood(m) {
-    want = m; if (!ctx) return;
+  function setMood(m) { clearTimeout(preview.t); setMoodI(m); }
+  function setMoodI(m) {
+    want = m; if (!ctx) return; ensure();
     if (m === mood) { duck(busy()); trackPlay(); return; }
     const t = ctx.currentTime, same = TRACK[m] && TRACK[m] === TRACK[mood];
     if (same) { mood = m; duck(busy()); return; }                    // same track for both moods: just keep playing
     music.gain.cancelScheduledValues(t); music.gain.setTargetAtTime(0, t, 0.4);
     setTimeout(() => { if (want !== m) return; mood = m; trackFor(m); duck(busy()); }, 1000);
   }
-  function chime(f = 660, v = 0.16) { if (!ctx) return; const t = ctx.currentTime; [0, 0.09].forEach((o, i) => { const s = ctx.createOscillator(), g = ctx.createGain(); s.frequency.value = f * (i ? 1.5 : 1); g.gain.setValueAtTime(0.0001, t + o); g.gain.linearRampToValueAtTime(v, t + o + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t + o + 0.8); s.connect(g); g.connect(sfx); s.start(t + o); s.stop(t + o + 0.85); }); try { navigator.vibrate && navigator.vibrate(30); } catch (e) {} }
-  function pause(p) { paused = p; if (p) { hush(); if (ctx) trackStop(); } else trackPlay(); duck(false); }
+  function chime(f = 660, v = 0.16) { if (!ctx) return; ensure(); const t = ctx.currentTime; [0, 0.09].forEach((o, i) => { const s = ctx.createOscillator(), g = ctx.createGain(); s.frequency.value = f * (i ? 1.5 : 1); g.gain.setValueAtTime(0.0001, t + o); g.gain.linearRampToValueAtTime(v, t + o + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t + o + 0.8); s.connect(g); g.connect(sfx); s.start(t + o); s.stop(t + o + 0.85); }); try { navigator.vibrate && navigator.vibrate(30); } catch (e) {} }
+  function pause(p) { if (!p) ensure(); paused = p; if (p) { hush(); if (ctx) trackStop(); } else trackPlay(); duck(false); }
   function stop() { hush(); setMood('off'); }
 
   let lock = null;
@@ -139,12 +147,13 @@ const COACH_AUDIO = (() => {
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && lock) wake(true); });
 
   /* a few seconds of a mood, for the settings preview */
-  function preview(m) { init(); setMood(m); clearTimeout(preview.t); preview.t = setTimeout(() => setMood('off'), 9000); }
+  function preview(m) { init(); clearTimeout(preview.t); setMoodI(m); preview.t = setTimeout(() => setMoodI('off'), 9000); }
 
-  /* test tap: peak and RMS of the master output */
-  function meter() { if (!ctx) return null; if (!meter.a) { meter.a = ctx.createAnalyser(); meter.a.fftSize = 2048; master.connect(meter.a); } const d = new Float32Array(2048); meter.a.getFloatTimeDomainData(d); let pk = 0, sq = 0; for (const x of d) { pk = Math.max(pk, Math.abs(x)); sq += x * x; } return [pk, Math.sqrt(sq / d.length)]; }
+  /* test tap: peak and RMS of the master output, or of the music alone with meter('music') (no voice, no chimes) */
+  function meter(which) { if (!ctx) return null; const key = which === 'music' ? 'm' : 'a'; if (!meter[key]) { meter[key] = ctx.createAnalyser(); meter[key].fftSize = 2048; (which === 'music' ? music : master).connect(meter[key]); } const d = new Float32Array(2048); meter[key].getFloatTimeDomainData(d); let pk = 0, sq = 0; for (const x of d) { pk = Math.max(pk, Math.abs(x)); sq += x * x; } return [pk, Math.sqrt(sq / d.length)]; }
 
   return {
+    get state() { return ctx ? ctx.state : 'none'; }, get mood() { return mood; }, _suspend() { return ctx && ctx.suspend(); },      // for tools/test-audio.mjs
     meter, init, say, busy, hush, setMood, chime, pause, stop, wake, curated, sample, preview,
     get musicOn() { return musicOn; }, set musicOn(v) { musicOn = v; LSset('coach.music', v ? '1' : '0'); duck(busy()); },
     get voiceOn() { return voiceOn; }, set voiceOn(v) { voiceOn = v; LSset('coach.voice', v ? '1' : '0'); if (!v) hush(); },

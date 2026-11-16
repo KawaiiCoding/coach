@@ -11,7 +11,10 @@
     "voice": "[ -x tools/.venv/bin/python ] || (python3 -m venv tools/.venv && tools/.venv/bin/pip install --quiet edge-tts) && tools/.venv/bin/python tools/record_voice.py",
     "test": "node tools/test.mjs",
     "test:app": "node tools/test-app.mjs",
-    "music": "sh tools/music.sh"
+    "music": "sh tools/music.sh",
+    "test:audio": "node tools/test-audio.mjs",
+    "test:talk": "node tools/test-talk.mjs",
+    "test:figure": "node tools/test-figure.mjs"
   },
   "engines": {
     "node": ">=18"

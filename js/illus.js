@@ -21,7 +21,7 @@ const ILLUS = (() => {
     child: { hx: 40, hy: 78, tr: 5, nk: 10, ua: 15, fa: 15, th: 30, sh: 180, hl: 'tr' },
     uptrap: { nk: -55, ua: -30, fa: -130, hl: 'nk' },
     levator: { nk: -30, ua: -60, fa: 150, hl: 'nk' },
-    chintuck: { nk: -97, hd: 13, zoom: true, hl: 'nk' },
+    chintuck: { nk: -97, hd: 13, zoom: 'head', backCue: true, hl: 'nk' },      // close-up of the head and shoulders; a small arrow shows the head gliding back
     'shoulder-roll': { zoom: true, rollCue: true, ua: 92, fa: 88 },      // side-on, upper body: the shoulder draws a circle, up, back, down, forward      // head drawn back over the shoulders, chin slightly down, eyes level: a tuck, not a tilt
     'supine-chin': { ...LY, nk: 178, th: -60, sh: 60, hl: 'nk' },
     scm: { nk: -115, hl: 'nk' },
@@ -600,6 +600,8 @@ const ILLUS = (() => {
     out += `<path d="M${f(an[0])} ${f(an[1])}L${f(J[0])} ${f(J[1])}" style="stroke:${BAND}" stroke-width="2.1" stroke-linecap="round"/><circle cx="${f(an[0])}" cy="${f(an[1])}" r="2.3" style="fill:${V('ill-glow', '#FFF7F0')};stroke:${BAND}" stroke-width="1.5"/>`;
     out += BD.at === 'W' ? `<circle cx="${f(J[0])}" cy="${f(J[1])}" r="1.9" style="fill:${BAND}"/>` : `<circle cx="${f(J[0])}" cy="${f(J[1])}" r="${BD.r || 4.6}" fill="none" style="stroke:${BAND}" stroke-width="2"/>`;      // gripped in the hand, or looped round the limb
     const ly = Math.max(-2, Math.min(my - 6.5, 84)); out += `<rect x="${f(mx - lw / 2)}" y="${f(ly - 4.3)}" width="${f(lw)}" height="6.4" rx="3.2" style="fill:${V('ill-glow', '#FFF7F0')};stroke:${BAND}" stroke-width=".6"/><text x="${f(mx)}" y="${f(ly + .5)}"${opt.mirror ? ` transform="translate(${f(2 * mx)} 0) scale(-1 1)"` : ''} text-anchor="middle" font-size="4" font-weight="700" letter-spacing=".4" font-family="system-ui,-apple-system,sans-serif" style="fill:${BAND}">${lab}</text>`; }
+  if (p.backCue && !(p._cycle > 0)) { const ax = c[0] + 2.5, ay = c[1] - 10.8, L = 6.5;      // shown during the first repetition only: which way the head moves
+    out += `<path d="M${f(ax)} ${f(ay)}H${f(ax - L)}M${f(ax - L + 2.2)} ${f(ay - 1.9)}L${f(ax - L)} ${f(ay)}L${f(ax - L + 2.2)} ${f(ay + 1.9)}" style="stroke:${TOPd}" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`; }
   if (p.strap) out += `<path d="M${f(g.W[0])} ${f(g.W[1])}L${f(g.T[0])} ${f(g.T[1])}" style="stroke:${V('ill-stem', '#7F9A70')}" stroke-width="1.6" stroke-linecap="round"/>`;
   if (p.rollCue) { const cx = g.S[0] - 7, cy = g.S[1] - 1, R2 = 8.4, pt = a => [cx + R2 * Math.cos(a * R), cy + R2 * Math.sin(a * R)], a0 = pt(-112), a1 = pt(-218), tg = (-218 - 90) * R, hd = k => [a1[0] - 3.9 * Math.cos(tg + k * .62), a1[1] - 3.9 * Math.sin(tg + k * .62)];      // round arrow behind the shoulder: up, back and down, clear of the face
     out += `<path d="M${f(a0[0])} ${f(a0[1])}A${R2} ${R2} 0 0 0 ${f(a1[0])} ${f(a1[1])}M${f(hd(1)[0])} ${f(hd(1)[1])}L${f(a1[0])} ${f(a1[1])}L${f(hd(-1)[0])} ${f(hd(-1)[1])}" style="stroke:${TOPd}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".9"/>`; }
@@ -704,6 +706,7 @@ const ILLUS = (() => {
     // the other side of a move that uses one arm and the opposite leg: the same view, with the other arm and the other leg doing the work
     if (other && mv.swap) for (const [a, b] of [['ua', 'ua2'], ['fa', 'fa2'], ['th', 'th2'], ['sh', 'sh2'], ['ft', 'ft2']]) { const t = P[a]; P[a] = P[b]; P[b] = t; if (P[a] === undefined) delete P[a]; if (P[b] === undefined) delete P[b]; }
     if (mv.armSwing) { const w = Math.sin(Math.PI * (cycle + phase)); P.ua = 85 - 32 * w; P.fa = P.ua - 15 - 35 * Math.max(0, w); P.ua2 = 85 + 32 * w; P.fa2 = P.ua2 - 15 - 35 * Math.max(0, -w); }
+    P._cycle = cycle;
     return P;
   }
   /* One steady frame for a whole exercise in the player: the box that holds the figure through the entire movement, at the
@@ -714,8 +717,8 @@ const ILLUS = (() => {
     const poses = mv ? [0, .25, .5, .75, 1].flatMap(u => [0, 1].map(c => animPose(key, mv, u, c, u))) : [T[key] || T.stand];
     let x0 = 1e9, x1 = -1e9, y0 = 1e9, zoom = false, hipY = 0;
     for (const o of poses) { const g = geo({ ...o }), p = g.p, c = [g.S[0] + Math.cos(p.nk * RD) * 11.4, g.S[1] + Math.sin(p.nk * RD) * 11.4];
-      if (p.zoom) { zoom = true; hipY = Math.max(hipY, g.H[1]); }      // small neck and head movements: frame the upper body only, so they can be seen
-      for (const q of (p.zoom ? [g.H, g.S, g.E, g.W, g.E2, g.W2, [g.S[0] - 16, g.S[1]], [g.S[0] + 16, g.S[1]], [c[0] - 9, c[1]], [c[0] + 9, c[1]], [c[0], c[1] - 9]] : [g.H, g.S, g.E, g.W, g.K, g.A, g.T, g.K2, g.A2, g.T2, g.E2, g.W2, [c[0] - 9, c[1]], [c[0] + 9, c[1]], [c[0], c[1] - 9]])) if (q) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); }
+      if (p.zoom) { zoom = true; hipY = Math.max(hipY, p.zoom === 'head' ? g.S[1] + 5 : g.H[1]); }      // small neck and head movements: frame the upper body only, so they can be seen
+      for (const q of (p.zoom === 'head' ? [[g.S[0] - 20, g.S[1] + 6], [g.S[0] + 20, g.S[1] + 6], [c[0] - 12, c[1]], [c[0] + 12, c[1]], [c[0], c[1] - 12]] : p.zoom ? [g.H, g.S, g.E, g.W, g.E2, g.W2, [g.S[0] - 16, g.S[1]], [g.S[0] + 16, g.S[1]], [c[0] - 9, c[1]], [c[0] + 9, c[1]], [c[0], c[1] - 9]] : [g.H, g.S, g.E, g.W, g.K, g.A, g.T, g.K2, g.A2, g.T2, g.E2, g.W2, [c[0] - 9, c[1]], [c[0] + 9, c[1]], [c[0], c[1] - 9]])) if (q) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); }
       if (p.prop === 'chair') { x0 = Math.min(x0, 34); x1 = Math.max(x1, 90); } else if (p.prop) { x0 = Math.min(x0, p.hx - 34); x1 = Math.max(x1, p.hx + 34); }
       if (p.w) { x0 = Math.min(x0, p.w - 4); x1 = Math.max(x1, p.w + 4); } if (p.prop === 'table') x1 = Math.max(x1, 120);
       if (p.top) { x0 = Math.min(x0, 46); x1 = Math.max(x1, 128); y0 = Math.min(y0, 26); } if (p.band) { x0 = Math.min(x0, p.band.x - 4); x1 = Math.max(x1, p.band.x + 4); y0 = Math.min(y0, p.band.y - 2); } }
@@ -723,5 +726,12 @@ const ILLUS = (() => {
     if (w / h < ratio) { const nw = h * ratio; x0 -= (nw - w) / 2; w = nw; } else { const nh = w / ratio; y0 -= (nh - h) * .72; h = nh; }
     return [x0, y0, w, h].map(v => v.toFixed(1)).join(' ');
   }
-  return { FRONT, T, geo, svg, MOVES, animPose, setFemale, frame, isFront };
+  /* The garden scene on its own (sun glow, cloud, hill, bushes, ground), for drawing behind the 3D figure. The ground line is
+     anchored to the bottom of the box, so a figure standing a fixed distance above the bottom edge always stands on it. */
+  function scene(uid = 's') {
+    const V = (n, d) => `var(--${n},${d})`, F = c => `style="fill:${c}"`, B1 = V('ill-bush', '#B4C7A3'), B2 = V('ill-bush2', '#9DB58C'), STEM = V('ill-stem', '#7F9A70'), GR = V('ill-ground', '#EFDCCB');
+    const bush = (x, y, k, col) => `<g transform="translate(${x} ${y}) scale(${k})">${[[0, -15, 8], [-7, -9, 8], [7, -9, 8], [-12, -2, 7], [12, -2, 7], [0, -4, 10]].map(([cx, cy, r]) => `<circle cx="${cx}" cy="${cy}" r="${r}" ${F(col)}/>`).join('')}<path d="M0 3V-17M0 -6L-6 -12M0 -9L6 -15" style="stroke:${STEM}" stroke-width=".9" stroke-linecap="round" fill="none" opacity=".75"/></g>`;
+    return `<svg class="ill scene3" viewBox="0 0 160 100" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><rect x="-200" y="-300" width="560" height="500" ${F(V('ill-bg', '#FBEDE1'))}/><circle cx="84" cy="42" r="50" ${F(V('ill-glow', '#FFF7F0'))}/><g ${F(V('ill-cloud', '#F4E6D9'))}><circle cx="24" cy="10" r="6"/><circle cx="32" cy="7" r="7.5"/><circle cx="40" cy="11" r="5.5"/><rect x="18" y="10" width="28" height="6" rx="3"/></g><ellipse cx="34" cy="90" rx="66" ry="13" ${F(V('ill-hill', '#CFDCBD'))}/>${bush(14, 83, 1.25, B1) + bush(146, 83, 1.4, B2) + bush(127, 86, .7, B1)}<ellipse cx="80" cy="92" rx="120" ry="7" ${F(GR)}/><rect x="-200" y="92" width="560" height="60" ${F(GR)}/></svg>`;
+  }
+  return { FRONT, T, geo, svg, MOVES, animPose, setFemale, frame, isFront, scene };
 })();

@@ -8,7 +8,7 @@
   const today = () => dkey(0);
   const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { return null; } };
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
-  const DEF = { onboarded: false, started: today(), profile: { breathless: 'no', redflags: [], desk: 4, sofa: 2, phone: 2, stand: 2, sleep: 'side', duration: 10, deskGood: false, stage: 0, sex: '', osteo: false, w: { now: [], sym: [] }, perWeek: 5, theme: 'auto' }, pain: {}, logs: [], remind: { on: false, every: 45 } };
+  const DEF = { onboarded: false, started: today(), profile: { breathless: 'no', redflags: [], desk: 4, sofa: 2, phone: 2, stand: 2, sleep: 'side', duration: 10, deskGood: false, stage: 0, sex: '', osteo: false, w: { now: [], sym: [] }, perWeek: 5, theme: 'auto', fig: '3d' }, pain: {}, logs: [], remind: { on: false, every: 45 } };
   let S = load() || JSON.parse(JSON.stringify(DEF));
   S.profile = { ...DEF.profile, ...S.profile }; S.remind = S.remind || DEF.remind; S.logs = S.logs || []; S.pain = S.pain || {};
   for (const k in S.pain) if (typeof S.pain[k] === 'number') S.pain[k] = { v: S.pain[k], t: ['pain'] };
@@ -22,6 +22,8 @@
   const runsOf = l => (l && l.runs) || [], ordinal = n => n + (n % 10 === 1 && n % 100 !== 11 ? 'st' : n % 10 === 2 && n % 100 !== 12 ? 'nd' : n % 10 === 3 && n % 100 !== 13 ? 'rd' : 'th');
   const dayTotal = l => { const r = runsOf(l); return r.length ? r.reduce((a, x) => a + (x.min || 0), 0) : (l && l.minutes) || 0; };
   const isF = () => S.profile.sex === 'f';
+  /* a small picture of an exercise: the 3D still when the figure setting is 3D and the move has one, otherwise the 2D drawing */
+  const pic = (ill, pose, opt = {}) => FIG3D.wrap(ILLUS.svg(ill, pose, opt), ill, opt.ex);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const fmt = s => { s = Math.max(0, Math.ceil(s)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
   const cap = s => s.charAt(0).toUpperCase() + s.slice(1), low = s => s.charAt(0).toLowerCase() + s.slice(1);
@@ -279,6 +281,20 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
   const BREATH_BY = Object.fromEntries(BREATH.ex.map(e => [e.id, e]));
   const PRAISE = ['Nice work.', 'Lovely.', 'Great job.', 'That was good.', 'Well done.', 'Beautiful.', 'You are doing great.'];
   const MID = ['Nice and steady.', 'Good. Keep breathing.', 'That is it.', 'Looking good.', 'Stay with it.', 'Lovely control.', 'Good work.'];
+  /* encouragement that fits what you are doing; drawn so that the same line does not come back for a long while */
+  const CHEER = { stretch: ['Breathe into it.', 'Let it soften on the out-breath.', 'Good. Just stay there.', 'Easy. No forcing.', 'Lovely. Stay with it.', 'Shoulders down, jaw soft.', 'Nice and relaxed.', 'Let the breath do the work.'],
+    strength: ['Good control.', 'Strong and steady.', 'Nice, keep that form.', 'That is it, smooth.', 'You have got this.', 'Quality over speed.', 'Good. Keep breathing.', 'Lovely control.'],
+    move: ['Nice and easy.', 'Good rhythm.', 'That is it.', 'Loosening up nicely.', 'Keep it relaxed.'] };
+  /* How the coach talks. 'must' lines (starting, switching sides, resting, the last reps, safety) are always said. 'cue'
+     lines (how to do it, what to focus on, what to avoid) need about 11 seconds of quiet first; 'cheer' lines need 22
+     seconds of quiet and at least 45 seconds since the last encouragement. No optional line is repeated within a few
+     minutes, and encouragement is drawn from a pool so it does not sound like a loop. */
+  function talk(text, kind = 'must', o = {}) { if (!text || !PL) return false; const now = performance.now() / 1000, said = PL.saidAt || (PL.saidAt = new Map());
+    if (kind !== 'must') { if (COACH_AUDIO.busy()) return false; if (now - (PL.talkT || -99) < (o.gap || (kind === 'cheer' ? 22 : 11))) return false;
+      if (kind === 'cheer' && now - (PL.cheerT || -99) < 45) return false; const last = said.get(text); if (last !== undefined && now - last < (kind === 'cheer' ? 600 : 150)) return false; }
+    COACH_AUDIO.say(text, o); PL.talkT = now; said.set(text, now); if (kind === 'cheer') PL.cheerT = now; return true; }
+  // a line from the pool that has not been said, or not for the longest time
+  const fresh = pool => { const said = (PL && PL.saidAt) || new Map(), never = pool.filter(t => !said.has(t)); return never.length ? pick(never) : pool.slice().sort((a, b) => said.get(a) - said.get(b))[0]; };
   const illOf = x => x.ill || (x.id === 'wu-cat' ? 'allfours' : 'stand');
   const floorIll = k => { const t = ILLUS.T[k]; if (!t) return false; const p = { hx: 70, hy: 53, tr: -90, ...t }; return Math.abs(Math.sin(p.tr * Math.PI / 180)) < 0.5 || p.hy >= 66; };
   /* spec: { r: id, t, reps, sets, section, primer, why, music, key } */
@@ -312,6 +328,7 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
     const how = sentences(x.how);
     const focus = c.focus.map(f => 'Focus on ' + low(f) + '.'), avoid = c.avoid.slice(0, 2).map(a => 'Avoid ' + low(a).replace(/^avoid /, '') + '.');
     st.cues = [...(spec.primer ? ['A quick twenty seconds to loosen up before the strength work.'] : []), ...how.slice(1), focus[0], where && isStretch ? `Let ${where} soften as you breathe out.` : where ? `Feel ${where} doing the work.` : '', avoid[0], focus[1], isStretch ? 'A mild pull only. Never sharp.' : 'Breathe out on the effort.', avoid[1], focus[2]].filter(Boolean);
+    st.keys = [focus[0], avoid[0]].filter(Boolean);      // the two reminders worth repeating on later sets
     return { ...st, kind: isStretch ? 'stretch' : 'strength', name: x.n, x, ill: x.ill, mv, tempo, cycles,
       intro: [x.n + '.', how[0]], music: st.music || (isStretch ? 'flow' : 'energy'), where };
   }
@@ -359,7 +376,7 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
       el.innerHTML = `${dots}<h1>Where do you have pain or issues?</h1>
 <div id="obmap"></div><div class="sticky"><button class="btn" id="obnext">${Object.keys(S.pain).length ? 'Continue' : 'Nothing, keep me moving'}</button></div>`;
       bodyMap($('obmap'), () => renderOnboard(), { compact: true, head: `<div class="seg sm"><button class="${Pf.sex === 'f' ? 'on' : ''}" data-sex="f">Woman</button><button class="${Pf.sex === 'm' ? 'on' : ''}" data-sex="m">Man</button></div>`,
-        bind: m => m.querySelectorAll('[data-sex]').forEach(b => b.onclick = () => { Pf.sex = b.dataset.sex; ILLUS.setFemale(isF()); save(); renderOnboard(); }) });
+        bind: m => m.querySelectorAll('[data-sex]').forEach(b => b.onclick = () => { Pf.sex = b.dataset.sex; ILLUS.setFemale(isF()); FIG3D.setFemale(isF()); save(); renderOnboard(); }) });
       $('obnext').onclick = () => { if (!Pf.sex) Pf.sex = 'x'; ob = 1; save(); renderOnboard(); };
     } else if (ob === 1) {
       el.innerHTML = `${dots}<h1>Your day includes…</h1><p class="lede">Tap all that apply. Your workout adapts to each.</p>${dayGrid(Pf)}<div class="sticky"><button class="btn" id="obday">${Pf.days.length ? 'Continue' : 'Skip'}</button></div>`;
@@ -378,10 +395,12 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
   /* ---------- today ---------- */
   let session = null;
   const streak = () => { let n = 0; for (let o = 0; ; o--) { const l = S.logs.find(x => x.d === dkey(o)); if (active(l)) n++; else if (o === 0) continue; else break; } return n; };
-  function suggestResets() {
-    const h = new Date().getHours(), ids = h < 10 ? ['morning', 'pre-walk', 'desk'] : h < 17 ? ['sitting', 'desk', 'post-walk'] : h < 21 ? ['sofa', 'post-run', 'shoulders'] : ['bed', 'calm2', 'shoulders'];
-    return ids.map(id => RESETS.find(r => r.id === id));
-  }
+  /* Quickies follow the clock: wake-up moves in the morning, desk and sitting breaks through the working day, getting off
+     the sofa in the evening, winding down at night. Ones already done today drop to the end of the row. */
+  const DAYPART = [[5, 'this morning', ['morning', 'pre-walk', 'desk']], [10, 'late morning', ['desk', 'sitting', 'phone']], [12, 'midday', ['sitting', 'desk', 'post-walk']], [14, 'this afternoon', ['desk', 'phone', 'sitting']], [17, 'this evening', ['sofa', 'shoulders', 'post-walk']], [21, 'tonight', ['bed', 'calm2', 'shoulders']]];
+  const dayPart = () => { const h = new Date().getHours(); return [...DAYPART].reverse().find(d => h >= d[0]) || DAYPART[DAYPART.length - 1]; };      // before 5 in the morning still counts as night
+  function suggestResets() { const done = new Set(log().resets || []), ids = dayPart()[2];
+    return [...ids.filter(i => !done.has(i)), ...ids.filter(i => done.has(i))].map(id => RESETS.find(r => r.id === id)).filter(Boolean); }
   function renderToday() {
     const el = $('s-today'), Pf = S.profile, L = log(); session = buildSession();
     const steps = sessionSteps(session), doneN = session.items.filter(i => L.done.includes(itemKey(i))).length, all = doneN >= session.items.length;
@@ -392,8 +411,8 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
     const lastChk = S.lastCheck ? daysSince(S.lastCheck) : 99, chkId = areas.length && lastChk >= 3 ? areas[(S.logs.length) % areas.length] : null;
     const phaseRows = PHASES.map(([pid, n, secs], k) => { const its = session.items.map((it, i) => ({ it, i, st: steps[i] })).filter(o => secs.includes(o.it.section)); if (!its.length) return '';
       const m = Math.max(1, Math.round(its.reduce((a, o) => a + o.it.secs, 0) / 60)), done = its.every(o => L.done.includes(itemKey(o.it)));
-      return `<details class="act ${done ? 'done' : ''}"><summary><div class="thumb">${ILLUS.svg((its.find(o => !o.it.primer) || its[0]).st?.ill || 'stand', null, { uid: 't' + k, glow: false, fit: 1.375 })}</div><div class="grow"><b>${n}</b><span>${m} min · ${its.length} ${its.length === 1 ? 'exercise' : 'exercises'}</span></div><span class="num">${done ? I.check : k + 1}</span></summary>
-<div class="exlist">${its.map(o => `<button class="exrow ${L.done.includes(itemKey(o.it)) ? 'done' : ''}" data-play="${o.i}"><div class="thumb sm">${ILLUS.svg(o.st ? o.st.ill : 'stand', null, { uid: 'e' + o.i, fit: 1.39 })}</div><span class="grow">${esc(o.st ? o.st.name : o.it.ex.n)}</span><span class="go">${I.play}</span></button>`).join('')}</div></details>`; }).join('');
+      return `<details class="act ${done ? 'done' : ''}"><summary><div class="thumb">${pic((its.find(o => !o.it.primer) || its[0]).st?.ill || 'stand', null, { uid: 't' + k, glow: false, fit: 1.375 })}</div><div class="grow"><b>${n}</b><span>${m} min · ${its.length} ${its.length === 1 ? 'exercise' : 'exercises'}</span></div><span class="num">${done ? I.check : k + 1}</span></summary>
+<div class="exlist">${its.map(o => `<button class="exrow ${L.done.includes(itemKey(o.it)) ? 'done' : ''}" data-play="${o.i}"><div class="thumb sm">${pic(o.st ? o.st.ill : 'stand', null, { uid: 'e' + o.i, fit: 1.39 })}</div><span class="grow">${esc(o.st ? o.st.name : o.it.ex.n)}</span><span class="go">${I.play}</span></button>`).join('')}</div></details>`; }).join('');
     el.innerHTML = `<header class="top"><div><h1>Today</h1>${streak() > 1 ? `<p class="kicker">${I.sun}<span>${streak()} days in a row</span></p>` : ''}${runsOf(L).length ? `<p class="kicker runsum">${I.check}<span><b>${runsOf(L).length}</b> ${runsOf(L).length === 1 ? 'session' : 'sessions'} today · ${dayTotal(L)} min</span></p>` : ''}</div><div class="topbtns"><button class="iconbtn tint" data-go="program" aria-label="Program">${I.cal}</button><button class="iconbtn" data-settings aria-label="Settings">${I.cog}</button></div></header>
 
 ${flagged() ? `<div class="note bad">${I.alert}<span><b>Check with a doctor first.</b> Something you ticked needs a look before training. Gentle walking and the calm resets are fine meanwhile. <a href="#" id="editflags">Change answers</a></span></div>` : ''}
@@ -403,7 +422,7 @@ ${RU.gentle ? `<div class="note">${I.heart}<span>Gentler today, since yesterday 
 <button class="btn big" id="start">${I.play}<span>${all ? 'Go again' : doneN ? 'Continue' : 'Start session'}</span></button>
 ${chkId ? `<section class="card chk"><p><b>How is your ${esc(low(REGION[chkId].n))} today?</b></p><div class="scale sm">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button data-chk="${n}" class="${n === pv(chkId) ? 'was' : ''}">${n}</button>`).join('')}</div></section>` : ''}
 <h3 class="sect">Today’s activities</h3>${phaseRows}
-<div class="secthead"><h3 class="sect">Quickies for now</h3><button class="link" data-go="resets">See all</button></div>
+<div class="secthead"><h3 class="sect">Quickies for ${dayPart()[1]}</h3><button class="link" data-go="resets">See all</button></div>
 <div class="hscroll">${suggestResets().map(r => resetCard(r, 'q')).join('')}</div>
 <div class="secthead"><h3 class="sect">Where it bothers you</h3><button class="link" id="editmap">Edit</button></div>
 <div class="chips">${areas.map(id => `<button class="chip on" data-area="${id}">${esc(REGION[id].n)}${sideTxt(id)} <b style="color:${sevCol(pv(id))}">${pv(id)}</b></button>`).join('') || '<button class="chip" id="addmap">Add an area</button>'}</div>`;
@@ -417,7 +436,7 @@ ${chkId ? `<section class="card chk"><p><b>How is your ${esc(low(REGION[chkId].n
     const ef = $('editflags'); if (ef) ef.onclick = e => { e.preventDefault(); safetySheet(); };
     el.querySelectorAll('[data-chk]').forEach(b => b.onclick = () => { const v = +b.dataset.chk; S.pain[chkId].v = v; log().pain[chkId] = v; S.lastCheck = today(); save(); toast(v < pv(chkId) ? 'Noted. Going the right way.' : 'Noted. Thanks.'); renderToday(); });
   }
-  const resetCard = (r, uid) => `<button class="rcard" data-reset="${r.id}"><div class="rart">${ILLUS.svg(r.ill, null, { uid: uid + r.id, glow: false, fit: 1.6 })}</div><span class="tag ${r.cat}">${SECTION_NAME[r.cat]}</span><b>${esc(r.n)}</b><span class="mins">${Math.max(1, Math.round(resetSteps(r).reduce((a, s) => a + stepSecs(s), 0) / 60))} min</span></button>`;
+  const resetCard = (r, uid) => `<button class="rcard" data-reset="${r.id}"><div class="rart">${pic(r.ill, null, { uid: uid + r.id, glow: false, fit: 1.6 })}</div><span class="tag ${r.cat}">${SECTION_NAME[r.cat]}</span><b>${esc(r.n)}</b><span class="mins">${Math.max(1, Math.round(resetSteps(r).reduce((a, s) => a + stepSecs(s), 0) / 60))} min</span></button>`;
   function mapSheet(after) { sheet('Where it bothers you', close => el => { el.innerHTML = '<div id="smap"></div><div class="sfoot"><button class="btn" id="mapdone">Done</button></div>'; bodyMap(el.querySelector('#smap'), () => {}); el.querySelector('#mapdone').onclick = () => { close(); after(); }; }); }
   function startReset(id) { const r = RESETS.find(x => x.id === id); if (!r) return; play(resetSteps(r), { kind: 'reset', id, n: r.n }); }
 
@@ -445,7 +464,7 @@ ${chkId ? `<section class="card chk"><p><b>How is your ${esc(low(REGION[chkId].n
     // stage progress: what the next stage asks for
     const need = ST.id === 1 ? [14, 14] : ST.id === 2 ? [42, 28] : [84, 28], win = need[1], got = S.logs.filter(l => daysSince(l.d) < win && active(l)).length, req = Math.round(win * 4 / 7), dayN = daysSince(S.started) + 1;
     const msg = doneW >= Pf.perWeek ? ['Week complete', 'You hit your plan. That is how habits stick.'] : st >= 2 ? ['Keep it up', `${st} days in a row. Every bit of movement counts.`] : doneW ? ['Nice start', 'You are building a great habit.'] : ['Fresh week', 'Five minutes today gets it going.'];
-    const exRow = (it, k) => `<button class="exrow" data-ex="${it.ex.id}"><div class="thumb sm">${ILLUS.svg(it.ex.ill, null, { ex: it.ex.id, uid: 'g' + k + it.ex.id, fit: 1.39 })}</div><span class="grow"><b>${esc(it.ex.n)}</b><small>${esc(it.why ? cap(WHERE[it.why.id] || it.why.n) : '')}</small></span>${I.chev}</button>`;
+    const exRow = (it, k) => `<button class="exrow" data-ex="${it.ex.id}"><div class="thumb sm">${pic(it.ex.ill, null, { ex: it.ex.id, uid: 'g' + k + it.ex.id, fit: 1.39 })}</div><span class="grow"><b>${esc(it.ex.n)}</b><small>${esc(it.why ? cap(WHERE[it.why.id] || it.why.n) : '')}</small></span>${I.chev}</button>`;
     const hist = week.map(w => w.l).filter(active).reverse();
     el.innerHTML = `<header class="top"><div><h1>Program</h1><p class="kicker">${I.chart}<span><b class="acc">${thisW}</b> of ${Pf.perWeek} sessions this week</span></p></div><button class="iconbtn" data-settings aria-label="Settings">${I.cog}</button></header>
 <section class="card"><div class="wknav"><button class="iconbtn" id="wkprev" aria-label="Previous week" ${wkOff <= startOff ? 'disabled' : ''}>${I.back}</button><p class="label">${wkLabel} · <b class="acc">${doneW}</b> of ${Pf.perWeek}</p><button class="iconbtn" id="wknext" aria-label="Next week" ${wkOff >= 0 ? 'disabled' : ''}>${I.chev}</button></div><div class="week">${week.map(w => `<div class="${w.k === today() ? 'today' : ''}"><span>${'MTWTFSS'[(w.d.getDay() + 6) % 7]}</span><span class="dn">${w.d.getDate()}</span><i class="${active(w.l) ? 'on' : ''}">${active(w.l) ? (runsOf(w.l).length > 1 ? `<b>${runsOf(w.l).length}</b>` : I.check) : ''}</i></div>`).join('')}</div></section>
@@ -455,7 +474,7 @@ ${chkId ? `<section class="card chk"><p><b>How is your ${esc(low(REGION[chkId].n
 <div class="stepper">${STAGES.map(s => `<button class="${s.id < ST.id ? 'done' : s.id === ST.id ? 'now' : ''}" data-stage="${s.id}" aria-label="Stage ${s.id}: ${s.n}"><span class="sdot">${s.id < ST.id ? I.check : s.id}</span><small>${s.n.split(' ')[0]}</small></button>`).join('')}</div>
 <div class="stnow"><b>${ST.n}</b><small>${ST.weeks}</small></div>
 ${ST.id < 4 ? `<div class="pbar"><i style="width:${Math.min(100, got / req * 100)}%"></i></div><p class="small">${got} of ${req} active days to reach the next stage</p>` : ''}
-<div class="hscroll exs">${[...sess.stretches.map(it => [it, 'Lengthen', 'cool']), ...sess.strength.map(it => [it, 'Strengthen', 'energy'])].map(([it, tag, cl], k) => `<button class="xcard" data-ex="${it.ex.id}"><div class="thumb">${ILLUS.svg(it.ex.ill, null, { ex: it.ex.id, uid: 'g' + k + it.ex.id, fit: 1.375 })}</div><span class="tag ${cl}">${tag}</span><b>${esc(it.ex.n)}</b></button>`).join('') || '<p class="small">Add an area or your day to see your exercises.</p>'}</div></section>
+<div class="hscroll exs">${[...sess.stretches.map(it => [it, 'Lengthen', 'cool']), ...sess.strength.map(it => [it, 'Strengthen', 'energy'])].map(([it, tag, cl], k) => `<button class="xcard" data-ex="${it.ex.id}"><div class="thumb">${pic(it.ex.ill, null, { ex: it.ex.id, uid: 'g' + k + it.ex.id, fit: 1.375 })}</div><span class="tag ${cl}">${tag}</span><b>${esc(it.ex.n)}</b></button>`).join('') || '<p class="small">Add an area or your day to see your exercises.</p>'}</div></section>
 ${hist.length ? `<h3 class="sect">${wkLabel}</h3><section class="card flush">${hist.map(l => { const rs = runsOf(l), day = new Date(l.d + 'T12:00').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
   if (!rs.length) return `<div class="hrow"><span class="grow"><b>${day}</b><small>${[l.done.length >= 2 ? 'Session' : '', ...(l.resets || []).map(id => (RESETS.find(r => r.id === id) || {}).n)].filter(Boolean).join(', ')}${l.minutes ? ' · ' + l.minutes + ' min' : ''}</small></span>${l.feel ? `<span class="feel ${l.feel}">${cap(l.feel)}</span>` : ''}<i class="ok">${I.check}</i></div>`;
   return `<div class="hrow day"><span class="grow"><b>${day}</b><small>${rs.length} ${rs.length === 1 ? 'session' : 'sessions'} · ${dayTotal(l)} min</small></span><i class="ok">${rs.length > 1 ? `<b>${rs.length}</b>` : I.check}</i></div>${rs.map(r => `<div class="hrow run"><time>${r.at}</time><span class="grow"><b>${esc(r.n)}${r.part ? ' (part)' : ''}</b><small>${r.min} min</small></span>${r.feel ? `<span class="feel ${r.feel}">${cap(r.feel)}</span>` : ''}</div>`).join('')}`; }).join('')}</section>` : ''}
@@ -471,7 +490,7 @@ ${settingRows().map(setRow).join('')}
   }
   function exSheet(id) {
     const x = STRETCH_BY[id] || STRENGTH_BY[id]; if (!x) return; const c = COACH[x.id] || { focus: [], avoid: [] };
-    sheet(x.n, close => el => { el.innerHTML = `<div class="exart">${ILLUS.svg(x.ill, null, { ex: x.id, uid: 'x', fit: 1.6 })}</div><p class="dose">${PLAN.dose(x)}</p><p>${esc(x.how)}</p>
+    sheet(x.n, close => el => { el.innerHTML = `<div class="exart">${pic(x.ill, null, { ex: x.id, uid: 'x', fit: 1.6 })}</div><p class="dose">${PLAN.dose(x)}</p><p>${esc(x.how)}</p>
 <div class="fa"><div><p class="label ok">Focus on</p><ul>${c.focus.map(f => `<li>${esc(f)}</li>`).join('')}</ul></div><div><p class="label bad">Avoid</p><ul>${c.avoid.map(f => `<li>${esc(f)}</li>`).join('')}</ul></div></div>
 <button class="btn" id="exgo">${I.play}<span>Play this one</span></button>`;
       el.querySelector('#exgo').onclick = () => { close(); const st = mkStep({ r: id, section: x.sets == null ? 'stretch' : 'strength' }, rules()); play([st], { kind: 'single' }); }; });
@@ -483,7 +502,7 @@ ${settingRows().map(setRow).join('')}
     el.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { const k = b.dataset.f; if (k === 'breath') Pf.breathless = Pf.breathless === 'yes' ? 'no' : 'yes'; else { const i = Pf.redflags.indexOf(k); i >= 0 ? Pf.redflags.splice(i, 1) : Pf.redflags.push(k); } save(); draw(el); });
     el.querySelectorAll('[data-br]').forEach(b => b.onclick = () => { Pf.breathless = b.dataset.br; save(); draw(el); });
     el.querySelector('#sdone').onclick = () => { close(); rerender(); }; }; return draw; }); }
-  const settingRows = () => { const Pf = S.profile; return [['map', I.body, 'Where it bothers you', Object.keys(S.pain).length + ' areas'], ['day', I.desk, 'Your day', dayNames(Pf)], ['about', I.user, 'About you', Pf.sex === 'f' ? 'Woman' : Pf.sex === 'm' ? 'Man' : 'Not set'], ['safety', I.shield, 'Safety answers', flagged() ? 'Needs a look' : 'All clear'], ['week', I.cal, 'Sessions per week', Pf.perWeek], ['remind', I.bell, 'Move reminders', S.remind.on ? 'Every ' + S.remind.every + ' min' : 'Off'], ['voice', I.voice, 'Coach voice', COACH_AUDIO.voiceName === COACH_AUDIO.CLIPS ? 'Andrew' : COACH_AUDIO.voiceName ? COACH_AUDIO.voiceName.replace(/Microsoft |Google /, '').split(' ')[0] : 'Default'], ['music', I.music, 'Music', COACH_AUDIO.musicOn ? 'On' : 'Off'], ['theme', I.contrast, 'Appearance', cap(Pf.theme)], ['stage', I.steps, 'Stage', Pf.stage ? 'Stage ' + Pf.stage : 'Automatic']]; };
+  const settingRows = () => { const Pf = S.profile; return [['map', I.body, 'Where it bothers you', Object.keys(S.pain).length + ' areas'], ['day', I.desk, 'Your day', dayNames(Pf)], ['about', I.user, 'About you', Pf.sex === 'f' ? 'Woman' : Pf.sex === 'm' ? 'Man' : 'Not set'], ['safety', I.shield, 'Safety answers', flagged() ? 'Needs a look' : 'All clear'], ['week', I.cal, 'Sessions per week', Pf.perWeek], ['remind', I.bell, 'Move reminders', S.remind.on ? 'Every ' + S.remind.every + ' min' : 'Off'], ['voice', I.voice, 'Coach voice', COACH_AUDIO.voiceName === COACH_AUDIO.CLIPS ? 'Andrew' : COACH_AUDIO.voiceName ? COACH_AUDIO.voiceName.replace(/Microsoft |Google /, '').split(' ')[0] : 'Default'], ['music', I.music, 'Music', COACH_AUDIO.musicOn ? 'On' : 'Off'], ['theme', I.contrast, 'Appearance', cap(Pf.theme)], ['fig', I.layers, 'Coach figure', Pf.fig === '2d' ? '2D' : '3D'], ['stage', I.steps, 'Stage', Pf.stage ? 'Stage ' + Pf.stage : 'Automatic']]; };
   const setRow = ([id, ic, n, v]) => `<button class="setrow" data-set="${id}">${ic}<span class="grow">${n}</span><small>${esc(String(v))}</small>${I.chev}</button>`;
   /* erase everything this app has stored on the device: the profile and logs, the voice and music choices, the welcome flag */
   function wipeAll() { try { Object.keys(localStorage).filter(k => k === KEY || k.startsWith('coach.') || k.startsWith('tension.')).forEach(k => localStorage.removeItem(k)); sessionStorage.clear(); } catch (e) {} location.reload(); }
@@ -503,8 +522,23 @@ ${settingRows().map(setRow).join('')}
       btn.onclick = () => { try { localStorage.setItem(KEY, JSON.stringify({ ...JSON.parse(JSON.stringify(DEF)), ...j.data, profile: { ...DEF.profile, ...j.data.profile } })); Object.entries(j.prefs || {}).forEach(([k, v]) => { if (k.startsWith('coach.') && typeof v === 'string') localStorage.setItem(k, v); }); } catch (e) { toast('Could not restore'); return; } location.reload(); }; };
     rd.readAsText(file); }
   /* settings, reachable from the cog on every screen: the same rows as "Tune your plan", erase, and the version */
+  /* Catalogue, for testing: every movement the app can show, grouped, with the view it is drawn from. Tapping one plays
+     it in the real player exactly as in a session (preview, animation, both sides, rests, voice); closing the player
+     comes back here at the same place. Nothing played from here is logged. Open it from Settings or with ?go=catalogue. */
+  let CATF = 'all', CATY = 0;
+  function catalogueSheet() { sheet('Catalogue', close => el => {
+    const viewOf = (ill, id) => { if (!ILLUS.isFront(ill, id)) return 'Side'; const sv = ILLUS.svg(ill, null, { ex: id, uid: 'v' }); return /SEEN FROM ABOVE/.test(sv) ? 'Above' : /PALM|SQUEEZE|OPEN<|viewBox="24 8 112 84"|viewBox="0 -8 160 108" role="img" aria-label="(uptrap|scm|levator|jaw)/.test(sv) ? 'Close-up' : 'Front'; };
+    const groups = [['warm', 'Warm-up', WARMUP.map(w => ({ id: w.id, n: w.n, ill: (ILLUS.MOVES[w.id] || {}).ill || illOf(w) }))], ['stretch', 'Stretches', STRETCHES.map(x => ({ id: x.id, n: x.n, ill: x.ill, sides: x.sides }))], ['strength', 'Strength', STRENGTH.map(x => ({ id: x.id, n: x.n, ill: x.ill, sides: x.sides }))], ['calm', 'Breathing and calm', [...BREATH.ex.map(e => ({ id: 'breath:' + e.id, n: e.n.replace(/,.*$/, ''), ill: 'breathing' })), { id: 'scan', n: 'Body scan', ill: 'breathing' }, { id: 'walk', n: 'Easy walk', ill: 'walk' }]]];
+    const total = groups.reduce((a, g) => a + g[2].length, 0);
+    const draw = () => { el.innerHTML = `<div class="seg sm catfig"><button class="${FIG3D.mode === '3d' ? 'on' : ''}" data-fg="3d">3D</button><button class="${FIG3D.mode === '2d' ? 'on' : ''}" data-fg="2d">2D</button></div><div class="seg sm catf">${[['all', 'All ' + total], ...groups.map(g => [g[0], g[1].split(' ')[0] + ' ' + g[2].length])].map(([k, n]) => `<button class="${CATF === k ? 'on' : ''}" data-cf="${k}">${n}</button>`).join('')}</div>
+${groups.filter(g => CATF === 'all' || CATF === g[0]).map(g => `<h3 class="sect">${g[1]}</h3><section class="card flush">${g[2].map((x, k) => `<button class="exrow" data-cat="${x.id}"><div class="thumb sm">${pic(x.ill, null, { ex: x.id, uid: 'c' + g[0] + k, fit: 1.39 })}</div><span class="grow"><b>${esc(x.n)}</b><small>${FIG3D.on() && FIG3D.idFor(x.ill, x.id) ? '3D' : viewOf(x.ill, x.id) + ' view'}${x.sides === 2 ? ' · two sides' : ''}${ILLUS.MOVES[x.id] ? ' · animated' : ''} · ${x.id}</small></span><span class="go">${I.play}</span></button>`).join('')}</section>`).join('')}`;
+      el.querySelectorAll('[data-fg]').forEach(b => b.onclick = () => { S.profile.fig = b.dataset.fg; FIG3D.setMode(S.profile.fig); save(); const sh = el.closest('.sheet'), y = sh ? sh.scrollTop : 0; draw(); if (sh) sh.scrollTop = y; });
+      el.querySelectorAll('[data-cf]').forEach(b => b.onclick = () => { CATF = b.dataset.cf; CATY = 0; draw(); el.closest('.sheet').scrollTop = 0; });
+      el.querySelectorAll('[data-cat]').forEach(b => b.onclick = () => { const sh = el.closest('.sheet'); CATY = sh ? sh.scrollTop : 0; const st = mkStep({ r: b.dataset.cat, key: b.dataset.cat }, rules()); if (!st) return toast('This one has no player step'); close(); setTimeout(() => play([st], { kind: 'test', n: st.name }), 260); }); };
+    draw(); requestAnimationFrame(() => { const sh = el.closest('.sheet'); if (sh) sh.scrollTop = CATY; }); }); }
   function settingsSheet() { sheet('Settings', close => el => {
-    el.innerHTML = `<section class="card flush settings">${settingRows().map(setRow).join('')}</section><p class="label">Your data</p><section class="card flush settings"><button class="setrow" id="bkup">${I.save}<span class="grow">Back up my data<small>Everything in one file</small></span></button><button class="setrow" id="rstr">${I.restore}<span class="grow">Restore from a backup</span></button><input type="file" id="rstrfile" accept="application/json,.json" hidden><button class="setrow danger" id="wipe2">${I.trash}<span class="grow">Erase all my data</span></button></section><p class="setver" id="setver">Tension Coach</p>`;
+    el.innerHTML = `<section class="card flush settings">${settingRows().map(setRow).join('')}</section><p class="label">Your data</p><section class="card flush settings"><button class="setrow" id="bkup">${I.save}<span class="grow">Back up my data<small>Everything in one file</small></span></button><button class="setrow" id="rstr">${I.restore}<span class="grow">Restore from a backup</span></button><input type="file" id="rstrfile" accept="application/json,.json" hidden><button class="setrow danger" id="wipe2">${I.trash}<span class="grow">Erase all my data</span></button></section><p class="label">For testing</p><section class="card flush settings"><button class="setrow" id="opencat">${I.layers}<span class="grow">Catalogue of all movements<small>Play any exercise on its own</small></span>${I.chev}</button></section><p class="setver" id="setver">Tension Coach</p>`;
+    el.querySelector('#opencat').onclick = () => { close(); setTimeout(catalogueSheet, 200); };
     el.querySelectorAll('[data-set]').forEach(b => b.onclick = () => { close(); setTimeout(() => SETTINGS[b.dataset.set](), 180); });
     el.querySelector('#bkup').onclick = backupData; const rb = el.querySelector('#rstr'), rf = el.querySelector('#rstrfile'); rb.onclick = () => rf.click(); rf.onchange = () => { if (rf.files && rf.files[0]) restoreData(rf.files[0], rb); };
     armWipe(el.querySelector('#wipe2')); appVersion().then(v => { const t = el.querySelector('#setver'); if (t) t.textContent = 'Tension Coach · version ' + (v || 'local'); }); }); }
@@ -532,7 +566,7 @@ ${has('post') ? `<p class="label">Since the birth</p>${chipRow([['early', 'Under
 ${has('period') || true ? `<div class="list"><button class="opt ${log().period ? 'on' : ''}" data-period="1"><span class="box">${I.check}</span>Period pain today (gentler session)</button></div>` : ''}` : ''}
 <button class="btn" id="adone">Done</button>`;
       const on = (sel, fn) => el.querySelectorAll(sel).forEach(b => b.onclick = () => { fn(b.dataset); save(); draw(el); });
-      on('[data-sex]', d => { Pf.sex = d.sex; ILLUS.setFemale(isF()); }); on('[data-osteo]', () => { Pf.osteo = !Pf.osteo; }); on('[data-wn]', d => tog(w.now, d.wn)); on('[data-tri]', d => { w.tri = +d.tri; });
+      on('[data-sex]', d => { Pf.sex = d.sex; ILLUS.setFemale(isF()); FIG3D.setFemale(isF()); }); on('[data-osteo]', () => { Pf.osteo = !Pf.osteo; }); on('[data-wn]', d => tog(w.now, d.wn)); on('[data-tri]', d => { w.tri = +d.tri; });
       on('[data-post]', d => { w.post = d.post; }); on('[data-cs]', () => { w.cs = !w.cs; }); on('[data-ws]', d => tog(w.sym, d.ws)); on('[data-period]', () => { log().period = !log().period; });
       el.querySelector('#adone').onclick = () => { close(); rerender(); }; }; return draw; }),
     week: () => sheet('Sessions per week', close => el => { el.innerHTML = chipRow([[3, '3'], [4, '4'], [5, '5'], [6, '6'], [7, '7']], S.profile.perWeek, 'pw'); el.querySelectorAll('[data-pw]').forEach(b => b.onclick = () => { S.profile.perWeek = +b.dataset.pw; save(); close(); rerender(); }); }),
@@ -555,6 +589,7 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
       el.querySelectorAll('[data-mp]').forEach(b => b.onclick = () => COACH_AUDIO.preview(b.dataset.mp));
       el.querySelectorAll('[data-mon]').forEach(b => b.onclick = () => { COACH_AUDIO.musicOn = b.dataset.mon === '1'; draw(el); });
       el.querySelector('#mdone').onclick = () => { COACH_AUDIO.stop(); close(); rerender(); }; }; return draw; }),
+    fig: () => sheet('Coach figure', close => el => { el.innerHTML = chipRow([['3d', '3D'], ['2d', '2D']], S.profile.fig === '2d' ? '2d' : '3d', 'fg') + (FIG3D.supported ? '' : '<p class="small">This device cannot show 3D, so the 2D figure is used.</p>'); el.querySelectorAll('[data-fg]').forEach(b => b.onclick = () => { S.profile.fig = b.dataset.fg; FIG3D.setMode(S.profile.fig); save(); close(); rerender(); }); }),
     theme: () => sheet('Appearance', close => el => { el.innerHTML = chipRow([['auto', 'Automatic'], ['light', 'Light'], ['dark', 'Dark']], S.profile.theme, 'th'); el.querySelectorAll('[data-th]').forEach(b => b.onclick = () => { S.profile.theme = b.dataset.th; save(); applyTheme(); close(); rerender(); }); }),
     stage: () => sheet('Stage', close => el => { el.innerHTML = `<p class="small">The app moves you on when you train 4 or more days a week and pain stays low. You can set it yourself.</p>${chipRow([[0, 'Automatic'], ...STAGES.map(s => [s.id, s.id + ' · ' + s.n])], S.profile.stage, 'st')}`; el.querySelectorAll('[data-st]').forEach(b => b.onclick = () => { S.profile.stage = +b.dataset.st; save(); close(); rerender(); }); })
   };
@@ -603,7 +638,8 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
     const fitBox = () => { const sv = el.firstElementChild; if (!sv || !sv.viewBox) return; const b = sv.viewBox.baseVal; let x = b.x, y = b.y, w = b.width, h = b.height; if (!w || !h) return;
       if (w / h < ratio) { const nw = h * ratio; x -= (nw - w) / 2; w = nw; } else { const nh = w / ratio; y -= (nh - h) * .55; h = nh; } sv.setAttribute('viewBox', `${x} ${y} ${w} ${h}`); };
     const draw = (V, u, cyc, ph, ci) => { const cy = st.cycles[ci === undefined ? PL.c : ci] || {}, left = /left/i.test(cy.side || ''), swap = !!(V.mv && V.mv.swap), o = { uid: 'p', slice: true, ex: V.ex, u, mirror: left && !swap }; if (V.vb) o.vb = V.vb;      // moves like the bird-dog keep the same view and work the other arm and leg instead of being mirrored
-      el.innerHTML = ILLUS.svg(V.ill, V.mv ? ILLUS.animPose(V.ill, V.mv, u, cyc, ph, left && swap) : null, o); if (!V.vb) fitBox(); };
+      const id3 = FIG3D.on() ? FIG3D.idFor(V.ill, V.ex) : null; if (id3) { FIG3D.stage(el).draw(id3, V.hold || V.mv ? { u, cyc, ph } : null, left); return; }      // 3D: the same clock drives the figure; a move without its own timing loops by itself
+      el._f3 = null; el.innerHTML = ILLUS.svg(V.ill, V.mv ? ILLUS.animPose(V.ill, V.mv, u, cyc, ph, left && swap) : null, o); if (!V.vb) fitBox(); };
     const V0 = view(0); draw(V0, 0, 0, 0); PL.moves = !reduced && !!(V0.hold || V0.mv);
     if (reduced) return;
     let v = 0, pt = 0, tp = 0, rt = 0, last = performance.now(), drawn = 0, lastC = -1, still = false;
@@ -613,11 +649,11 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
       if (now - drawn < 30) { if (!PL.paused) { if (ready) { pt += dt; tp += dt; } if (resting) rt += dt; } return; } const el2 = now - (drawn || now); drawn = now;
       if (!PL.paused) { if (ready) { pt += dt; tp += dt; } else { pt = 0; tp = 0; } rt = resting ? rt + dt : 0; }
       if (resting && cy.sw && st.cycles[PL.c + 1]) { if (!still) { still = true; draw(view(PL.c + 1), 0, 0, 0, PL.c + 1); } return; }      // switching sides: show the starting position of the side that comes next, so you can set up
-      if (resting) { el.innerHTML = ILLUS.svg('rest', null, { uid: 'p', slice: true, u: (1 - Math.cos(2 * Math.PI * rt / 4.4)) / 2 }); fitBox(); still = false; return; }      // rest: stand tall, breathe slowly
+      if (resting) { const bu = (1 - Math.cos(2 * Math.PI * rt / 4.4)) / 2; if (FIG3D.on() && FIG3D.has('rest')) FIG3D.stage(el).draw('rest', { u: bu, cyc: 0, ph: 0 }, false); else { el._f3 = null; el.innerHTML = ILLUS.svg('rest', null, { uid: 'p', slice: true, u: bu }); fitBox(); } still = false; return; }      // rest: stand tall, breathe slowly
       if (V.hold) { if (!PL.paused) { const target = ready ? (pt > 0.6 && (pt - 0.6) % 6.4 < 4 ? 1 : 0) : PL.phase === 'work' ? 1 : 0; v += Math.sign(target - v) * Math.min(Math.abs(target - v), (el2 / 1000 || dt) / (target ? 2.2 : 1.2)); } draw(V, ease(v), 0, 0); return; }
       if (V.mv) { const t = ready ? tp : PL.el + (PL.paused ? 0 : Math.min(.25, Math.max(0, (now - PL.last) / 1000))), [up, hd, dn] = V.tempo, total = V.tempo.reduce((a, b) => a + b, 0), k = t % total;
         draw(V, k < up ? ease(k / up) : k < up + hd ? 1 : k < up + hd + dn ? 1 - ease((k - up - hd) / dn) : 0, Math.floor(t / total), k / total); return; }
-      if (!still) { still = true; draw(V, 0, 0, 0); } };
+      if (!still) { still = true; draw(V, 0, 0, 0); } else if (el._f3) draw(V, 0, 0, 0); };
     raf = requestAnimationFrame(frame);
   }
   function play(steps, meta) {
@@ -651,10 +687,10 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
     const lines = [];
     if (first && !PL.greeted) { PL.greeted = true; const h = new Date().getHours(); lines.push(h < 12 ? 'Good morning.' : h < 18 ? 'Hi there.' : 'Good evening.');
       if (PL.meta.kind === 'session' && S.tipDay !== today()) { S.tipDay = today(); save(); lines.push(TIPS[Math.floor(Date.now() / 864e5) % TIPS.length]); lines.push('If anything does not feel good, just stop.'); } }
-    else if (!first) lines.push(pick(PRAISE));
+    else if (!first && (performance.now() / 1000 - (PL.praiseT || -99) > 70 || Math.random() < .3)) { lines.push(fresh(PRAISE)); PL.praiseT = performance.now() / 1000; }
     lines.push((first ? 'First: ' : 'Next: ') + st.intro[0], st.intro[1]);
     COACH_AUDIO.prefetch([...lines, ...st.cues, ...(PL.steps[i + 1] ? ['Next: ' + PL.steps[i + 1].intro[0], PL.steps[i + 1].intro[1]] : [])]);
-    lines.filter(Boolean).forEach((l, k) => COACH_AUDIO.say(l, { urgent: k === 0, keep: true }));
+    lines.filter(Boolean).forEach((l, k) => talk(l, 'must', { urgent: k === 0, keep: true }));
     const words = lines.join(' ').split(/\s+/).length, posChange = prev && floorIll(prev.ill) !== floorIll(st.ill);
     PL.t = Math.min(first ? 8 : 12, Math.max(first ? 7 : 5, Math.round(words / 2.6) + 1 + (posChange ? 3 : 0)));
     $('player').classList.add('ready'); $('upnext').textContent = (first ? 'Get ready' : 'Up next') + (PL.moves ? ' · preview' : '');
@@ -665,13 +701,14 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
   }
   function startCycle(firstC) {
     const st = PL.steps[PL.i], cy = st.cycles[PL.c]; PL.t = cy.t; PL.el = 0; PL.saidHalf = PL.said5 = false; PL.cueAt = firstC ? 9 : 6;
-    if (reduced && cy.ill) { const f = $('pfig'); if (f) f.innerHTML = ILLUS.svg(cy.ill, null, { uid: 'p', slice: true, ex: cy.ex, u: 0 }); }      // reduced motion: still switch to the picture of this part
+    if (reduced && cy.ill) { const f = $('pfig'); if (f) f._f3 = null; if (f) f.innerHTML = ILLUS.svg(cy.ill, null, { uid: 'p', slice: true, ex: cy.ex, u: 0 }); }      // reduced motion: still switch to the picture of this part
     $('pside').textContent = cy.rest ? cy.label : cy.side || (cy.label && !/^Set 1 of 1$/.test(cy.label) ? cy.label : '');
     $('player').classList.toggle('resting', !!cy.rest);
     if (st.kind === 'breath' || st.kind === 'scan') { $('pside').textContent = ''; return; }
-    if (cy.rest) { COACH_AUDIO.say(cy.sw ? 'Switch sides.' : pick(['Rest. Shake it out.', 'Good. Take a breather.', 'Nice. Short rest.']), { urgent: true }); return; }
-    if (!firstC) COACH_AUDIO.say(cy.side && st.cycles[PL.c - 1] && st.cycles[PL.c - 1].sw ? 'And hold.' : cy.reps ? (cy.label ? cy.label.replace(/ ·.*/, '') + '. Here we go.' : 'Here we go.') : 'And again. Ease in.', { urgent: true });
-    else COACH_AUDIO.say(cy.reps ? 'Begin. Slow and controlled.' : st.kind === 'stretch' ? 'Ease in gently.' : 'Go.', {});
+    // one line per change: switching sides is announced once; the few seconds of release between holds are quiet
+    if (cy.rest) { if (cy.sw) talk(fresh(['Switch sides.', 'Other side now.', 'And the other side.']), 'must', { urgent: true }); else if (cy.t > 8) talk(fresh(['Rest. Shake it out.', 'Good. Take a breather.', 'Nice. Short rest.', 'Rest. Breathe easy.']), 'must', { urgent: true }); return; }
+    if (!firstC) { if (cy.side && st.cycles[PL.c - 1] && st.cycles[PL.c - 1].sw) return; } if (!firstC) talk( cy.reps ? (cy.label ? cy.label.replace(/ ·.*/, '') + '. Here we go.' : 'Here we go.') : fresh(['And again. Ease in.', 'Once more. Ease in.', 'Back into it, gently.']), 'must', { urgent: true });
+    else talk(st.kind === 'move' ? fresh(['Off you go.', 'And go, easy pace.', 'Let us start.']) : cy.reps ? fresh(['Begin. Slow and controlled.', 'Off you go. Nice and controlled.', 'Let us go. Smooth reps.']) : st.kind === 'stretch' ? fresh(['Ease in gently.', 'Ease into it, slowly.', 'Settle in gently.']) : 'Go.', 'must');
   }
   function finishStep(skipped) {
     if (!PL) return; const st = PL.steps[PL.i];
@@ -680,10 +717,11 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
     if (PL.i < PL.steps.length - 1) beginStep(PL.i + 1); else showDone();
   }
   function logRun(finished) {      // called when the player closes: a run counts once it has at least a minute and a half of real work in it
-    if (!PL || PL.logged || (PL.runSecs || 0) < 90) return null; PL.logged = true; const L = log(), d = new Date();
+    if (!PL || PL.logged || PL.meta.kind === 'test' || (PL.runSecs || 0) < 90) return null; PL.logged = true; const L = log(), d = new Date();
     const run = { at: String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'), kind: PL.meta.kind === 'reset' ? 'reset' : 'session', n: PL.meta.kind === 'reset' ? PL.meta.n : 'Session', min: Math.max(1, Math.round(PL.runSecs / 60)) };
     if (!finished) run.part = true; (L.runs = L.runs || []).push(run); save(); return run; }
   function markDone(st) {
+    if (PL.meta.kind === 'test') return;      // previews from the catalogue leave no trace in the history
     const L = log(); L.minutes = (L.minutes || 0) + Math.max(0, Math.round(stepSecs(st) / 60)); PL.runSecs = (PL.runSecs || 0) + stepSecs(st) + 8;
     if (PL.meta.kind === 'session' && st.key && !L.done.includes(st.key)) L.done.push(st.key); save();
   }
@@ -696,11 +734,20 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
     const bar = $('pp' + PL.i); if (bar) { const tot = st.cycles.reduce((a, c) => a + c.t, 0), so = st.cycles.slice(0, PL.c).reduce((a, c) => a + c.t, 0); bar.style.width = Math.min(100, (so + PL.el) / tot * 100) + '%'; }
     if (st.kind === 'breath') breathTick(st, cy); else if (st.kind === 'scan') scanTick(st, cy);
     else if (!cy.rest) {
+      const strength = st.kind === 'strength';      // counting out reps is for strength work, not for warm-up moves
       if (cy.reps) { const r = Math.min(cy.reps, Math.floor(PL.el / cy.repT) + 1); $('preps').textContent = `Rep ${r} of ${cy.reps}`;
-        if (!PL.saidHalf && cy.reps >= 6 && r === Math.ceil(cy.reps / 2) + 1) { PL.saidHalf = true; COACH_AUDIO.say(pick(['Halfway. Nice.', 'Halfway there.', 'Half done. Keep it smooth.'])); }
-        if (!PL.said5 && cy.reps >= 6 && r === cy.reps - 1) { PL.said5 = true; COACH_AUDIO.say('Last two.', { urgent: !COACH_AUDIO.busy() }); } }
-      else if (cy.t >= 20 && !PL.said5 && PL.t <= 5.5) { PL.said5 = true; if (!COACH_AUDIO.busy()) COACH_AUDIO.say(pick(['Five more seconds.', 'Nearly there.', 'Almost done. Breathe.'])); }
-      if (PL.el >= PL.cueAt && PL.t > 6 && !COACH_AUDIO.busy()) { const cues = st.cues, ln = PL.cueI < cues.length ? cues[PL.cueI++] : pick(MID); COACH_AUDIO.say(ln); PL.cueAt = PL.el + 8 + Math.random() * 5; }
+        if (strength && !PL.saidHalf && cy.reps >= 8 && r === Math.ceil(cy.reps / 2) + 1) { PL.saidHalf = true; talk(fresh(['Halfway. Nice.', 'Halfway there.', 'Half done. Keep it smooth.']), 'cheer'); }
+        if (strength && !PL.said5 && cy.reps >= 6 && r === cy.reps - 1) { PL.said5 = true; talk(fresh(['Last two.', 'Two more.', 'Two to go.']), 'cue', { gap: 6 }); } }
+      else if (cy.t >= 25 && !PL.said5 && PL.t <= 5.5) { PL.said5 = true; talk(fresh(['Five more seconds.', 'Nearly there.', 'Almost done. Breathe.', 'Just a few more seconds.']), 'cue', { gap: 8 }); }
+      /* in between: first teach (how, focus, avoid) on the first side or set, later only a key reminder once per set
+         and now and then a word of encouragement; long quiet stretches are fine */
+      // nothing new close to the end of a hold or set, where the countdown or the last reps are said
+      if (PL.el >= PL.cueAt && PL.t > 13) { const teach = PL.cueI < st.cues.length, keys = st.keys || [];
+        let ln, kind = 'cue', after = () => {};
+        if (teach) { ln = st.cues[PL.cueI]; after = () => PL.cueI++; }
+        else if (keys.length && PL.keyC !== PL.c && Math.random() < .6) { ln = keys[(PL.keyN || 0) % keys.length]; after = () => { PL.keyC = PL.c; PL.keyN = (PL.keyN || 0) + 1; }; }
+        else { ln = fresh(CHEER[st.kind] || CHEER.stretch); kind = 'cheer'; }
+        if (talk(ln, kind)) { after(); PL.cueAt = PL.el + (PL.cueI < st.cues.length ? 12 + Math.random() * 4 : 18 + Math.random() * 10); } else PL.cueAt = PL.el + 3; }
     }
     if (PL.t <= 0) { PL.c++; if (PL.c >= st.cycles.length) finishStep(false); else startCycle(false); }
   }
@@ -708,10 +755,10 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
     const [inh, h1, exh, h2] = st.x.pattern, cyc = inh + h1 + exh + h2, k = PL.el % cyc, n = Math.floor(PL.el / cyc);
     const ph = k < inh ? 'in' : k < inh + h1 ? 'hold' : k < inh + h1 + exh ? 'out' : 'rest', u = k < inh ? k / inh : k < inh + h1 ? 1 : k < inh + h1 + exh ? 1 - (k - inh - h1) / exh : 0;
     const core = $('bcore'); if (core) { core.style.transform = `scale(${0.62 + 0.38 * ease(Math.max(0, Math.min(1, u)))})`; $('bword').textContent = { in: 'Breathe in', hold: 'Hold', out: 'Breathe out', rest: 'Rest' }[ph]; }
-    if (ph !== PL.bph) { PL.bph = ph; if (n < 3 && ph === 'in') COACH_AUDIO.say(n === 0 ? 'Breathe in through the nose…' : 'In…', { urgent: true, rate: 0.85 }); if (n < 3 && ph === 'out') COACH_AUDIO.say(n === 0 ? 'and slowly out.' : 'and out.', { urgent: true, rate: 0.85 });
-      if (n >= 4 && ph === 'out' && n % 4 === 0 && PL.t > 10 && PL.lastTip !== n) { PL.lastTip = n; const c = st.cues; COACH_AUDIO.say(PL.cueI < c.length ? c[PL.cueI++] : pick(['Let the out-breath be long and easy.', 'Shoulders heavy. Jaw soft.', 'Nothing to do but breathe.'])); } }
+    if (ph !== PL.bph) { PL.bph = ph; if (n < 3 && ph === 'in') talk(n === 0 ? 'Breathe in through the nose…' : 'In…', 'must', { urgent: true, rate: 0.85 }); if (n < 3 && ph === 'out') talk(n === 0 ? 'and slowly out.' : 'and out.', 'must', { urgent: true, rate: 0.85 });
+      if (n >= 5 && ph === 'out' && n % 6 === 5 && PL.t > 10 && PL.lastTip !== n) { PL.lastTip = n; const c = st.cues; if (PL.cueI < c.length) { if (talk(c[PL.cueI], 'cue')) PL.cueI++; } else talk(fresh(['Let the out-breath be long and easy.', 'Shoulders heavy. Jaw soft.', 'Nothing to do but breathe.', 'Let each breath settle you a little more.']), 'cheer'); } }
     $('preps').textContent = `Breath ${n + 1}`;
-    if (PL.t <= 8 && !PL.said5) { PL.said5 = true; COACH_AUDIO.say('Last breath. Let it all go.', { keep: true }); }
+    if (PL.t <= 8 && !PL.said5) { PL.said5 = true; talk('Last breath. Let it all go.', 'must', { keep: true }); }
   }
   function scanTick(st, cy) {
     if (!PL.lines) { const full = cy.t >= 200; PL.lines = SCAN.flatMap((r, ri) => (full ? r.lines : r.lines.slice(0, 1)).map(l => ({ l, ri }))); PL.lk = -1; }
@@ -720,6 +767,7 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
     if (PL.t <= 0.3) PL.lines = null;
   }
   function showDone() {
+    if (PL.meta.kind === 'test') return endPlayer();      // a preview from the catalogue goes straight back to the catalogue
     clearInterval(PL.iv); cancelAnimationFrame(raf); const P = $('player'), L = log(); let mins = Math.max(1, Math.round(PL.steps.reduce((a, s) => a + stepSecs(s), 0) / 60));
     if (PL.meta.kind === 'reset' && !L.resets.includes(PL.meta.id)) L.resets.push(PL.meta.id); save();
     COACH_AUDIO.setMood('calm'); P.classList.remove('ready', 'resting'); P.classList.add('calm', 'finished');
@@ -737,9 +785,9 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
     $('pfin').onclick = endPlayer;
   }
   function endPlayer() {
-    if (!PL) return; logRun(false); clearInterval(PL.iv); cancelAnimationFrame(raf); clearTimeout(PL.closeT); PL = null; COACH_AUDIO.stop(); COACH_AUDIO.wake(false);
+    if (!PL) return; const wasTest = PL.meta.kind === 'test'; logRun(false); clearInterval(PL.iv); cancelAnimationFrame(raf); clearTimeout(PL.closeT); PL = null; COACH_AUDIO.stop(); COACH_AUDIO.wake(false);
     try { if (document.fullscreenElement) document.exitFullscreen(); } catch (e) {}
-    const P = $('player'); P.classList.add('closing'); setTimeout(() => { P.className = 'player'; P.innerHTML = ''; document.body.classList.remove('playing'); }, 250); S.remind.last = Date.now(); save(); rerender();
+    const P = $('player'); P.classList.add('closing'); setTimeout(() => { P.className = 'player'; P.innerHTML = ''; document.body.classList.remove('playing'); }, 250); if (!wasTest) S.remind.last = Date.now(); save(); rerender(); if (wasTest) setTimeout(catalogueSheet, 300);
   }
   document.addEventListener('keydown', e => { if (!PL) return; if (e.key === ' ') { e.preventDefault(); setPause(!PL.paused); } if (e.key === 'ArrowRight') finishStep(true); if (e.key === 'Escape') endPlayer(); });
 
@@ -752,7 +800,7 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
     steps.filter(Boolean).forEach(st => { add('First: ' + st.intro[0]); add('Next: ' + st.intro[0]); add(st.intro[1]); st.cues.forEach(add); });
     steps.filter(Boolean).forEach(st => st.cycles.forEach((cy, i) => { if (i && cy.reps && cy.label && !cy.side) add(cy.label.replace(/ ·.*/, '') + '. Here we go.'); }));      // the second part of a warm-up is announced by name
     add('Lie on your left side with a pillow between the knees, or sit supported.');
-    [...PRAISE, ...MID, ...TIPS, ...SCAN.flatMap(r => r.lines)].forEach(add);
+    [...PRAISE, ...MID, ...TIPS, ...SCAN.flatMap(r => r.lines), ...Object.values(CHEER).flat(), 'Off you go.', 'And go, easy pace.', 'Let us start.', 'Off you go. Nice and controlled.', 'Let us go. Smooth reps.', 'Ease into it, slowly.', 'Settle in gently.', 'Two more.', 'Two to go.', 'Just a few more seconds.', 'Rest. Breathe easy.', 'Let each breath settle you a little more.', 'Other side now.', 'And the other side.', 'Once more. Ease in.', 'Back into it, gently.'].forEach(add);
     ['Good morning.', 'Hi there.', 'Good evening.', 'If anything does not feel good, just stop.', 'Switch sides.', 'Rest. Shake it out.', 'Good. Take a breather.', 'Nice. Short rest.', 'And hold.', 'Here we go.', 'And again. Ease in.',
       'Begin. Slow and controlled.', 'Ease in gently.', 'Go.', 'Halfway. Nice.', 'Halfway there.', 'Half done. Keep it smooth.', 'Last two.', 'Five more seconds.', 'Nearly there.', 'Almost done. Breathe.', 'Breathe in through the nose…', 'In…', 'and slowly out.', 'and out.',
       'Let the out-breath be long and easy.', 'Shoulders heavy. Jaw soft.', 'Nothing to do but breathe.', 'Last breath. Let it all go.', 'That is it. Well done for showing up today.', 'All done. That was great work.', 'Finished. Your body will thank you.', 'How do you feel?',
@@ -795,6 +843,9 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
     if (first) $('spgo').onclick = close; else { el.onclick = close; setTimeout(close, 2600); }
   }
 
+  // coming back to the app later in the day: refresh Today so the quickies match the time
+  let shownPart = dayPart()[0]; document.addEventListener('visibilitychange', () => { if (document.visibilityState !== 'visible' || PL || !S.onboarded) return; const p = dayPart()[0]; if (p !== shownPart) { shownPart = p; const t = $('s-today'); if (t && t.classList.contains('on') && !document.querySelector('.sheetwrap')) renderToday(); } });
+
   /* ---------- test hook ----------
      tools/test-app.mjs builds sessions for many made-up people through this. It swaps the state in memory only for the
      duration of the call and never saves, so real data is untouched. */
@@ -806,8 +857,8 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
     } finally { S = keep; session = keepSess; } } };
 
   /* ---------- start ---------- */
-  applyTheme(); ILLUS.setFemale(isF()); welcome();
-  if (!S.onboarded) renderOnboard(); else { show(qgo === 'quickies' ? 'resets' : 'today'); if (qr) setTimeout(() => startReset(qr), 300);
+  applyTheme(); FIG3D.setMode(S.profile.fig); ILLUS.setFemale(isF()); FIG3D.setFemale(isF()); welcome();
+  if (!S.onboarded) renderOnboard(); else { show(qgo === 'quickies' ? 'resets' : 'today'); if (qgo === 'catalogue') setTimeout(catalogueSheet, 300); if (qr) setTimeout(() => startReset(qr), 300);
     // home-screen shortcut "Start": scroll is already at the Start button; sound needs a tap, so highlight it instead of auto-playing
     if (qgo === 'start') setTimeout(() => { const b = $('start'); if (b) { b.classList.add('nudge'); b.focus(); } }, 300); }
 })();

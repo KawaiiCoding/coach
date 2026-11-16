@@ -404,3 +404,20 @@ body.onb { padding-bottom: 0; }
 .mapzoom button { width: 44px; height: 44px; display: grid; place-items: center; color: var(--acc); } .mapzoom button + button { border-top: 1px solid var(--line); }
 .mapzoom button:disabled { color: var(--mute); opacity: .4; } .mapzoom .ic { width: 22px; height: 22px; stroke-width: 2.3; }
 #s-onboard.fit .mapwrap { display: block; } #s-onboard.fit .mapscroll { height: 100%; }
+
+/* catalogue (testing): filter row that wraps, sheet that scrolls smoothly and keeps its header in view */
+.catf { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; } .catf button { padding: 7px 12px; font-size: 13px; }
+.sheet { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+.sheet .shead { position: sticky; top: -8px; z-index: 3; background: var(--bg); padding-top: 8px; margin-top: -8px; }
+
+/* 3D coach figure: the scene is drawn behind, the figure's own page sits on top with a clear background */
+.pfig { position: relative; }
+.pfig .scene3 { position: absolute; inset: 0; }
+.f3frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; opacity: 0; transition: opacity .3s; }
+.f3frame.on { opacity: 1; }
+.f3re { position: absolute; right: 10px; bottom: 10px; width: 40px; height: 40px; border: 0; border-radius: 50%; display: grid; place-items: center; background: var(--card, #fff); color: var(--ink, #3B2A20); box-shadow: 0 4px 14px rgba(120, 60, 20, .18); cursor: pointer; }
+.f3t { position: relative; display: block; width: 100%; height: 100%; }
+.exart .f3t { aspect-ratio: 1.6; height: auto; }
+.f3t .scene3 { position: absolute; inset: 0; width: 100%; height: 100%; }
+.f3t .f3img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 100%; display: block; }
+.catfig { display: flex; justify-content: flex-end; margin: 0 0 10px; } .catfig button { flex: none; }
