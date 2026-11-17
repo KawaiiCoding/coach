@@ -29,7 +29,7 @@ const PLAN = (() => {
     for (const m of tight) {
       if (stretches.length >= 6 || covered.has(m.id)) continue;
       const a = A[m.id];
-      const cands = STRETCHES.filter(s => s.m.includes(m.id) && !stretches.includes(s));
+      const cands = STRETCHES.filter(s => EQUIP.ok(s.id) && s.m.includes(m.id) && !stretches.includes(s));
       if (!cands.length) continue;
       const prefer = a.shortening > 0.25 ? ['static', 'pnf'] : ['release', 'mobility', 'static'];
       cands.sort((x, y) => (prefer.indexOf(x.type) === -1 ? 9 : prefer.indexOf(x.type)) - (prefer.indexOf(y.type) === -1 ? 9 : prefer.indexOf(y.type)) || x.m.indexOf(m.id) - y.m.indexOf(m.id));
@@ -43,13 +43,13 @@ const PLAN = (() => {
     const strength = [], sc = new Set();
     for (const m of weakList) {
       if (strength.length >= 6 || sc.has(m.id)) continue;
-      const cands = STRENGTH.filter(s => s.m.includes(m.id) && !strength.includes(s)).sort((x, y) => x.level - y.level || x.m.indexOf(m.id) - y.m.indexOf(m.id));
+      const cands = STRENGTH.filter(s => EQUIP.ok(s.id) && s.m.includes(m.id) && !strength.includes(s)).sort((x, y) => x.level - y.level || x.m.indexOf(m.id) - y.m.indexOf(m.id));
       if (!cands.length) continue;
       const s = cands[0]; strength.push(s); s.m.forEach(i => sc.add(i)); s.why = m;
     }
     // mobility / warm-up: one dynamic drill for the most affected region
     const region = tight[0] ? tight[0].reg : 'Trunk';
-    const mob = STRETCHES.filter(s => (s.type === 'dynamic' || s.type === 'mobility') && s.m.some(i => MUSCLE[i].reg === region || MUSCLE[i].reg === 'Trunk')).slice(0, 2);
+    const mob = STRETCHES.filter(s => EQUIP.ok(s.id) && (s.type === 'dynamic' || s.type === 'mobility') && s.m.some(i => MUSCLE[i].reg === region || MUSCLE[i].reg === 'Trunk')).slice(0, 2);
     // balance report
     const balance = PAIRS.map(([n, tightIds, weakIdsP, label]) => {
       const mr = ids => ids.reduce((s, i) => s + A[i].r, 0) / ids.length, mt = ids => ids.reduce((s, i) => s + A[i].T, 0) / ids.length, mp = ids => ids.reduce((s, i) => s + A[i].pain, 0) / ids.length;

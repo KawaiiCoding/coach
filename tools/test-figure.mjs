@@ -24,14 +24,19 @@ if (!ws) { console.error('could not start the browser'); done(2); }
 await new Promise(r => ws.onopen = r);
 ws.onmessage = m => { const d = JSON.parse(m.data); if (d.id && pend.has(d.id)) { pend.get(d.id)(d.result || d); pend.delete(d.id); } else if (d.method === 'Runtime.exceptionThrown') errors.push(d.params.exceptionDetails.exception?.description || d.params.exceptionDetails.text); };
 await send('Runtime.enable'); await send('Page.enable');
-await send('Page.navigate', { url: `http://127.0.0.1:${PORT}/fig3d.html?lab` });
-let ready = false; for (let i = 0; i < 60 && !ready; i++) { const r = await send('Runtime.evaluate', { expression: '!!(window.__lab && window.__lab.test)', returnByValue: true }); ready = !!r.result?.value; if (!ready) await sleep(250); }
-if (!ready) { console.error('the page did not load:\n' + errors.join('\n')); done(2); }
-const t0 = Date.now(), res = await send('Runtime.evaluate', { expression: 'JSON.stringify(__lab.test())', returnByValue: true });
-if (!res.result?.value) { console.error('the test crashed:\n' + JSON.stringify(res, null, 1).slice(0, 1500) + '\n' + errors.join('\n')); done(2); }
-const out = JSON.parse(res.result.value);
+// Every move is checked on both figures (the man's and the woman's bodies have different widths). A move must pass on both.
+let out = null, t0 = Date.now();
+for (const sex of ['m', 'f']) {
+  await send('Page.navigate', { url: `http://127.0.0.1:${PORT}/fig3d.html?lab&sex=${sex}` }); await sleep(300);
+  let ready = false; for (let i = 0; i < 60 && !ready; i++) { const r = await send('Runtime.evaluate', { expression: '!!(window.__lab && window.__lab.test) && FEM === ' + (sex === 'f'), returnByValue: true }); ready = r.result?.value === true; if (!ready) await sleep(250); }
+  if (!ready) { console.error('the page did not load:\n' + errors.join('\n')); done(2); }
+  const res = await send('Runtime.evaluate', { expression: 'JSON.stringify(__lab.test())', returnByValue: true });
+  if (!res.result?.value) { console.error('the test crashed:\n' + JSON.stringify(res, null, 1).slice(0, 1500) + '\n' + errors.join('\n')); done(2); }
+  const o = JSON.parse(res.result.value); o.failures.forEach(f => { f.where += sex === 'f' ? ' (woman)' : ''; });
+  if (!out) out = o; else { out.frames += o.frames; out.failures.push(...o.failures); out.passed = out.passed.filter(k => o.passed.includes(k)); out.failed = [...new Set([...out.failed, ...o.failed])]; }
+}
 // The app shows a move in 3D only if it passed every rule here; the rest keep their 2D picture. The list is written by this test.
-{ const { writeFileSync } = await import('node:fs'); writeFileSync(join(root, 'js/fig3d/ok.js'), '/* Written by npm run test:figure: the moves that passed every rule. The app shows only these in 3D. */\nconst FIG3D_OK = ' + JSON.stringify(out.passed) + ';\n');
+{ const { writeFileSync } = await import('node:fs'); writeFileSync(join(root, 'js/fig3d/ok.js'), '/* Written by npm run test:figure: the moves that passed every rule. The app shows only these in 3D. */\nconst FIG3D_OK = ' + JSON.stringify(out.passed) + ';\nconst FIG3D_VER = \'' + Date.now().toString(36) + '\';\n');
   console.log(`${out.passed.length} moves pass and are shown in 3D; ${out.failed.length} keep their 2D picture: ${out.failed.join(', ')}`); }
 console.log(`checked ${out.frames} frames over ${out.moves} moves, in ${((Date.now() - t0) / 1000).toFixed(0)} s`);
 if (errors.length) console.log('page errors:\n' + errors.join('\n'));

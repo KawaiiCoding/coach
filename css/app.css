@@ -413,7 +413,7 @@ body.onb { padding-bottom: 0; }
 /* 3D coach figure: the scene is drawn behind, the figure's own page sits on top with a clear background */
 .pfig { position: relative; }
 .pfig .scene3 { position: absolute; inset: 0; }
-.f3frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; opacity: 0; transition: opacity .3s; }
+.f3frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; opacity: 0; }
 .f3frame.on { opacity: 1; }
 .f3re { position: absolute; right: 10px; bottom: 10px; width: 40px; height: 40px; border: 0; border-radius: 50%; display: grid; place-items: center; background: var(--card, #fff); color: var(--ink, #3B2A20); box-shadow: 0 4px 14px rgba(120, 60, 20, .18); cursor: pointer; }
 .f3t { position: relative; display: block; width: 100%; height: 100%; }
@@ -421,3 +421,12 @@ body.onb { padding-bottom: 0; }
 .f3t .scene3 { position: absolute; inset: 0; width: 100%; height: 100%; }
 .f3t .f3img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 100%; display: block; }
 .catfig { display: flex; justify-content: flex-end; margin: 0 0 10px; } .catfig button { flex: none; }
+.needs { display: flex; align-items: center; gap: 8px; margin: -4px 0 10px; font-weight: 600; color: var(--accent, #E8793F); } .needs svg { width: 18px; height: 18px; flex: none; }
+/* the sun glow and the cloud behind the 3D figure: a fixed layer, so they never move when the view is turned or zoomed */
+.f3bg { position: absolute; inset: 0; overflow: hidden; display: block; }
+.f3bg::before { content: ''; position: absolute; left: 52%; top: 44%; height: 88%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: var(--ill-glow); }
+.petart { position: relative; aspect-ratio: 1.5; background: var(--ill-bg); }
+.hero .f3hero { position: relative; display: block; width: 100%; height: 100%; min-height: 196px; } .hero .f3hero .f3img { object-fit: contain; object-position: 50% 100%; }
+.f3hero .f3bg::before { left: 50%; top: 52%; height: 88%; } .hero .f3hero .f3img { object-fit: contain; object-position: 50% 60%; } .hero .heroart { align-self: stretch; }
+.f3img.f3in { animation: f3in .25s ease-out; } @keyframes f3in { from { opacity: 0; } to { opacity: 1; } }
+.spart .f3hero { display: block; position: relative; width: 100%; height: 100%; }

@@ -35,8 +35,9 @@ const TB = [[-9.4, 0], [-8.8, 4.6], [-7.2, 8], [-4.5, 10.2], [0, 10.8], [5, 10.2
 /* The woman's figure: the same skeleton and joints, with narrower shoulders and ribcage, a narrower waist, slightly wider
    hips and a fuller chest. Asked for with ?sex=f in the address. */
 const FEM = new URLSearchParams(location.search).get('sex') === 'f';
-if (FEM) { const sc = (T, f) => T.forEach(r => { r[1] *= f(r[0]); });
-  sc(TW, u => u < 11 ? 1.045 : u < 24 ? .89 : u < 36 ? .93 : u < 46 ? .9 : 1); sc(TF, u => u >= 24 && u <= 36 ? 1.13 : u > 10 && u < 24 ? .94 : 1); sc(TB, u => u > 10 && u < 24 ? .95 : 1); }
+if (FEM) { const sc = (T, f) => T.forEach(r => { r[1] *= f(r[0]); }), mixr = (a, b, u0, u1, u) => a + (b - a) * ramp(u0, u1, u);      // every change blends in over several centimetres: no step anywhere in the outline
+  sc(TW, u => u < 20 ? mixr(1.045, .89, 3, 15, u) : u < 34 ? mixr(.89, .93, 20, 30, u) : mixr(.93, .9, 34, 41, u) + (1 - mixr(.93, .9, 34, 41, u)) * ramp(44, 50, u));
+  sc(TF, u => 1 - .06 * ramp(6, 14, u) * (1 - ramp(18, 25, u)) + .13 * ramp(21, 27, u) * (1 - ramp(33, 39, u))); sc(TB, u => 1 - .05 * ramp(6, 14, u) * (1 - ramp(18, 26, u))); }
 function trunkSkin(rows) {                                       // rows: [u, scale, grow]
   const N = SP.cols, pos = [], idx = [];
   rows.forEach(([u, k, grow]) => { const W = Math.max(0, prof(TW, u)), F = Math.max(0, prof(TF, u)), B = Math.max(0, prof(TB, u)), gl = Math.exp(-(((u + 3) / 5.2) ** 2));
@@ -133,14 +134,16 @@ part(mouth, PAL.mouth, G.head, head, 0).position.set(11.98, 8.3, 0);
 // hair: one sculpted piece. Its edge follows a real hairline (forehead, temple, sideburn, over the ear, down to the nape)
 // and it is thicker on top with a soft lift at the front, so the skull is always fully covered.
 function hairGeo() {
-  const N = 96, Mv = 22, KEY = [[0, 41], [28, 39], [50, 27], [66, 10], [78, -8], [87, -4], [94, 9], [103, 14], [116, 9], [130, -10], [152, -33], [180, -40]];
+  // the woman's hair: a softer, lower hairline that covers the temples and is drawn back over the ears to the nape, with more body
+  const N = 96, Mv = 22, KEY = FEM ? [[0, 37], [24, 33], [46, 21], [62, 5], [74, -12], [84, -13], [93, -3], [102, 2], [116, -8], [134, -30], [156, -47], [180, -52]]
+    : [[0, 41], [28, 39], [50, 27], [66, 10], [78, -8], [87, -4], [94, 9], [103, 14], [116, 9], [130, -10], [152, -33], [180, -40]];
   const line = a => { a = Math.abs(a); for (let i = 1; i < KEY.length; i++) if (a <= KEY[i][0]) { const [a0, e0] = KEY[i - 1], [a1, e1] = KEY[i], k = (a - a0) / (a1 - a0); return e0 + (e1 - e0) * (k * k * (3 - 2 * k)); } return -40; };
   const pos = [], idx = [];
   for (let j = 0; j <= Mv + 1; j++) for (let i = 0; i < N; i++) {
     const az = i / N * 360 - 180, v = Math.min(1, j / Mv), rim = j > Mv, hl = line(az);
     const el = (90 + (hl - (rim ? 3.5 : 0) - 90) * Math.pow(v, .9)) * R, a = az * R;
     const lift = 1.9 * Math.exp(-((az / 46) ** 2)) * Math.sin(Math.PI * clamp((v - .25) / .75, 0, 1)) ** .8;
-    const r = HR + (rim ? .16 : .55 + 1.25 * (1 - v * v) + lift);
+    const r = HR + (rim ? .16 : .55 + 1.25 * (1 - v * v) + lift + (FEM ? .45 + .5 * Math.exp(-(((Math.abs(az) - 150) / 40) ** 2)) : 0));
     pos.push(r * HS[0] * Math.cos(el) * Math.cos(a), r * HS[1] * Math.sin(el), r * HS[2] * Math.cos(el) * Math.sin(a));
   }
   for (let j = 0; j <= Mv; j++) for (let i = 0; i < N; i++) { const p0 = j * N + i, p1 = j * N + (i + 1) % N, p2 = (j + 1) * N + i, p3 = (j + 1) * N + (i + 1) % N; idx.push(p0, p1, p2, p1, p3, p2); }
@@ -150,7 +153,8 @@ function hairGeo() {
   return g;
 }
 part(hairGeo(), PAL.hair, G.hair, head, .34, true).position.set(...HC);
-if (FEM) part(ell(4.9, 1, .92, 1.05, 28), PAL.hair, G.hair, head, .34).position.set(HC[0] - 9.4, HC[1] + 8.6, 0);      // hair tied up in a bun
+if (FEM) { const bun = ell(4.3, .95, 1, 1.12, 32); const hb = part(bun, PAL.hair, G.hair, head, .34); hb.position.set(HC[0] - 10.1, HC[1] - 5.6, 0); hb.rotation.z = -.35;      // gathered in a low bun at the nape: it sits in the hollow of the neck, so it never presses into the mat when she lies down
+  part(ell(1.5, 1, .8, 2.6, 20), PAL.hair, G.hair, head, .3).position.set(HC[0] - 8.3, HC[1] - 3.4, 0); }
 
 /* Forearm, wrist and palm are one skin. Turning the palm (pronation) is spread along the forearm, as the two forearm bones do it;
    the wrist bend is a rounded curve, so there is no ball joint and no step between arm and hand. */

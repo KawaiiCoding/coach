@@ -1,10 +1,10 @@
 /* Offline cache for GitHub Pages. Bump CACHE when files change. */
-const CACHE = 'tension-coach-v92';
+const CACHE = 'tension-coach-v107';
 const FILES = ['./', './index.html', './manifest.webmanifest', './css/app.css',
   './js/kinematics.js', './js/data/muscles.js', './js/data/postures.js', './js/data/stretches.js', './js/data/strength.js',
-  './js/data/breathing.js', './js/data/regions.js', './js/data/stages.js', './js/data/coaching.js', './js/data/mindful.js', './js/illus.js', './js/data/women.js',
+  './js/data/breathing.js', './js/data/regions.js', './js/data/stages.js', './js/data/coaching.js', './js/data/mindful.js', './js/data/equipment.js', './js/illus.js', './js/data/women.js',
   './js/data/resets.js', './js/plan.js', './js/coach.js', './js/app.js',
-  './fig3d.html', './js/fig3d.js', './js/fig3d/ok.js', './js/fig3d/three.min.js', './js/fig3d/look.js', './js/fig3d/body.js', './js/fig3d/props.js', './js/fig3d/moves.js', './js/fig3d/catalog.js', './js/fig3d/limits.js', './js/fig3d/solve.js', './js/fig3d/host.js', './js/fig3d/test.js',
+  './fig3d.html', './js/fig3d.js', './js/fig3d/ok.js', './js/fig3d/three.min.js', './js/fig3d/look.js', './js/fig3d/body.js', './js/fig3d/props.js', './js/fig3d/moves.js', './js/fig3d/catalog.js', './js/fig3d/limits.js', './js/fig3d/solve.js', './js/fig3d/scenery.js', './js/fig3d/host.js', './js/fig3d/test.js',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-180.png', './icons/icon-maskable-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });

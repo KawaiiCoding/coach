@@ -2,7 +2,7 @@
 /* ---------- poses: every exercise is a function of time returning joint angles (degrees, forward = +) ---------- */
 const BASE = { hipX: 0, hipY: 93.5, hipZ: 0, pel: 2, lum: 0, che: -2, nec: 0, hea: 0, lumS: 0, cheS: 0, necS: 0, flexR: 3, flexL: 3, abdR: 5, abdL: 5, elbR: 9, elbL: 9, wri: 3, breath: 0, curlR: .3, curlL: .3, wfR: 0, wfL: 0, proR: 14, proL: 14, rotR: 0, rotL: 0, pelT: 0, lumT: 0, cheT: 0, headT: 0, heelR: 0, heelL: 0, fxR: 0, fxL: 0, liftR: 0, liftL: 0, kneelR: 0, kneelL: 0, footZ: 9.6, toe: 7, pelS: 0, ikL: 0, hLx: 0, hLy: 60, hLz: -19, ikR: 0, hRx: 0, hRy: 60, hRz: 19, knX: -11, plantR: 0, plantL: 0, bal: 1, kdR: 0, kdL: 0, wR: 1, wL: 1,
   fzR: -99, fzL: -99, toR: -99, toL: -99, kpU: 0, kpO: 0, freeR: 0, freeL: 0, ankR: 0, ankL: 0, rest: 0, headUp: 0, hRhead: 0, hLhead: 0, hRhx: 0, hRhy: 0, hRhz: 0, hLhx: 0, hLhy: 0, hLhz: 0, eoR: 0, eoL: 0, holdR: 0, holdL: 0,
-  roll: 0, shrR: 0, shrL: 0, shFR: 0, shFL: 0, kuR: 0, kuL: 0, koR: 0, koL: 0, kxR: 0, kxL: 0, flR: 0, flL: 0, tuR: 0, tuL: 0, knZ: 9, ballY: 3.3,
+  epR: 0, epL: 0, eRx: 0, eRy: 0, eRz: 0, eLx: 0, eLy: 0, eLz: 0, hugR: 0, hugL: 0, roll: 0, shrR: 0, shrL: 0, shFR: 0, shFL: 0, kuR: 0, kuL: 0, koR: 0, koL: 0, kxR: 0, kxL: 0, flR: 0, flL: 0, tuR: 0, tuL: 0, knZ: 9, ballY: 3.3,
   seat: 0, soles: 0, palmIn: 0, onThighR: 0, onThighL: 0, hW: 0, plantWall: 0, edR: 0, edL: 0, load: 0, ballX: 0, ballZ: 0 };      // seat: height of what the body rests on; hW: hand targets fixed in the room; edR/edL: elbow low; load: weight held      // wR, wL: share of weight on each foot
 // rise, hold, lower, rest: one rep every 5.2 s, eased with a quintic so speed is zero at both ends
 const rep = (t, P = 5.2) => { const u = (((t % P) + P) % P) / P; return u < .36 ? smoother(u / .36) : u < .52 ? 1 : u < .9 ? 1 - smoother((u - .52) / .38) : 0; };
@@ -109,7 +109,7 @@ Object.assign(EX, {
   curl: { label: 'Biceps curl', props: { dumbbells: {} }, yaw: 28, pose(t) { const s = rep(t);
     return { load: 1, elbR: 8 + 128 * s, elbL: 8 + 128 * s, proR: -80, proL: -80, curlR: .78, curlL: .78, wri: 0, abdR: 7, abdL: 7, flexR: 2 - 4 * s, flexL: 2 - 4 * s }; } },
   // Triceps press-down with a band anchored at the top of the door: elbows stay by the ribs, the forearms press down and return.
-  triceps: { label: 'Triceps band', props: { door: { x: 34 }, band: { anchor: [34, 203, 0] } }, yaw: -24, view: [1.1, 16, 104, 0], pose(t) { const s = rep(t);
+  triceps: { label: 'Triceps band', props: { door: { x: 34 }, band: { anchor: [34, 204, 0] } }, yaw: -24, view: [1.1, 16, 104, 0], pose(t) { const s = rep(t);
     return { pel: 6, che: 0, elbR: 112 - 100 * s, elbL: 112 - 100 * s, proR: 82, proL: 82, curlR: .8, curlL: .8, wri: 0, abdR: 5, abdL: 5, flexR: 4, flexL: 4, wfR: 6 * s, wfL: 6 * s }; } },
   // Foot roll on a tennis ball (sitting on a chair): the sole rolls slowly over the ball; the ball rolls half as far as the foot.
   footroll: { label: 'Foot roll (ball)', stance: 'chair', barefoot: true, props: { ball: {} }, yaw: 35, pitch: 12, view: [1.6, -10, 46, 6], pose(t) { const w = Math.sin(TAU * t / 5.2);

@@ -21,7 +21,7 @@ cv.addEventListener('pointerdown', ev => { ptrs.set(ev.pointerId, ev); try { cv.
 cv.addEventListener('pointermove', ev => { if (!ptrs.has(ev.pointerId)) return; ptrs.set(ev.pointerId, ev);
   if (ptrs.size >= 2) { const [a, b] = [...ptrs.values()]; cam.uZoom = clamp(Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) / (pinch || 1), .6, 3.2); cam.held = true; return; }
   if (!cam.drag) return; const dx = ev.clientX - cam.drag.x, dy = ev.clientY - cam.drag.y; if (Math.abs(dx) + Math.abs(dy) > 6) { cam.drag.moved = true; lastTap = 0; cam.held = true; }
-  cam.tYaw = cam.drag.yaw - dx * .45; cam.tPitch = clamp(cam.drag.pitch + dy * .25, -4, 60); cam.lastUser = now; });
+  cam.tYaw = cam.drag.yaw - dx * .45; cam.tPitch = clamp(cam.drag.pitch + dy * .25, 3, 62); cam.lastUser = now; });
 const endDrag = ev => { ptrs.delete(ev.pointerId); cam.drag = null; cam.lastUser = now; };
 cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
 cv.addEventListener('wheel', ev => { ev.preventDefault(); cam.uZoom = clamp(cam.uZoom * Math.exp(-ev.deltaY * .0015), .6, 3.2); cam.held = true; }, { passive: false });
@@ -29,7 +29,7 @@ cv.addEventListener('wheel', ev => { ev.preventDefault(); cam.uZoom = clamp(cam.
 /* The pose of a move. Catalogue moves are written as P(u, phase, cycle); on their own they loop with the usual rep timing. */
 const REST = { breath: 0 };
 function poseOf(k, t, d) { const x = EX[k];
-  if (x.P) { if (d) return x.P(d.u, d.ph, d.cyc); const P = x.period || 5.2, c = Math.floor(t / P), ph = (((t % P) + P) % P) / P; return x.P(x.cont ? ph : x.period ? hold11(t) : rep(t), ph, c); }
+  if (x.P) { if (d) return x.P(d.u, d.ph, d.cyc, now); const P = x.period || 5.2, c = Math.floor(t / P), ph = (((t % P) + P) % P) / P; return x.P(x.cont ? ph : x.period ? hold11(t) : rep(t), ph, c, t); }
   return x.pose(t); }
 Object.values(EX).forEach(x => { if (x.P && !x.pose) x.pose = function (t) { return poseOf(Object.keys(EX).find(k => EX[k] === x), t, null); }; });
 
@@ -52,7 +52,7 @@ function fitView(k, yaw, pitch) { const key = k + '|' + yaw + '|' + pitch; if (v
   if (!x.focus) { add(fp.set((a0 + a1) / 2 * fvr.x, 0, (a0 + a1) / 2 * fvr.z), 4); propPoints(x).forEach(q => add(fp.set(q[0], q[1], q[2]), 2)); }
   cur = keep;
   const asp = W / Hpx, Hh = Math.max(268, 190 / asp), m = x.focus ? 1.12 : 1.16, ca = (a0 + a1) / 2; let zoom = Math.min(Hh * asp / ((a1 - a0) * m), Hh / ((b1 - b0) * m)), cb = (b0 + b1) / 2;
-  if (!LAB && !x.focus) { const g = stance(k) === 'stand' && !x.mat ? .075 : .12, fb = fp.set(fvr.x * ca, 0, fvr.z * ca).dot(fu);      // inside the app the floor sits at a fixed height above the bottom edge, on the ground of the scene behind
+  if (!LAB && !x.focus) { const g = .14, fb = fp.set(fvr.x * ca, 0, fvr.z * ca).dot(fu);      // inside the app the floor sits at a fixed height above the bottom edge, on the ground of the scene behind
     zoom = Math.min(Hh * asp / ((a1 - a0) * 1.14), Hh * (1 - g) / ((b1 - fb) * 1.16)); cb = fb + Hh / zoom * (.5 - g); }
   const v = [zoom, fvr.x * ca + fu.x * cb, fu.y * cb, fvr.z * ca + fu.z * cb]; views.set(key, v); return v; }
 const viewOf = k => cam.over || (EX[k].view && !EX[k].P ? EX[k].view : fitView(k, EX[k].yaw || 0, EX[k].pitch ?? 7));
@@ -65,11 +65,12 @@ function aim() { const y = cam.yaw * R, pi = cam.pitch * R;
   camera.lookAt(tgt); camera.updateMatrixWorld(); camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
   HIPC.set(-1, 1, 0).applyMatrix4(root.matrixWorld).applyMatrix4(camera.matrixWorldInverse);
   HEADC.set(HC[0] + 1.2, HC[1] - 1.5, 0).applyMatrix4(head.matrixWorld).applyMatrix4(camera.matrixWorldInverse);
-  renderer.render(scene, camera); }
+  SCN(cam.yaw); renderer.render(scene, camera); }
 function draw(t, dt) {
   if (fade) { const el = now - fade.t0; if (!fade.swapped && el >= FADE) { showMove(fade.to); fade.swapped = true; }
     cv.style.opacity = el < FADE ? 1 - smoother(el / FADE) : smoother((el - FADE) / FADE); if (el >= 2 * FADE) { fade = null; cv.style.opacity = 1; } }
-  matG.visible = LAB || stance(cur) !== 'stand' || !!EX[cur].mat; disc.visible = LAB;
+  if (SHOWPET) { if (!petOn) { petDir = -petDir; PET(0, 0, 300, { kind: SHOWPET, coat: +QS.get('coat') || 0, a: -150, end: 150, dir: petDir }); } petOn = PET(dt || 0, 0, 300); cam.over = [2.3, 0, 26, -150]; cam.held = true; cam.tYaw = 0; cam.tPitch = 9; root.visible = matG.visible = shadow.visible = false; }      // a pet shown on purpose: it walks to and fro
+  else if (!LAB && dt) PET(dt, cam.yaw, (camera.right - camera.left) / camera.zoom);
   const pNow = full(poseOf(cur, moveTime(), drive)); if (drive) pNow.breath += restU; apply(pNow, t); syncProps(pNow);
   const yw = EX[cur].yaw || 0;
   if (!cam.drag && !cam.held) { const d = ((yw - cam.tYaw) % 360 + 540) % 360 - 180, k = 1 - Math.exp(-dt * 2.2); cam.tYaw += d * k; cam.tPitch += ((EX[cur].pitch ?? 7) - cam.tPitch) * k; }
@@ -77,6 +78,7 @@ function draw(t, dt) {
   const vw = viewOf(cur), kv = dt ? 1 - Math.exp(-dt * 3) : 1;
   cam.zNow += (cam.uZoom - cam.zNow) * k; camera.zoom += (vw[0] * cam.zNow - camera.zoom) * (cam.held ? k : kv); tgt.x += (vw[1] - tgt.x) * kv; tgt.y += (vw[2] - tgt.y) * kv; tgt.z += (vw[3] - tgt.z) * kv; camera.updateProjectionMatrix();
   aim(); }
+const SHOWPET = QS.get('pet'); let petOn = false, petDir = -1;
 const nav = document.getElementById('nav');
 if (LAB) Object.entries(EX).forEach(([k, x]) => { const b = document.createElement('button'); b.textContent = x.label || k; b.onclick = () => go(k); b.dataset.k = k; nav.append(b); });
 addEventListener('resize', () => frame()); frame();
@@ -89,10 +91,13 @@ window.FIG = {
   show(k, instant) { if (!EX[k]) return false; drive = null; if (instant || k === cur) { if (k !== cur) showMove(k); } else go(k); return true; },
   drive(u, cyc, ph) { drive = { u, cyc: cyc || 0, ph: ph || 0 }; },      // position inside the repetition, from the app's own clock
   recentre, moved: () => cam.held,
+  petThumb(kind, coat, w, h) { const keepLive = live; live = false; frame(w, h); PET(0, 0, 300, { kind, coat, a: 0, ph: 1.1 }); PET(.001, 0, 300); root.visible = matG.visible = shadow.visible = false; cam.over = [3.3, 0, 26, -150]; const k = cur; cur = 'rest'; apply(full(EX.rest.P(0)), 0); syncProps(full(EX.rest.P(0)));
+    camera.zoom = 3.3; tgt.set(0, 26, -150); camera.updateProjectionMatrix(); cam.yaw = 0; cam.pitch = 9; aim(); const url = cv.toDataURL('image/png'); PET(0, 0, 300, { hide: true }); root.visible = matG.visible = shadow.visible = true; cam.over = null; cur = k; live = keepLive; return url; },
   free() { if (drive) { drive = null; moveT0 = now; } },      // let the move loop by itself, starting from its start position
   size: () => frame(),
   /* a still picture of a move at its end position, for lists */
   thumb(k, w, h, type) { if (!EX[k]) return null; const keepCur = cur, keepLive = live; live = false; frame(w, h); cur = k; const x = EX[k], yw = x.yaw || 0, pi = x.pitch ?? 7;
-    matG.visible = LAB || stance(k) !== 'stand' || !!x.mat; disc.visible = LAB; const p = full(x.P ? x.P(x.tu ?? 1, .25, 0) : x.pose(x.tt ?? 2)); const vw = fitView(k, yw, pi); apply(p, 0); syncProps(p); camera.zoom = vw[0]; tgt.set(vw[1], vw[2], vw[3]); camera.updateProjectionMatrix(); cam.yaw = yw; cam.pitch = pi; aim();
-    const url = cv.toDataURL(type || 'image/png'); cur = keepCur; live = keepLive; return url; },
+    const p = full(x.P ? x.P(x.tu ?? 1, .25, 0) : x.pose(x.tt ?? 2)); const vw = fitView(k, yw, pi); apply(p, 0); syncProps(p); camera.zoom = vw[0]; tgt.set(vw[1], vw[2], vw[3]); camera.updateProjectionMatrix(); cam.yaw = yw; cam.pitch = pi;
+    const hid = x.bare ? [disc, matG] : []; hid.forEach(o => { o.visible = false; }); aim(); hid.forEach(o => { o.visible = true; });      // bare: no mat and no ground, just the figure with a little greenery behind      // bare: the figure alone, for the home screen
+    const url = cv.toDataURL(type || 'image/png', .86); cur = keepCur; live = keepLive; return url; },
 };

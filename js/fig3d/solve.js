@@ -11,9 +11,14 @@ function shape(p, t) {                                          // everything th
   const trunkZ = -(p.pel + p.lum + p.che) * R, trunkX = (p.pelS + p.lumS + p.cheS) * R;
   arms.forEach(a => { const r = a.s > 0, flex = r ? p.flexR : p.flexL, abd = r ? p.abdR : p.abdL, elb = r ? p.elbR : p.elbL;
     const lift = smoother((Math.max(flex, abd) - 60) / 110);                                // the shoulder girdle rises as the arm goes overhead
-    a.sh.position.set((r ? p.shFR : p.shFL) * 2.4, SHO.y + 3.4 * lift + 3.4 * (r ? p.shrR : p.shrL), a.s * (SHO.z - 1.4 * lift));      // shr: shrug; shF: shoulder drawn forward (+) or back (-)
+    a.sh.position.set((r ? p.shFR : p.shFL) * 3.6, SHO.y + 3.4 * lift + 3.4 * (r ? p.shrR : p.shrL), a.s * SHO.z);      // shr: shrug; shF: shoulder drawn forward (+) or back (-)
     const curl = r ? p.curlR : p.curlL, wf = r ? p.wfR : p.wfL, pro = r ? p.proR : p.proL, rot = r ? p.rotR : p.rotL;
-    a.sh.rotation.set(-a.s * abd * R - trunkX * (1 - ramp(20, 80, abd)), a.s * rot * R, clamp(flex * R - trunkZ, -50 * R, 180 * R));      // arm angles are given against the room; the shoulder itself stays inside its own range
+    /* Lifting the arm sideways always means away from the body. With the arm overhead the same turn would tip it inward, toward
+       the head, so its direction follows the arm (cosine of the forward lift), and an overhead arm keeps a few degrees of clearance
+       from the ear. */
+    const fRel = clamp(flex * R - trunkZ, -50 * R, 180 * R), hang = (1 - ramp(15, 50, Math.abs(fRel / R))) * (1 - ramp(30, 70, elb));      // an arm that simply hangs keeps a hand's breadth from the hip: it never brushes the body
+    const abdE = Math.max(abd, 8 * ramp(115, 165, fRel / R), (FEM ? 11.5 : 8.5) * hang);
+    a.sh.rotation.set(-a.s * abdE * R * (abdE < 60 ? Math.cos(fRel) : 1) - trunkX * (1 - ramp(20, 80, abd)), a.s * rot * R, fRel);      // arm angles are given against the room; the shoulder itself stays inside its own range
     a.el.rotation.set(0, 0, elb * R); a.wr.rotation.set(a.s * wf * R, a.s * pro * R, p.wri * R);
     a.fingers.forEach((sg, i) => { const c = clamp(curl * (1 + .16 * i), 0, 1.08); sg[0].rotation.x = a.s * c * 80 * R; sg[1].rotation.x = a.s * c * 100 * R; sg[2].rotation.x = a.s * c * 68 * R; });
     a.t0.rotation.set(a.s * ((5 + 33 * curl) * (1 - (r ? p.plantR : p.plantL)) - 6 * (r ? p.plantR : p.plantL)) * R, 0, (20 - 44 * curl) * R); a.t1.rotation.set(a.s * 22 * curl * R, 0, (4 - 40 * curl) * R); });
@@ -27,16 +32,26 @@ function corePen(pt, r) {                                       // how far a poi
 /* The body as solid shapes: capsules for the trunk, both thighs, both shins and the other arm, a sphere for the head.
    bodyPen(point, radius) says how far a point of that size is inside any of them and which way is out. The arm solver uses it
    to keep every hand, fingertip and elbow outside the body; the automatic test uses the same function to verify it. */
-const headC = V3(), CAP = Array.from({ length: 8 }, () => ({ a: V3(), b: V3(), r: 0 })), bestN = V3(); let capN = 0;
-function buildBody(self) { root.updateMatrixWorld(true); capN = 0; const add = (r) => { const c = CAP[capN++]; c.r = r; return c; };
-  let c = add(9.4); c.a.set(0, 3, 0).applyMatrix4(root.matrixWorld); c.b.set(0, 23, 0).applyMatrix4(chest.matrixWorld); core0.copy(c.a); core1.copy(c.b);
+const headC = V3(), CAP = Array.from({ length: 12 }, () => ({ a: V3(), b: V3(), r: 0 })), bestN = V3(); let capN = 0;
+function buildBody(self, noArms) { root.updateMatrixWorld(true); capN = 0; const add = (r) => { const c = CAP[capN++]; c.r = r; return c; };
+  let c = add(9.4); c.a.set(0, 3, 0).applyMatrix4(root.matrixWorld); c.b.set(0, 23, 0).applyMatrix4(chest.matrixWorld); core0.copy(c.a); core1.copy(c.b); trZ.set(0, 0, 1).transformDirection(root.matrixWorld);
   legs.forEach(l => { c = add(7.2); l.hip.getWorldPosition(c.a); l.kn.getWorldPosition(c.b); c = add(4.8); l.kn.getWorldPosition(c.a); l.an.getWorldPosition(c.b); });
-  arms.forEach(o => { if (o === self) return; c = add(3.3); o.el.getWorldPosition(c.a); o.wr.getWorldPosition(c.b); c = add(2.4); o.wr.getWorldPosition(c.a); o.tips[1].getWorldPosition(c.b); });
+  arms.forEach(o => { if (o === self || noArms) return; c = add(3.3); o.el.getWorldPosition(c.a); o.wr.getWorldPosition(c.b); c = add(2.4); o.wr.getWorldPosition(c.a); o.tips[1].getWorldPosition(c.b); });
   headC.set(HC[0], HC[1], 0).applyMatrix4(head.matrixWorld); }
-function bodyPen(pt, r) { let best = -1e9;
-  for (let i = 0; i < capN; i++) { const c = CAP[i]; cq.subVectors(c.b, c.a); const t = clamp(cv3.subVectors(pt, c.a).dot(cq) / (cq.lengthSq() || 1e-6), 0, 1); coreN.subVectors(pt, cv3.copy(c.a).addScaledVector(cq, t));
+/* The trunk is not a round tube: it is an oval, about 16 cm to each side at the hips and the chest, 13.5 at the waist, and
+   10 front to back. trunkPen measures a point against that shape, so a hand cannot rest inside the side of the chest or hips. */
+const trZ = V3(), TRW0 = t => t < .3 ? 15.9 - 2.4 * (t / .3) : t < .75 ? 13.5 + 2.7 * ((t - .3) / .45) : 16.2 - 2.6 * ((t - .75) / .25), TRW = t => TRW0(t) * (!FEM ? 1 : t < .2 ? 1.045 : t < .55 ? .93 : .94), TRD = FEM ? 10.9 : 10.3;      // each figure is measured against its own shape
+function trunkPen(pt, r) { cq.subVectors(core1, core0); const t = clamp(cv3.subVectors(pt, core0).dot(cq) / (cq.lengthSq() || 1e-6), 0, 1); coreN.subVectors(pt, cv3.copy(core0).addScaledVector(cq, t));
+  const d = coreN.length() || 1e-6, lat = Math.abs(coreN.dot(trZ)), sag = Math.sqrt(Math.max(0, d * d - lat * lat)), k = Math.hypot(lat / TRW(t), sag / TRD) || 1e-6;
+  coreN.multiplyScalar(1 / d); return r - d * (1 - 1 / k); }
+/* The head as it is drawn: an oval (wider front to back and top to bottom than side to side), hair and ears included. */
+const HRAD = [12, 13.2, 10.7], hq = V3(), hInv = new THREE.Matrix4();
+function headPen(pt, r) { hq.copy(pt).applyMatrix4(hInv.copy(head.matrixWorld).invert()); hq.x -= HC[0]; hq.y -= HC[1];
+  const k = Math.hypot(hq.x / (HRAD[0] + r), hq.y / (HRAD[1] + r), hq.z / (HRAD[2] + r)) || 1e-6, d = hq.length() || 1e-6; coreN.subVectors(pt, headC).normalize(); return d * (1 / k - 1); }
+function bodyPen(pt, r) { let best = trunkPen(pt, r); bestN.copy(coreN);
+  for (let i = 1; i < capN; i++) { const c = CAP[i]; cq.subVectors(c.b, c.a); const t = clamp(cv3.subVectors(pt, c.a).dot(cq) / (cq.lengthSq() || 1e-6), 0, 1); coreN.subVectors(pt, cv3.copy(c.a).addScaledVector(cq, t));
     const d = coreN.length() || 1e-6, pen = c.r + r - d; if (pen > best) { best = pen; bestN.copy(coreN).multiplyScalar(1 / d); } }
-  if (r < 4) { coreN.subVectors(pt, headC); const d = coreN.length() || 1e-6, pen = 8.5 + r - d; if (pen > best) { best = pen; bestN.copy(coreN).multiplyScalar(1 / d); } }      // hands and fingertips; an elbow may pass beside the ear
+  { const pen = headPen(pt, r < 4 ? r - 1.6 : r - 3.4); if (pen > best) { best = pen; bestN.copy(coreN); } }      // a hand may lie on the hair; an elbow keeps clear of the head too      // hands and fingertips; an elbow may pass beside the ear
   coreN.copy(bestN); return best; }
 function wristLimit(a, maxBend) {                               // wrist: at most maxBend degrees of bend from the forearm's line, at most 95 of turn at the wrist itself
   const q = a.wr.quaternion, n = Math.hypot(q.y, q.w); if (n > 1e-5) qTw.set(0, q.y / n, 0, q.w / n); else qTw.copy(QI);
@@ -59,7 +74,7 @@ function place(p, ox, oz, oy = 0) {                                      // put 
   root.updateMatrixWorld(true); root.getWorldQuaternion(qRoot);
   legs.forEach(l => { const r = l.s > 0, fx = r ? p.fxR : p.fxL, lift = r ? p.liftR : p.liftL, kn = r ? p.kneelR : p.kneelL; let ph = (r ? p.heelR : p.heelL) * R;
     l.hip.getWorldPosition(H); pole.set(Math.cos(sto(p, r) * R), 0, l.s * Math.sin(sto(p, r) * R)); const fz = stz(p, r);
-    const free = r ? p.freeR : p.freeL; const ku = p.kpU + (r ? p.kuR : p.kuL), ko = p.kpO + (r ? p.koR : p.koL); kp.copy(pole).multiplyScalar(Math.max(0, 1 - Math.abs(ku) - Math.abs(ko))).addScaledVector(UP, ku).addScaledVector(cv3.set(0, 0, l.s), ko).addScaledVector(XF, r ? p.kxR : p.kxL).normalize(); const flr = r ? p.flR : p.flL, tu = (r ? p.tuR : p.tuL) * R, tuLift = 6 * Math.sin(tu) + 7 * Math.cos(tu) - 7;      // flr: height of what this foot stands on; tu: toes lifted, weight on the heel      // which way the knee points: over the toes when standing, up when lying or sitting
+    const free = r ? p.freeR : p.freeL; const ku = p.kpU + (r ? p.kuR : p.kuL), ko = p.kpO + (r ? p.koR : p.koL); kp.copy(pole).multiplyScalar(Math.max(0, 1 - Math.abs(ku) - Math.abs(ko))).addScaledVector(UP, ku).addScaledVector(cv3.set(0, 0, l.s), ko).addScaledVector(XF, r ? p.kxR : p.kxL).normalize(); const flr = r ? p.flR : p.flL, tu = (r ? p.tuR : p.tuL) * R, tuLift = 7.4 * Math.sin(tu) + 7 * Math.cos(tu) - 7;      // flr: height of what this foot stands on; tu: toes lifted, weight on the heel      // which way the knee points: over the toes when standing, up when lying or sitting
     for (let it = 0; it < 2; it++) {
       const fw = 11.6 - 11.6 * Math.cos(ph) + 7 * Math.sin(ph);                              // heel raise: the ankle swings up and forward over the ball of the foot
       A.set(fx + pole.x * fw, 1 + 11.6 * Math.sin(ph) + 7 * Math.cos(ph) + lift + flr + tuLift, l.s * fz + pole.z * fw);
@@ -97,9 +112,9 @@ function place(p, ox, oz, oy = 0) {                                      // put 
   // Floor rule: if any fingertip, thumb tip, wrist or elbow would end up below the mat surface, the hand is lifted until it clears.
   arms.forEach(a => { const r = a.s > 0, w = r ? p.ikR : p.ikL; a.miss = 0; root.updateMatrixWorld(true);
     chest.getWorldQuaternion(qRoot); a.wr.getWorldPosition(wFree); a.el.getWorldPosition(eFree); const wk = w;      // where the free arm has its wrist and elbow
-    buildBody(a); push.set(0, 0, 0); pPush.set(0, 0, 0);
+    buildBody(a, Math.max(p.hugR, p.hugL) > .5); push.set(0, 0, 0); pPush.set(0, 0, 0);      // when one hand holds the other arm, the two arms do not push each other away (the solid-body test still checks they do not cross)
     // A free arm is left exactly as posed unless it would pass into the body; then it is solved like a placed arm and eased out of the way.
-    const inFree = Math.max(bodyPen(wFree, 3.2), bodyPen(a.tips[1].getWorldPosition(sv), 1.7), bodyPen(eFree, 4.2)), guard = w < .001 ? clamp((inFree + 1.5) / 1.5, 0, 1) : 1; if (guard <= 0) return;
+    const inFree = Math.max(bodyPen(wFree, 3.2), bodyPen(a.tips[1].getWorldPosition(sv), 1.7), bodyPen(eFree, 4.2)), guard = w < .001 ? smoother((inFree + 6) / 6) : 1; if (guard <= 0) return;      // the arm starts to give way early and gradually (from 6 cm off), so it glides round the body and never bounces off it
     for (let it = 0, lift = 0; it < 7; it++) {
       a.sh.getWorldPosition(H);
       A.set((r ? p.hRx : p.hLx) + (p.hipX + ox) * (1 - p.hW), Math.max(2.7, r ? p.hRy : p.hLy) + lift, (r ? p.hRz : p.hLz) + (p.hipZ + oz) * (1 - p.hW));
@@ -117,6 +132,9 @@ function place(p, ox, oz, oy = 0) {                                      // put 
       K.copy(H).addScaledVector(e, L.ua * Math.cos(be)).addScaledVector(pp, L.ua * Math.sin(be));
       for (let n = 0; n < 5 && K.y < 5; n++) { pole.y += .5; pp.copy(pole).addScaledVector(e, -pole.dot(e)).normalize(); K.copy(H).addScaledVector(e, L.ua * Math.cos(be)).addScaledVector(pp, L.ua * Math.sin(be)); }
       A.copy(H).addScaledVector(e, d);
+      { const ep = r ? p.epR : p.epL;                           // a pinned elbow: the elbow stays on a given spot (resting on the mat, held at the side) and only the forearm turns about it
+        if (ep > .001) { cv3.set(r ? p.eRx : p.eLx, r ? p.eRy : p.eLy, r ? p.eRz : p.eLz); sv.subVectors(cv3, H).normalize(); K.lerp(cv3.copy(H).addScaledVector(sv, L.ua), ep);
+          sv.copy(a.tg).add(push).sub(K).normalize(); A.lerp(cv3.copy(K).addScaledVector(sv, L.fa), ep); pp.subVectors(K, H).addScaledVector(e, -cv3.subVectors(K, H).dot(e)).normalize(); } }
       // Shoulder range. The upper arm, seen from the ribcage, may go at most SH_BACK behind the body and SH_ACROSS across it.
       // If the target would need more, the upper arm stops at the limit and the hand stops short of the target (the test reports it).
       sv.subVectors(K, H).normalize().applyQuaternion(qi.copy(qRoot).invert()); let lim = false;
@@ -138,10 +156,17 @@ function place(p, ox, oz, oy = 0) {                                      // put 
       let low = 1e9; a.tips.forEach((g, i) => { low = Math.min(low, g.getWorldPosition(sv).y - (i < 5 ? 1.25 : i === 5 ? 2.6 : 4.4)); });
       // Body rule: neither the wrist nor the elbow may enter the trunk. The hand target is pushed out, the elbow is steered away.
       let pw1 = bodyPen(a.wr.getWorldPosition(sv), 3.2); if (pw1 > 0) push.addScaledVector(coreN, pw1 + .05);
-      const ph1 = bodyPen(a.tips[1].getWorldPosition(sv), 1.7); if (ph1 > 0) { push.addScaledVector(coreN, ph1 + .05); pw1 = Math.max(pw1, ph1); }      // fingertips count too
+      const ph1 = (r ? p.hugR : p.hugL) > .5 ? 0 : bodyPen(a.tips[1].getWorldPosition(sv), 1.7); if (ph1 > 0) { push.addScaledVector(coreN, ph1 + .05); pw1 = Math.max(pw1, ph1); }      // fingertips count too (a hand that holds a limb lies on it: there the wrist alone keeps the distance)
       const pe1 = bodyPen(a.el.getWorldPosition(sv), 4.2); if (pe1 > 0) pPush.addScaledVector(coreN, .05 + pe1 * .3);
       a.miss = w > .99 ? a.wr.getWorldPosition(sv).distanceTo(cv3.copy(a.tg).add(push)) : 0;      // short of the (steered) target only when a joint limit stopped it
       if (low >= 0 && pw1 <= .02 && pe1 <= .05) break; if (low < 0) lift += -low + .05; }
+    { const hg = r ? p.hugR : p.hugL;                           // a hand holding a leg (or the other forearm): the palm faces what it holds and the fingers wrap round it
+      if (hg > .001) { a.sh.updateWorldMatrix(false, true); a.el.getWorldQuaternion(qT); a.wr.getWorldPosition(H); let best = 1e9; const segs = [];
+        legs.forEach(l => { segs.push([l.hip, l.kn], [l.kn, l.an]); }); const o = arms[r ? 1 : 0]; segs.push([o.el, o.wr]);
+        segs.forEach(([g0, g1]) => { g0.getWorldPosition(thA); g1.getWorldPosition(thB); cq.subVectors(thB, thA); const t = clamp(cv3.subVectors(H, thA).dot(cq) / (cq.lengthSq() || 1e-6), 0, 1); cv3.copy(thA).addScaledVector(cq, t); const d = cv3.distanceTo(H); if (d < best) { best = d; az.subVectors(cv3, H); } });
+        { cq.subVectors(core1, core0); const t = clamp(cv3.subVectors(H, core0).dot(cq) / (cq.lengthSq() || 1e-6), 0, 1); cv3.copy(core0).addScaledVector(cq, t); const d = cv3.distanceTo(H) - 6; if (d < best) { best = d; az.subVectors(cv3, H); } }      // or the trunk: a hand resting on the belly or the chest lies flat on it
+        az.normalize(); ay.subVectors(a.el.getWorldPosition(cv3), H).normalize(); ay.addScaledVector(az, -ay.dot(az)).normalize(); az.multiplyScalar(-a.s); ax.crossVectors(ay, az);
+        qS.setFromRotationMatrix(M.makeBasis(ax, ay, az)); a.wr.quaternion.slerp(qi.copy(qT).invert().multiply(qS), hg); wristLimit(a, 60); } }
     const hd = r ? p.holdR : p.holdL;                           // hand resting on the head: it continues the line of the forearm, laid onto the skull, palm toward it
     if (hd > .001) { a.sh.updateWorldMatrix(false, true); a.el.getWorldQuaternion(qT); a.wr.getWorldPosition(H);
       az.set(HC[0], HC[1], 0).applyMatrix4(head.matrixWorld).sub(H).normalize();             // from the wrist toward the centre of the skull
