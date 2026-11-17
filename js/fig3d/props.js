@@ -21,9 +21,12 @@ prop('grips', arms.map(a => a.wr), g => { const s = g.parent === arms[0].wr ? 1 
 prop('straps', [scene, scene, scene, scene], g => { const geo = new THREE.CylinderGeometry(1, 1, 1, 10); part(geo, PM.band, GP, g, 0); });
 prop('hook', [scene, scene], g => { cyl(g, PM.steel, 4.6, 1.3, 0, -.9, 0, 'y', 0); cyl(g, PM.dark, 1.2, 1.6, 2.6, -.2, 2.6, 'y', 0); cyl(g, PM.dark, 1.2, 1.6, -2.6, -.2, -2.6, 'y', 0); { const t = new THREE.TorusGeometry(2.1, .62, 10, 24); t.rotateX(Math.PI / 2); t.rotateZ(Math.PI / 2); part(t, PM.dark, GP, g, 0).position.y = 1.6; } });      // an anchor plate screwed to the wall, with a ring: something made to be pulled on
 /* A band round a limb is a loop that sits on it: round the forefoot, the ankle or the knee. The band leaves from the side of the loop. */
-const LOOP = { foot: { r: 5.3, c: [10.2, -4.2, 0], ax: 'x', sy: .8 }, ankle: { r: 4.9, c: [0, 3.2, 0], ax: 'y' }, knee: { r: 7.3, c: [0, -3.5, 0], ax: 'y' } };
+const LOOP = { foot: { r: 6.5, c: [9, -4.9, 0], ax: 'x', sy: .74 }, ankle: { r: 4.9, c: [0, 3.2, 0], ax: 'y' }, knee: { r: 7.3, c: [0, -3.5, 0], ax: 'y' } };
 const loops = {}; ['foot', 'ankle', 'knee'].forEach(kind => legs.forEach(l => { const par = kind === 'knee' ? l.kn : l.an, L0 = LOOP[kind], g = new THREE.Group(); g.visible = false; par.add(g); g.position.set(...L0.c);
   const t = new THREE.TorusGeometry(L0.r, .95, 10, 40); if (L0.ax === 'x') t.rotateY(Math.PI / 2); else t.rotateX(Math.PI / 2); if (L0.sy) t.scale(1, L0.sy, 1); part(t, PM.band, GP, g, 0); loops[kind + (l.s > 0 ? 'R' : 'L')] = g; }));
+/* Small things held in the hands: a rubber band round the fingers and thumb (finger extension) and a rolled towel (grip). */
+prop('fband', arms.map(a => a.wr), g => { const t = new THREE.TorusGeometry(1, .16, 8, 32); t.rotateX(Math.PI / 2); part(t, PM.band, GP, g, 0); });
+prop('towel', arms.map(a => a.wr), g => { const s = g.parent === arms[0].wr ? 1 : -1; g.position.set(0, -6.6, -s * 2.3); cyl(g, PM.soft, 2.3, 15, 0, 0, 0, 'x', .3); });
 const blocksOf = x => (x.props && x.props.blocks) || [];
 function propPoints(x) { const o = [], pr = x.props || {}; blocksOf(x).forEach(b => { for (const X of [b[0], b[1]]) for (const Y of [b[2], Math.min(b[3], 175)]) for (const Z of [Math.max(b[4], -45), Math.min(b[5], 45)]) o.push([X, Y, Z]); });
   if (pr.door) { const dx = pr.door.x ?? 8; o.push([dx, 0, 42], [dx, 0, -42], [dx, 190, 42], [dx, 190, -42]); }
@@ -46,6 +49,7 @@ function syncProps(p) { const want = {}, use = k => { Object.assign(want, EX[k].
   for (const name in PROPS) { const P = PROPS[name]; if (want[name]) P.cfg = want[name]; P.show = want[name] ? 1 : 0;
     P.gs.forEach(g => { g.visible = P.show > .5; }); }
   PROPS.door.gs[0].position.x = PROPS.door.cfg.x ?? 8;
+  PROPS.fband.gs.forEach((g, i) => { const c = i ? p.curlL : p.curlR, s = i ? -1 : 1, r = 2.3 + 2.5 * (1 - c); g.position.set(0, -12.6 + 3.2 * c, -s * (1.2 + 1.6 * c)); g.scale.set(r, 1, r * .8); });      // the band stretches as the fingers open
   const bare = !!EX[cur].barefoot; legs.forEach(l => { l.shod.forEach(g => g.visible = !bare); l.bare.forEach(g => g.visible = bare); });      // bare feet where the move needs them (e.g. a ball under the sole)
   scene.updateMatrixWorld(true);
   { const c = want.ball || {}, g0 = PROPS.ball.gs[0], g1 = PROPS.ball.gs[1], r = c.r || 3.3; g1.visible = false;      // ball: under a foot (ballX, ballZ), between the knees, or two under the head

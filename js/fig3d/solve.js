@@ -125,7 +125,7 @@ function place(p, ox, oz, oy = 0) {                                      // put 
       { const ot = r ? p.onThighR : p.onThighL; if (ot > .001) { const lg = legs[r ? 0 : 1]; lg.hip.getWorldPosition(thA); lg.kn.getWorldPosition(thB); thA.lerp(thB, .72).add(cv3.set(-6.2, 11.4, 0)); A.lerp(thA, ot); } }      // resting on the thigh: measured from the leg as it is now
       A.lerpVectors(wFree, A, wk); a.tg.copy(A); A.add(push);
       { const near = minReach(L.ua, L.fa, ELBOW_MAX) + 4, ln = cv3.subVectors(A, H).length(); if (ln < near) A.addScaledVector(sv.set(1, .25, 0).applyQuaternion(qRoot).normalize(), near - ln); }      // a target too close to the shoulder is eased forward, so the arm never flips
-      { const eo = r ? p.eoR : p.eoL; pole.set(-.9 * (1 - eo), .1 + .25 * eo, a.s * (.42 + .58 * eo)); pole.lerp(cv3.set(-.25, -1, a.s * .5), r ? p.edR : p.edL); if (wk < 1) pole.lerpVectors(cv3.subVectors(eFree, H).normalize(), pole, wk); pole.add(pPush); }      // elbow points back and a little out; "elbow out" for a hand on the head
+      { const eo = r ? p.eoR : p.eoL; pole.set(-.9 * (1 - eo), .1 + .25 * eo, a.s * (.42 + .58 * eo)); pole.lerp(cv3.set(-.25, -1, a.s * .5), r ? p.edR : p.edL); pole.lerp(cv3.set(1, -.25, a.s * .15).applyQuaternion(qRoot), r ? p.efR : p.efL); if (wk < 1) pole.lerpVectors(cv3.subVectors(eFree, H).normalize(), pole, wk); pole.add(pPush); }      // elbow points back and a little out; "elbow out" for a hand on the head
       e.subVectors(A, H); const d = clamp(e.length(), minReach(L.ua, L.fa, ELBOW_MAX), L.ua + L.fa - .15); e.normalize();
       pp.copy(pole).addScaledVector(e, -pole.dot(e)).normalize();
       const be = Math.acos(clamp((L.ua ** 2 + d * d - L.fa ** 2) / (2 * L.ua * d), -1, 1));

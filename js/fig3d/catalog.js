@@ -79,10 +79,10 @@ C('door-er', 'Doorway external rotation stretch', { props: { door: { x: 30 } }, 
 C('hands-behind', 'Hands clasped behind the back', { yaw: 28, hold: true, P(u) { const h = first(u), s = then(u);      // arms long behind the back, hands together, lifting away from the body as the chest opens
   return { flexR: 3 - 34 * h - 10 * s, flexL: 3 - 34 * h - 10 * s, abdR: 4, abdL: 4, rotR: 24 * h, rotL: 24 * h, elbR: 9 - 4 * h, elbL: 9 - 4 * h, proR: 14 + 50 * h, proL: 14 + 50 * h, curlR: .5, curlL: .5, che: -2 - 6 * s, shFR: -s, shFL: -s, nec: -3 * s }; } });
 C('cross-body', 'Cross-body shoulder stretch', { clasp: true, yaw: 75, pitch: 10, hold: true, P(u) { const h = sm(clamp(u / .5, 0, 1)), hl = sm(clamp((u - .42) / .5, 0, 1)), s = then(u, .6), out = 10 * sin(PI * h);      // the arm goes across first; only then does the other hand come up under it, so the two never meet on the way      // one arm long across the front of the chest at shoulder height; the other forearm comes up in front of it, just above the elbow, and draws it in
-  return { ikR: h, hRx: 42 - 3 * s + out, hRy: 133, hRz: -21 - 2 * s, proR: 60, curlR: .15, eoR: .2, ikL: hl, hLx: 22, hLy: 123.5 + s, hLz: -1, edL: 1, curlL: .3, proL: -40 }; } });      // the other hand cradles the arm from underneath, just above the elbow
+  return { ikR: h, hRx: 33 - 3 * s + out, hRy: 133, hRz: -22 - 2 * s, proR: 0, wfR: 0, curlR: .25, efR: h, ikL: hl, hLx: 23, hLy: 120.5 + s, hLz: -2, edL: 1, curlL: .3, proL: -40 }; } });      // the other hand cradles the arm from underneath, just above the elbow
 C('hug', 'Self-hug upper-back stretch', { clasp: true, yaw: 75, pitch: 10, hold: true, P(u) { const h = first(u), s = then(u), out = 8 * sin(PI * h);      // arms crossed in front of the chest, each hand reaching for the opposite shoulder; the upper back rounds and the shoulder blades spread
   return { ikR: h, hRx: 27 + out, hRy: 139, hRz: -10, curlR: .3, edR: .8, ikL: h, hLx: 34 + out, hLy: 119, hLz: 5, edL: 1, curlL: .3, che: -2 + 12 * s, lum: 4 * s, nec: 10 * s, shFR: s, shFL: s }; } });
-C('triceps', 'Overhead triceps stretch', { yaw: 62, pitch: 8, hold: true, P(u) { const h = first(u), s = then(u);      // the elbow points at the ceiling and the hand slides down between the shoulder blades; the other arm stays relaxed
+C('triceps', 'Overhead triceps stretch', { yaw: 62, pitch: 8, hold: true, P(u) { const h = first(u), s = then(u);      // the elbow points at the ceiling and the hand slides down between the shoulder blades. OPEN: the reference shows the other hand on the elbow, easing it back; that helping hand is not drawn yet (its path over the head still crosses the head)
   return { flexR: 3 + 165 * h, elbR: 9 + 126 * h + 8 * s, abdR: 5 + 9 * h, proR: 14 - 14 * h, curlR: .2, lumS: 2 * s, nec: 5 * s }; } });
 C('wall-lat', 'Wall lat stretch', { props: { blocks: [WALL(62)] }, yaw: 25, P(u) { const h = first(u), s = then(u);
   return { bal: 0, hipX: -27 * s, hipY: 93.5 - 3 * s, pel: 2 + 58 * s, lum: -2 * s, che: -2 - 8 * s, nec: -8 * s, hW: 1, ikR: h, ikL: h, plantWall: 1, plantR: sm(h * 1.6), plantL: sm(h * 1.6), curlR: .05, curlL: .05,
@@ -104,7 +104,8 @@ C('itb', 'Standing cross-over hip stretch', { yaw: 90, P(u) { const st = first(u
 C('side-lunge', 'Side lunge adductor stretch', { yaw: 90, pitch: 10, P(u) { const s = u;
   return { footZ: 36, toe: 14, wR: 1, wL: 1 - .75 * s, hipY: 93.5 - 30 * s, hipX: -8 * s, pel: 2 + 22 * s, lum: 4 * s, nec: -8 * s,
     flexR: 3 + 30 * s, flexL: 3 + 30 * s, elbR: 9 + 80 * s, elbL: 9 + 80 * s, abdR: 5 + 6 * s, abdL: 5 + 6 * s, curlR: .15, curlL: .15 }; } });
-C('sit-stand', 'Sit-to-stand / squat', { yaw: 0, P: squatP(1) });
+C('sit-stand', 'Sit-to-stand / squat', { yaw: 0, props: { chair: {} }, P(u) { const p = squatP(1)(u), s = u;      // from standing in front of a chair: hips back and down until they just touch the seat, trunk leaning forward, arms reaching forward; then stand up again
+  return { ...p, hipX: -27 * s, hipY: 93 - 35.2 * s, pel: 2 + 30 * s }; } });
 C('deep-squat', 'Deep squat hold', { yaw: 25, P(u) { const p = squatP(1.28)(u); return { ...p, pel: 2 + 12 * u, lum: 30 * u, che: 14 * u, nec: -22 * u, flexR: 3 + 72 * u, flexL: 3 + 72 * u, abdR: 5 + 21 * u, abdL: 5 + 21 * u, elbR: 9 + 8 * u, elbL: 9 + 8 * u }; } });
 /* Standing hamstring stretch, heel on a step. The front leg is STRAIGHT, its heel resting on a low step with the toes pointing up; the
    standing knee is soft. The hips go back and the trunk hinges forward from the hips with a flat back, chest toward the front thigh. */
@@ -155,8 +156,8 @@ C('wall-slide', 'Wall slides', { props: { blocks: [WALL(40)] }, yaw: 35, pitch: 
 const handP = f => (u) => ({ flexR: 12, flexL: 12, elbR: 84, elbL: 84, abdR: 6, abdL: 6, nec: 8, hea: 6, wri: 0, ...f(u) });
 C('wrist-curl', 'Wrist curl', { props: { dumbbells: {} }, yaw: 40, pitch: 16, focus: 'hands', P: handP(u => ({ proR: -80, proL: -80, curlR: .8, curlL: .8, wfR: mx(-32, 48, u), wfL: mx(-32, 48, u) })) });
 C('reverse-wrist', 'Reverse wrist curl', { props: { dumbbells: {} }, yaw: 40, pitch: 16, focus: 'hands', P: handP(u => ({ proR: 84, proL: 84, curlR: .8, curlL: .8, wfR: mx(34, -48, u), wfL: mx(34, -48, u) })) });
-C('grip', 'Towel squeeze', { yaw: 40, pitch: 16, focus: 'hands', P: handP(u => ({ proR: 10, proL: 10, curlR: mx(.45, 1, u), curlL: mx(.45, 1, u) })) });
-C('finger-ext', 'Finger extension against a band', { yaw: 40, pitch: 16, focus: 'hands', P: handP(u => ({ proR: 60, proL: 60, curlR: mx(.7, 0, u), curlL: mx(.7, 0, u) })) });
+C('grip', 'Towel squeeze', { props: { towel: {} }, yaw: 40, pitch: 16, focus: 'hands', P: handP(u => ({ proR: 10, proL: 10, curlR: mx(.45, 1, u), curlL: mx(.45, 1, u) })) });
+C('finger-ext', 'Finger extension against a band', { props: { fband: {} }, yaw: 40, pitch: 16, focus: 'hands', P: handP(u => ({ proR: 60, proL: 60, curlR: mx(.7, 0, u), curlL: mx(.7, 0, u) })) });
 
 /* ---------- on a chair ---------- */
 const CH = { ...CHAIRP };
@@ -166,7 +167,10 @@ chairC('seated-twist', 'Seated spinal twist', { yaw: 62, P(u) { const a = first(
     plantL: 1 - .1 * sin(PI * a), onThighL: 1 - a, hLx: 2, hLy: 50.8 + 9 * arc, hLz: -20.5 }; } });
 chairC('seated-side', 'Seated quadratus lumborum stretch', { yaw: 90, P(u) { const h = first(u), s = then(u);
   return { ...CH, lumS: -17 * s, cheS: -19 * s, necS: -10 * s, pelS: -3 * s, onThighL: 1 - h, plantL: .9, hLx: 2, hLy: 50.8, hLz: -20.5, onThighR: 1 - h, plantR: 1 - h, ikR: 1 - h, abdR: 5 + 165 * h, rotR: -90 * h, proR: 14 - 80 * h, elbR: 12, curlR: .1 }; } });
-const fig4 = u => { const h = first(u, 1.8); return { freeR: h, wR: 1 - h, fxR: mx(CHX + 46, CHX + 37, h), liftR: mx(0, 72.5, h) + 3 * sin(PI * h), fzR: mx(9.6, -5.5, h), koR: .95 * h, kuR: -.4 * h, ankR: 10 * h, plantR: 1 - h }; };
+/* Figure-4 on a chair: the ankle of one leg rests on the other thigh just above the knee, the crossed knee dropping out to the side so the shin
+   lies roughly level. The foot is lifted clear of the thigh first, carried across, then set down: it never passes through the other leg. */
+const fig4 = u => { const h = first(u, 1.25), over = sm(clamp((h - .35) / .65, 0, 1)), on = sm(clamp(h * 3, 0, 1));      // the foot swings forward and up in front of the other knee, then comes back to rest on the thigh
+  return { freeR: on, wR: 1 - on, fxR: mx(CHX + 46, CHX + 37, h) + 20 * sin(PI * h) ** .6, liftR: 53 * sm(h) + 4 * sin(PI * h), fzR: mx(9.6, -9.6, over), koR: .95 * over, kuR: -.4 * over, ankR: -30 * over, plantR: 1 - h }; };
 chairC('seated-fig4', 'Seated figure-4 stretch', { clasp: true, yaw: 62, P(u) { const s = then(u, .5); return { ...CH, ...fig4(u), pel: 16 * s, lum: 3 + 4 * s, nec: -8 * s, onThighR: 0, onThighL: 0, plantR: .9, plantL: .9, hRx: 2, hRy: 50.8, hRz: 20.5, hLx: 2, hLy: 50.8, hLz: -20.5 }; } });      // hands hold the sides of the seat throughout
 chairC('peroneal', 'Peroneal (outer calf) stretch', { clasp: true, yaw: 62, P(u) { const h = first(u, 1.8), s = then(u, .5); return { ...CH, ...fig4(u), pel: 8 * s, nec: 10 * s, onThighR: 0, onThighL: 0, plantR: .9, plantL: .9, hRx: 2, hRy: 50.8, hRz: 20.5, hLx: 2, hLy: 50.8, hLz: -20.5, ankR: 10 * h + 22 * s }; } });
 chairC('ball-squeeze', 'Ball squeeze', { props: { ball: { at: 'knees', r: 6.6 } }, yaw: 75, P: u => ({ ...CH, footZ: mx(11.5, 9.9, u) }) });
