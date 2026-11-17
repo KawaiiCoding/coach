@@ -65,12 +65,14 @@ function aim() { const y = cam.yaw * R, pi = cam.pitch * R;
   camera.lookAt(tgt); camera.updateMatrixWorld(); camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
   HIPC.set(-1, 1, 0).applyMatrix4(root.matrixWorld).applyMatrix4(camera.matrixWorldInverse);
   HEADC.set(HC[0] + 1.2, HC[1] - 1.5, 0).applyMatrix4(head.matrixWorld).applyMatrix4(camera.matrixWorldInverse);
-  SCN(cam.yaw); renderer.render(scene, camera); }
+  if (!bareShot) SCN(cam.yaw); renderer.render(scene, camera); }
+let bareShot = false;
 function draw(t, dt) {
   if (fade) { const el = now - fade.t0; if (!fade.swapped && el >= FADE) { showMove(fade.to); fade.swapped = true; }
     cv.style.opacity = el < FADE ? 1 - smoother(el / FADE) : smoother((el - FADE) / FADE); if (el >= 2 * FADE) { fade = null; cv.style.opacity = 1; } }
   if (SHOWPET) { if (!petOn) { petDir = -petDir; PET(0, 0, 300, { kind: SHOWPET, coat: +QS.get('coat') || 0, a: -150, end: 150, dir: petDir }); } petOn = PET(dt || 0, 0, 300); cam.over = [2.3, 0, 26, -150]; cam.held = true; cam.tYaw = 0; cam.tPitch = 9; root.visible = matG.visible = shadow.visible = false; }      // a pet shown on purpose: it walks to and fro
   else if (!LAB && dt) PET(dt, cam.yaw, (camera.right - camera.left) / camera.zoom);
+  matG.visible = !EX[cur].nomat;
   const pNow = full(poseOf(cur, moveTime(), drive)); if (drive) pNow.breath += restU; apply(pNow, t); syncProps(pNow);
   const yw = EX[cur].yaw || 0;
   if (!cam.drag && !cam.held) { const d = ((yw - cam.tYaw) % 360 + 540) % 360 - 180, k = 1 - Math.exp(-dt * 2.2); cam.tYaw += d * k; cam.tPitch += ((EX[cur].pitch ?? 7) - cam.tPitch) * k; }
@@ -98,6 +100,6 @@ window.FIG = {
   /* a still picture of a move at its end position, for lists */
   thumb(k, w, h, type) { if (!EX[k]) return null; const keepCur = cur, keepLive = live; live = false; frame(w, h); cur = k; const x = EX[k], yw = x.yaw || 0, pi = x.pitch ?? 7;
     const p = full(x.P ? x.P(x.tu ?? 1, .25, 0) : x.pose(x.tt ?? 2)); const vw = fitView(k, yw, pi); apply(p, 0); syncProps(p); camera.zoom = vw[0]; tgt.set(vw[1], vw[2], vw[3]); camera.updateProjectionMatrix(); cam.yaw = yw; cam.pitch = pi;
-    const hid = x.bare ? [disc, matG] : []; hid.forEach(o => { o.visible = false; }); aim(); hid.forEach(o => { o.visible = true; });      // bare: no mat and no ground, just the figure with a little greenery behind      // bare: the figure alone, for the home screen
+    const hid = x.bare ? scene.children.filter(o => o !== root && o !== shadow && o.visible && !o.isCamera) : x.nomat ? [matG] : []; hid.forEach(o => { o.visible = false; }); bareShot = !!x.bare; aim(); bareShot = false; hid.forEach(o => { o.visible = true; });      // bare: no mat and no ground, just the figure with a little greenery behind      // bare: the figure alone, for the home screen
     const url = cv.toDataURL(type || 'image/png', .86); cur = keepCur; live = keepLive; return url; },
 };

@@ -426,7 +426,12 @@ body.onb { padding-bottom: 0; }
 .f3bg { position: absolute; inset: 0; overflow: hidden; display: block; }
 .f3bg::before { content: ''; position: absolute; left: 52%; top: 44%; height: 88%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: var(--ill-glow); }
 .petart { position: relative; aspect-ratio: 1.5; background: var(--ill-bg); }
-.hero .f3hero { position: relative; display: block; width: 100%; height: 100%; min-height: 196px; } .hero .f3hero .f3img { object-fit: contain; object-position: 50% 100%; }
-.f3hero .f3bg::before { left: 50%; top: 52%; height: 88%; } .hero .f3hero .f3img { object-fit: contain; object-position: 50% 60%; } .hero .heroart { align-self: stretch; }
+ .hero .heroart { align-self: stretch; }
 .f3img.f3in { animation: f3in .25s ease-out; } @keyframes f3in { from { opacity: 0; } to { opacity: 1; } }
 .spart .f3hero { display: block; position: relative; width: 100%; height: 100%; }
+/* the home-screen coach: the whole figure always fits inside its box; the glow behind it carries a low green hill, kept inside the circle */
+.hero .heroart { -webkit-mask-image: none; mask-image: none; align-items: stretch; }
+.f3hero { position: relative; display: block; flex: 1; align-self: stretch; width: 100%; min-height: 150px; }
+.f3hero .f3bg::before { display: none; }
+.f3hero .f3bg { background: radial-gradient(ellipse 62% 24% at 50% 93%, var(--ill-hill) 0 99%, transparent 100%), radial-gradient(circle at 76% 70%, var(--ill-bush) 0 7%, transparent 7.5%), radial-gradient(circle at 83% 66%, var(--ill-bush) 0 5.5%, transparent 6%), var(--ill-glow); -webkit-mask-image: radial-gradient(circle closest-side at 50% 50%, #000 0 96%, transparent 97%); mask-image: radial-gradient(circle closest-side at 50% 50%, #000 0 96%, transparent 97%); }
+.f3hero .f3img { object-fit: contain; object-position: 50% 50%; padding: 6% 0; box-sizing: border-box; }

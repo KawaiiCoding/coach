@@ -1,5 +1,5 @@
 /* Offline cache for GitHub Pages. Bump CACHE when files change. */
-const CACHE = 'tension-coach-v107';
+const CACHE = 'tension-coach-v109';
 const FILES = ['./', './index.html', './manifest.webmanifest', './css/app.css',
   './js/kinematics.js', './js/data/muscles.js', './js/data/postures.js', './js/data/stretches.js', './js/data/strength.js',
   './js/data/breathing.js', './js/data/regions.js', './js/data/stages.js', './js/data/coaching.js', './js/data/mindful.js', './js/data/equipment.js', './js/illus.js', './js/data/women.js',

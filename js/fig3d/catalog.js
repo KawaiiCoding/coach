@@ -39,7 +39,7 @@ C('march', 'Standing hip flexion march', { yaw: 28, P: u => ({ bal: 0, footZ: 6.
 /* The picture on the home screen: the coach in mid-stride, tall and easy, looking where they are going. */
 C('hero', 'Coach', { yaw: 26, pitch: 5, tu: 1, bare: true, P: () => ({ fxR: 27, fxL: -27, heelL: 44, tuR: 13, wR: 1, wL: 1, hipY: 90.5, pel: 3, che: -5, nec: -3, hea: -3, headT: 16,
   flexL: 34, flexR: -26, elbL: 52, elbR: 26, abdR: 9, abdL: 9, rotL: -8, proR: 10, proL: 6, curlR: .35, curlL: .35, cheT: -8, shFL: .5, shFR: -.5, breath: .5 }) });
-C('walk', 'Easy walk', { yaw: 20, cont: true, period: 1.3, P(u, ph) { const s = sin(TAU * ph), c = cos(TAU * ph);
+C('walk', 'Easy walk', { yaw: 20, nomat: true, cont: true, period: 1.3, P(u, ph) { const s = sin(TAU * ph), c = cos(TAU * ph);
   return { fxR: 15 * s, fxL: -15 * s, liftR: 5 * Math.max(0, c), liftL: 5 * Math.max(0, -c), wR: 1 - .45 * Math.max(0, c) ** 2, wL: 1 - .45 * Math.max(0, -c) ** 2, flexL: 3 + 16 * s, flexR: 3 - 16 * s, elbR: 24, elbL: 24, curlR: .45, curlL: .45 }; } });
 C('wu-swing', 'Arm swings and shoulder rolls', { yaw: 25, P: u => ({ flexR: -28 + 200 * u, flexL: -28 + 199 * u, elbR: 8, elbL: 8, abdR: 6, abdL: 6, proR: 14 - 14 * u, proL: 14 - 14 * u, curlR: .25, curlL: .25, che: -2 - 3 * u }) });
 C('shoulder-roll', 'Shoulder rolls', { yaw: 25, focus: 'head', cont: true, period: 2.5, P(u, ph) { const a = TAU * ph; return { shrR: .5 - .5 * cos(a), shrL: .5 - .5 * cos(a), shFR: sin(a), shFL: sin(a), che: -2 - 3 * sin(a) * (a > PI ? 1 : 0) }; } });      // a backward roll: forward, up, back, down
@@ -106,9 +106,11 @@ C('side-lunge', 'Side lunge adductor stretch', { yaw: 90, pitch: 10, P(u) { cons
     flexR: 3 + 30 * s, flexL: 3 + 30 * s, elbR: 9 + 80 * s, elbL: 9 + 80 * s, abdR: 5 + 6 * s, abdL: 5 + 6 * s, curlR: .15, curlL: .15 }; } });
 C('sit-stand', 'Sit-to-stand / squat', { yaw: 0, P: squatP(1) });
 C('deep-squat', 'Deep squat hold', { yaw: 25, P(u) { const p = squatP(1.28)(u); return { ...p, pel: 2 + 12 * u, lum: 30 * u, che: 14 * u, nec: -22 * u, flexR: 3 + 72 * u, flexL: 3 + 72 * u, abdR: 5 + 21 * u, abdL: 5 + 21 * u, elbR: 9 + 8 * u, elbL: 9 + 8 * u }; } });
-C('heel-step', 'Standing hamstring stretch, heel on a step', { props: { blocks: [[18, 52, 0, 14, -22, 22, 'wood']] }, yaw: 20, P(u) { const st = first(u, 1.25), s = then(u, .6);
-  return { fxR: 30 * st, flR: 14 * ramp(.55, .9, st), liftR: 26 * sin(PI * st) ** .7 * (1 - ramp(.9, 1, st)), tuR: 22 * s, wR: 1 - .85 * st, hipX: -10 * s, pel: 2 + 42 * s, lum: 3 * s, nec: -8 * s, hipY: 93.5 - 2 * s,
-    flexR: 3 - 12 * s, flexL: 3 - 12 * s, abdR: 5 + 13 * s, abdL: 5 + 13 * s }; } });
+/* Standing hamstring stretch, heel on a step. The front leg is STRAIGHT, its heel resting on a low step with the toes pointing up; the
+   standing knee is soft. The hips go back and the trunk hinges forward from the hips with a flat back, chest toward the front thigh. */
+C('heel-step', 'Standing hamstring stretch, heel on a step', { props: { blocks: [[20, 52, 0, 14, -22, 22, 'wood']] }, yaw: 20, hold: true, P(u) { const st = first(u, 1.3), s = then(u, .55), hy = 93.5 - 3.5 * st;
+  return { bal: 0, fxR: 30 * st, flR: 14 * ramp(.55, .9, st), liftR: 24 * sin(PI * st) ** .7 * (1 - ramp(.9, 1, st)), tuR: 24 * ramp(.6, 1, st), wR: 1 - .85 * st, fxL: -6 * st, hipX: -22.5 * st, hipY: hy, pel: 2 + 44 * s, lum: 0, che: -2, nec: -10 * s,
+    ikR: 1, ikL: 1, eoR: .8, eoL: .8, hRx: 1, hRy: hy + 9.5, hRz: 21.5, hLx: 1, hLy: hy + 9.5, hLz: -21.5, proR: 60, proL: 60, curlR: .35, curlL: .35 }; } });
 C('leg-swing', 'Leg swings', { props: { blocks: RAIL(-40) }, yaw: 30, P(u) { const a = mx(-26, 36, u);
   return { bal: 0, hipZ: 0, hipX: -3, wR: 0, freeR: 1, fxR: -3 + 82 * sin(a * R), liftR: 86 - 82 * cos(a * R) + 3, ankR: 0, hW: 1, ikL: 1, plantL: 1, hLx: 2, hLy: 103, hLz: -40, edL: .4, curlL: .45, flexR: 3 - a * .5, hipY: 93 }; } });
 /* Wall calf stretch. A long stance facing the wall: the back leg carries the stretch, its heel pressed down and the toes pointing
@@ -142,7 +144,7 @@ C('pushdown', 'Band triceps push-down', { props: { door: { x: 34 }, band: { anch
 C('pallof', 'Pallof press', { clasp: true, props: { blocks: [SIDEWALL(-97.6, 6)], band: { anchor: [6, 118, -96], rest: 62 } }, yaw: 55, pitch: 10, P: u => ({ ...GRIP, footZ: 13, hipY: 91, ikR: 1, ikL: 1, hRx: mx(24, 50, u), hRy: 121, hRz: 3.6, hLx: mx(24, 50, u), hLy: 121, hLz: -3.6, proR: 10, proL: 10, edR: .4, edL: .4 }) });
 C('band-er', 'Band external rotation', { props: { blocks: [SIDEWALL(-81.6, 10)], band: { s: [[[10, 104, -80], 'handR']], rest: 62 } }, yaw: 62, pitch: 12, P: u => ({ curlR: .8, wri: 0, elbR: 90, proR: 0, flexR: 3, abdR: 4, rotR: mx(-52, 34, u) }) });
 C('band-ir', 'Band internal rotation', { props: { blocks: [SIDEWALL(87.6, 10)], band: { s: [[[10, 104, 86], 'handR']], rest: 40 } }, yaw: 62, pitch: 12, P: u => ({ curlR: .8, wri: 0, elbR: 90, proR: 0, flexR: 3, abdR: 4, rotR: mx(34, -52, u) }) });
-C('pull-apart', 'Band pull-apart', { props: { band: { rest: 60 } }, yaw: 62, pitch: 10, P(u) { const th = mx(-3, 80, u) * R, r = 52.6, x = r * cos(th), z = 15.9 + r * sin(th);      // arms long with soft elbows, sweeping from in front out to a T at shoulder height; each hand stays at arm's length from its own shoulder
+C('pull-apart', 'Band pull-apart', { props: { band: { rest: 60 } }, yaw: 62, pitch: 10, P(u) { const th = mx(-3, 71, u) * R, r = 52.6, x = r * cos(th), z = 15.9 + r * sin(th);      // arms long with soft elbows, sweeping from in front out to a T at shoulder height; each hand stays at arm's length from its own shoulder
   return { ...GRIP, ikR: 1, ikL: 1, eoR: 1, eoL: 1, hRx: x, hRy: 134, hRz: z, hLx: x, hLy: 134, hLz: -z, proR: 80, proL: 80, shFR: -u, shFL: -u, che: -2 - 3 * u }; } });
 C('lateral-raise', 'Lateral raise (light)', { props: { dumbbells: {} }, yaw: 70, pitch: 8, P: u => ({ ...GRIP, load: .6, abdR: 6 + 80 * u, abdL: 6 + 80 * u, flexR: 6, flexL: 6, elbR: 12, elbL: 12, proR: 50, proL: 50 }) });
 C('press', 'Overhead press (light)', { props: { dumbbells: {} }, yaw: 40, P: u => ({ ...GRIP, load: .6, ikR: 1, ikL: 1, eoR: 1, eoL: 1, hRx: mx(15, 9, u), hRy: mx(147, 180, u), hRz: mx(27, 20, u), hLx: mx(15, 9, u), hLy: mx(147, 180, u), hLz: mx(-27, -20, u), proR: 80, proL: 80 }) });
@@ -180,7 +182,7 @@ chairC('breath:sigh', 'Physiological sigh', { P: u => ({ ...CH, breath: u, che: 
 /* ---------- lying on the back ---------- */
 const NK0 = -4, SX = SITX;                                   // NK0: neck angle with the head resting on the mat
 const supC = (id, label, def) => C(id, label, { stance: 'supine', yaw: 12, pitch: 14, ...def });
-const BELLY = { hRx: -12, hRy: 24, hRz: 3.5, hLx: -32, hLy: 26, hLz: -3.5, plantR: 0, plantL: 0, hugR: 1, hugL: 1, curlR: .06, curlL: .06, eoR: .5, eoL: .5, edR: .85, edL: .85 };      // one hand lying flat on the belly, the other flat on the chest, well apart, elbows resting out to the sides
+const BELLY = { hRx: -12, hRy: 25.2, hRz: 3.5, hLx: -32, hLy: 28.6, hLz: -3.5, plantR: 0, plantL: 0, hugR: 1, hugL: 1, curlR: .06, curlL: .06, eoR: .5, eoL: .5, edR: .85, edL: .85 };      // one hand lying flat on the belly, the other flat on the chest, well apart, elbows resting out to the sides
 const longLeg = (s, k = 1) => s > 0 ? { freeR: k, wR: 1 - k, fxR: mx(0, SX + 96, k), liftR: mx(0, 1.6, k), ankR: -14 * k } : { freeL: k, wL: 1 - k, fxL: mx(0, SX + 96, k), liftL: mx(0, 1.6, k), ankL: -14 * k };
 supC('scan', 'Body scan', { floor: { on: ['hips', 'shoulders', 'head'] }, yaw: 18, pitch: 18, P: u => ({ ...SUPINE, ...longLeg(1), ...longLeg(-1), footZ: 13, hRx: 8, hRz: 27, hLx: 8, hLz: -27, plantR: 0, plantL: 0, proR: -70, proL: -70, curlR: .3, curlL: .3, breath: u }) });      // lying long and loose: legs out, arms a little away from the body, palms up
 ['breathing', 'Diaphragmatic breathing', 'breath:belly', 'Diaphragmatic breathing, lying', 'pf-relax', 'Pelvic floor release breathing'].forEach((v, i, a) => { if (i % 2 === 0) supC(v, a[i + 1], { P: u => ({ ...SUPINE, ...BELLY, breath: u }) }); });
@@ -201,7 +203,7 @@ supC('supine-twist', 'Supine twist', { floor: { on: ['hips'] }, yaw: 20, pitch: 
   return { ...SUPINE, freeR: s, freeL: s, wR: 1 - s, wL: 1 - s, roll: -34 * s, cheT: -28 * s, lumT: -6 * s, headT: -30 * s, fxR: mx(0, SX + 26, s), fxL: mx(0, SX + 32, s), liftR: 17 * s + 8 * sin(PI * s), liftL: 3.2 * s + 6 * sin(PI * s), fzR: mx(9.6, -24, s), fzL: mx(9.6, 33, s),
     koL: .6 * s, koR: -.6 * s, hRx: mx(14, -32, s), hRy: 3, hRz: mx(23, 41, s), hLx: mx(14, -32, s), hLy: 3, hLz: mx(-23, -45, s) }; } });
 supC('supine-ham', 'Supine hamstring stretch with strap', { floor: { on: ['hips', 'shoulders', 'head'] }, clasp: true, props: { band: { s: [['handR', 'footR'], ['handL', 'footR']], rest: 46 } }, hold: true, yaw: 15, P(u) { const a = mx(42, 84, u) * R;
-  return { ...SUPINE, ...longLeg(-1), freeR: 1, wR: 0, fxR: SX + 84 * cos(a), liftR: 84 * sin(a) + 2, ankR: 4, kuR: 0, ikR: 1, ikL: 1, plantR: 0, plantL: 0, ...GRIP, hRx: -15, hRy: 38, hRz: 9, hLx: -15, hLy: 38, hLz: -9, eoR: .5, eoL: .5 }; } });
+  return { ...SUPINE, ...longLeg(-1), freeR: 1, wR: 0, fxR: SX + 84 * cos(a), liftR: 84 * sin(a) + 2, ankR: 4, kuR: 0, ikR: 1, ikL: 1, plantR: 0, plantL: 0, ...GRIP, hRx: -17, hRy: 44, hRz: 21, hLx: -17, hLy: 44, hLz: -5, eoR: .7, eoL: .3 }; } });      // the strap runs from the foot down either side of the leg to the hands, clear of the shin
 supC('curl-up', 'McGill curl-up', { floor: { on: ['hips'] }, P: u => ({ ...SUPINE, ...longLeg(-1), headUp: 1, nec: NK0 + 8 * u, che: 12 * u, lum: 3 * u, hRx: 1, hRz: 21, hLx: 1, hLz: -21 }) });
 supC('deadbug', 'Dead bug', { floor: { on: ['hips', 'shoulders', 'head'] }, yaw: 0, pitch: 12, P(u) { const top = 47.5, legX = SX + 42;
   return { ...SUPINE, ikR: 0, ikL: 0, plantR: 0, plantL: 0, freeR: 1, freeL: 1, wR: 0, wL: 0, elbR: 3, elbL: 3, proR: 0, proL: 0, curlR: .12, curlL: .12, wri: 0, flexR: 180 + 76 * u, flexL: 180, abdR: 3, abdL: 3, fxL: legX + 37 * u, liftL: top - 38 * u, fxR: legX, liftR: top, ankL: 8 * u }; } });
@@ -227,7 +229,7 @@ sitC('butterfly', 'Butterfly stretch', { yaw: 62, P(u) { const s = u;
 sitC('seated-ham', 'Seated hamstring stretch', { clasp: true, yaw: 25, P(u) { const s = u;
   return { ...TALL, kpU: 0, ...longLeg(1), freeL: 1, wL: 0, fxL: SX + 30, liftL: -1.5, fzL: 5, koL: .96, ankL: 20, pel: -2 + 26 * s, lum: 8 + 8 * s, che: 4 * s, nec: -4 * s, ikR: 1, ikL: 1, hRx: 40 + 26 * s, hRy: 19 - 2 * s, hRz: 15, hLx: 40 + 26 * s, hLy: 19 - 2 * s, hLz: 3.5, curlR: .2, curlL: .2 }; } });
 const bandFoot = dir => u => ({ ...TALL, footZ: 13.5, kpU: 1, ...longLeg(1), ...longLeg(-1), ankR: -4, ankL: -4, koR: dir * .34 * u, pel: -12, lum: 10, ikR: 1, ikL: 1, plantR: 1, plantL: 1, hRx: -16, hRy: 3, hRz: 22, hLx: -16, hLy: 3, hLz: -22 });      // legs long, toes to the ceiling, the band looped round the forefoot; the foot turns outward or inward against it
-sitC('band-eversion', 'Band eversion', { props: { blocks: [SIDEWALL(-41.6, SX + 86, 46, 24)], band: { s: [['footR', [SX + 88, 9, -40]]], rest: 30 } }, yaw: 24, pitch: 46, focus: 'feet', P: bandFoot(1) });
+sitC('band-eversion', 'Band eversion', { props: { band: { s: [['footR', 'footL']], rest: 17 } }, yaw: 24, pitch: 46, focus: 'feet', P: bandFoot(1) });
 sitC('band-inversion', 'Band inversion', { props: { blocks: [SIDEWALL(53.6, SX + 86, 22, 24)], band: { s: [['footR', [SX + 88, 9, 52]]], rest: 30 } }, yaw: 24, pitch: 46, focus: 'feet', P: bandFoot(-1) });
 sitC('9090', '90/90 hip stretch', { yaw: 62, pitch: 22, hold: true, P(u) { const s = u;      // both knees at right angles: the front shin across in front, the back shin out to the side; sit tall, then hinge over the front leg
   return { ...TALL, kpU: 0, freeR: 1, freeL: 1, wR: 0, wL: 0, fxR: SX + 60, liftR: -1.5, fzR: 2, koR: 1, ankR: 0, fxL: SX - 24, liftL: -1.5, fzL: 62, koL: 1, kxL: .5, ankL: 0,
@@ -304,4 +306,4 @@ sdC('copenhagen', 'Copenhagen adduction plank', { props: { blocks: [[-118, -72, 
 /* standing quadriceps stretch: on one leg with a hand on a rail, the other heel drawn toward the buttock, knee pointing down, hips level */
 C('quad-stand', 'Standing quadriceps stretch', { clasp: true, props: { blocks: RAIL(-40) }, yaw: 30, hold: true, P(u) { const h = first(u, 1.2), s = then(u, .5);
   return { bal: 0, wR: 0, freeR: 1, fxR: -25 * h - 2 * s, liftR: 5.6 + 67 * h + 3 * s, kuR: -h, ankR: 30 * h, hW: 1, ikL: 1, plantL: 1, hLx: 2, hLy: 103, hLz: -40, edL: .4, curlL: .45,
-    ikR: h, hRx: -20 - 2 * s, hRy: 95.5 + 3 * s, hRz: 19, hugR: h, curlR: .55, proR: 40, pel: 2 - 2 * s, hipY: 93 }; } });
+    ikR: h, hRx: -22 - s, hRy: 87 + 2 * s, hRz: 16.8, hugR: h, curlR: .3, proR: 40, pel: 2 - 2 * s, hipY: 93 }; } });
