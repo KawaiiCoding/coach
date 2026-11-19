@@ -17,7 +17,7 @@ prop('blocks', [scene, scene, scene, scene], g => part(new THREE.BoxGeometry(1, 
 prop('roller', [scene], g => { const geo = new THREE.CylinderGeometry(7, 7, 46, 28); geo.rotateX(Math.PI / 2); part(geo, PM.band, GP, g, .34); });
 prop('weight', [arms[0].wr], g => { g.position.set(0, -6.4, -2.3); cyl(g, PM.dark, 1.1, 8.6, 0, 0, 0, 'x', 0); [5.7, -5.7].forEach(x => cyl(g, PM.dark, 3.5, 3.2, x, 0, 0, 'x', 0)); });
 /* A band is always tied to something you can see: a handle in each hand that holds it, and a hook where it is fixed. */
-prop('grips', arms.map(a => a.wr), g => { const s = g.parent === arms[0].wr ? 1 : -1; g.position.set(0, -6.4, -s * 2.3); cyl(g, PM.dark, 1.15, 10.4, 0, 0, 0, 'x', 0); [5.5, -5.5].forEach(x => cyl(g, PM.band, 1.5, 1.2, x, 0, 0, 'x', 0)); });
+prop('grips', arms.map(a => a.wr), g => { const s = g.parent === arms[0].wr ? 1 : -1; g.position.set(0, -6.4, -s * 2.3); cyl(g, PM.dark, 1.15, 10.4, 0, 0, 0, 'x', 0); [5.5, -5.5].forEach(x => cyl(g, PM.dark, 1.5, 1.2, x, 0, 0, 'x', 0)); });
 prop('straps', [scene, scene, scene, scene], g => { const geo = new THREE.CylinderGeometry(1, 1, 1, 10); part(geo, PM.band, GP, g, 0); });
 prop('hook', [scene, scene], g => { cyl(g, PM.steel, 4.6, 1.3, 0, -.9, 0, 'y', 0); cyl(g, PM.dark, 1.2, 1.6, 2.6, -.2, 2.6, 'y', 0); cyl(g, PM.dark, 1.2, 1.6, -2.6, -.2, -2.6, 'y', 0); { const t = new THREE.TorusGeometry(2.1, .62, 10, 24); t.rotateX(Math.PI / 2); t.rotateZ(Math.PI / 2); part(t, PM.dark, GP, g, 0).position.y = 1.6; } });      // an anchor plate screwed to the wall, with a ring: something made to be pulled on
 /* A band round a limb is a loop that sits on it: round the forefoot, the ankle or the knee. The band leaves from the side of the loop. */
@@ -64,7 +64,13 @@ function syncProps(p) { const want = {}, use = k => { Object.assign(want, EX[k].
     /* A band held in the hand: the hand holds a bar across the palm, like a dumbbell. A strap runs from each end of the bar to a point
        in front of the knuckles, and the band goes on from there, so nothing passes through the fingers. */
     let nStrap = 0; const apex = (e, toward, out) => { const a = arms[e === 'handR' ? 0 : 1]; palm(a, out); const ax = V3(1, 0, 0).transformDirection(a.wr.matrixWorld), d = V3().subVectors(toward, out); d.addScaledVector(ax, -d.dot(ax)).normalize();
-      const e1 = out.clone().addScaledVector(ax, 5.5), e2 = out.clone().addScaledVector(ax, -5.5); out.addScaledVector(d, 9.5); [e1, e2].forEach(q => { const g = PROPS.straps.gs[nStrap++]; if (g) { g.visible = true; strand(g, q, out, 1); g.scale.x = g.scale.z = .55; } }); return out; };
+      const e1 = out.clone().addScaledVector(ax, 5.5), e2 = out.clone().addScaledVector(ax, -5.5); 
+      /* Keep the strap triangle at least 70 degrees off the forearm so the band runs in front of the arm, never through it. */
+      { const f = V3().subVectors(a.el.getWorldPosition(V3()), a.wr.getWorldPosition(V3())).normalize(), c = d.dot(f), lim = Math.cos(70 * Math.PI / 180);
+        if (c > lim) { const pp = d.clone().addScaledVector(f, -c);
+          if (pp.lengthSq() < 1e-6) { const fr = V3(0, 0, -a.s).transformDirection(a.wr.matrixWorld); pp.copy(fr).addScaledVector(f, -f.dot(fr)); }
+          pp.normalize(); d.copy(pp).multiplyScalar(Math.sqrt(1 - lim * lim)).addScaledVector(f, lim); d.addScaledVector(ax, -d.dot(ax)).normalize(); } }
+      out.addScaledVector(d, 9.5); [e1, e2].forEach(q => { const g = PROPS.straps.gs[nStrap++]; if (g) { g.visible = true; strand(g, q, out, 1); g.scale.x = g.scale.z = .55; } }); return out; };
     PROPS.straps.gs.forEach(g => { g.visible = false; });
     PROPS.band.gs.forEach((g, i) => { g.visible = !!st[i]; if (!st[i]) return; const A00 = spot(st[i][0], pa).clone(), B00 = spot(st[i][1], pb).clone(), A0 = spot(st[i][0], pa, B00).clone(), B0 = spot(st[i][1], pb, A00).clone(), hA = typeof st[i][0] === 'string' && st[i][0].startsWith('hand'), hB = typeof st[i][1] === 'string' && st[i][1].startsWith('hand');
       const A1 = hA ? apex(st[i][0], B0, A0.clone()) : A0, B1 = hB ? apex(st[i][1], A0, B0.clone()) : B0; strand(g, A1, B1, c.rest || (an ? 60 : 30)); });

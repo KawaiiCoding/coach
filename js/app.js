@@ -8,7 +8,7 @@
   const today = () => dkey(0);
   const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { return null; } };
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
-  const DEF = { onboarded: false, started: today(), profile: { breathless: 'no', redflags: [], desk: 4, sofa: 2, phone: 2, stand: 2, sleep: 'side', duration: 10, deskGood: false, stage: 0, sex: '', osteo: false, w: { now: [], sym: [] }, perWeek: 5, theme: 'auto', fig: '3d', gear: null }, pain: {}, logs: [], remind: { on: false, every: 45 } };
+  const DEF = { onboarded: false, started: today(), profile: { breathless: 'no', redflags: [], desk: 4, sofa: 2, phone: 2, stand: 2, sleep: 'side', duration: 10, deskGood: false, stage: 0, sex: '', osteo: false, w: { now: [], sym: [] }, perWeek: 5, theme: 'auto', fig: '3d', gear: [] }, pain: {}, logs: [], remind: { on: false, every: 45 } };
   let S = load() || JSON.parse(JSON.stringify(DEF));
   S.profile = { ...DEF.profile, ...S.profile }; S.remind = S.remind || DEF.remind; S.logs = S.logs || []; S.pain = S.pain || {};
   for (const k in S.pain) if (typeof S.pain[k] === 'number') S.pain[k] = { v: S.pain[k], t: ['pain'] };
@@ -38,6 +38,15 @@
 
   /* ---------- icons (line icons, no emoji) ---------- */
   const P = d => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+  /* Small pictures for the equipment chips, so a "band" or "soft ball" is recognisable without knowing the name. */
+  const GI = {
+    band: P('<path d="M3.5 6h5M15.5 6h5"/><path d="M6 6v4.5c0 4.2 2.7 7.5 6 7.5s6-3.3 6-7.5V6"/>'),
+    weights: P('<path d="M7 12h10"/><rect x="2.5" y="7.5" width="4.5" height="9" rx="1.2"/><rect x="17" y="7.5" width="4.5" height="9" rx="1.2"/>'),
+    roller: P('<ellipse cx="6" cy="12" rx="2.6" ry="5.5"/><path d="M6 6.5h12M6 17.5h12"/><path d="M18 6.5a2.6 5.5 0 0 1 0 11"/>'),
+    ball: P('<circle cx="12" cy="12" r="8"/><path d="M5.6 7.3c3.2 2.2 3.2 7.2 0 9.4M18.4 7.3c-3.2 2.2-3.2 7.2 0 9.4"/>'),
+    softball: P('<ellipse cx="12" cy="13.5" rx="9" ry="7"/><path d="M7.5 11a5 4 0 0 1 4-2.6"/>'),
+    bench: P('<rect x="2.5" y="9" width="19" height="3.5" rx="1"/><path d="M6 12.5V19M18 12.5V19"/>'),
+  };
   const I = {
     sun: P('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'),
     bolt: P('<path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/>'),
@@ -60,6 +69,7 @@
     layers: P('<path d="M12 3 2 8l10 5 10-5z"/><path d="M2 13l10 5 10-5"/>'), wind: P('<path d="M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h7"/>'),
     steps: P('<path d="M4 20h4v-4h4v-4h4V8h4"/>'), moon: P('<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z"/>'),
     bell: P('<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>'), sliders: P('<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>'),
+    edit: P('<path d="M4.5 19.5h4l10-10a2.8 2.8 0 0 0-4-4l-10 10z"/><path d="M13 7l4 4"/>'),
     user: P('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'), trash: P('<path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/>'),
     contrast: P('<circle cx="12" cy="12" r="9"/><path d="M12 3v18a9 9 0 0 0 0-18z" class="fill"/>'), desk: P('<circle cx="7.5" cy="4.3" r="2"/><path d="M7 8v6h4.5v6.5h1.8"/><path d="M7.2 9.8l4.3 1.7"/><path d="M3 9v11.5M3 15h4"/><path d="M10.5 11.5H22M20.5 11.5v9"/><path d="M14.5 11.5h4l1-4"/>'),
     sofa: P('<path d="M4 11V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3"/><path d="M2 13a2 2 0 0 1 4 0v2h12v-2a2 2 0 0 1 4 0v5H2zM5 18v2M19 18v2"/>'),
@@ -129,9 +139,9 @@
   let MAPV = 'f'; const MT = { z: 1, x: 0, y: 0 }, ZMAX = 3.2;
   function bodyMap(el, after, o = {}) {
     const draw = () => {
-      el.innerHTML = `<div class="maptools">${o.head || ''}<div class="seg sm"><button class="${MAPV === 'f' ? 'on' : ''}" data-v="f">Front</button><button class="${MAPV === 'b' ? 'on' : ''}" data-v="b">Back</button></div></div>
-<div class="mapwrap"><div class="mapscroll">${chartSvg(MAPV)}</div><div class="mapzoom" role="group" aria-label="Zoom"><button data-zoom="in" aria-label="Zoom in">${P('<path d="M12 5v14M5 12h14"/>')}</button><button data-zoom="out" aria-label="Zoom out">${P('<path d="M5 12h14"/>')}</button><button data-zoom="reset" aria-label="Reset the view">${P('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>')}</button></div></div>
-<div class="chips">${Object.keys(S.pain).map(id => `<button class="chip on" data-r="${id}">${esc(REGION[id].n)}${sideTxt(id)} <b style="color:${sevCol(pv(id))}">${pv(id)}</b></button>`).join('') || (o.compact ? '' : '<span class="hint">Tap a dot. Tap as many as you like.</span>')}</div>`;
+      const chips = `<div class="chips">${Object.keys(S.pain).map(id => `<button class="chip on" data-r="${id}">${esc(REGION[id].n)}${sideTxt(id)} <b style="color:${sevCol(pv(id))}">${pv(id)}</b></button>`).join('') || (o.compact ? '' : '<span class="hint">Tap a dot. Tap as many as you like.</span>')}</div>`;
+      el.innerHTML = `<div class="maptools">${o.head || ''}<div class="seg view" role="group" aria-label="View"><button class="${MAPV === 'f' ? 'on' : ''}" data-v="f" aria-pressed="${MAPV === 'f'}">Front</button><button class="${MAPV === 'b' ? 'on' : ''}" data-v="b" aria-pressed="${MAPV === 'b'}">Back</button></div></div>${o.compact ? '' : chips}
+<div class="mapwrap"><div class="mapscroll">${chartSvg(MAPV)}</div><div class="mapzoom" role="group" aria-label="Zoom"><button data-zoom="in" aria-label="Zoom in">${P('<path d="M12 5v14M5 12h14"/>')}</button><button data-zoom="out" aria-label="Zoom out">${P('<path d="M5 12h14"/>')}</button><button data-zoom="reset" aria-label="Reset the view">${P('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>')}</button></div></div>${o.compact ? chips : ''}`;
       const box = el.querySelector('.mapscroll'), svg = box.querySelector('svg'), btn = k => el.querySelector(`[data-zoom="${k}"]`);
       // keep the body inside the box: it can be moved until its edge reaches a little past the middle, no further
       const clamp = () => { const bw = box.clientWidth, bh = box.clientHeight, w = svg.clientWidth * MT.z, h = svg.clientHeight * MT.z, mx = Math.max(0, (w - bw) / 2) + (MT.z > 1 ? 30 : 0), my = Math.max(0, (h - bh) / 2) + (MT.z > 1 ? 30 : 0);
@@ -161,13 +171,14 @@
       el.querySelectorAll('[data-r]').forEach(z => { const go = () => painSheet(z.dataset.r, () => { if (el.isConnected) draw(); after && after(); }, z.dataset.s); z.onclick = go; z.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') go(); }; }); };
     draw();
   }
+  const SYMPTOM_SHORT = { tingle: 'Nerve sign: do not stretch into it. New or spreading? See a doctor.', weak: 'Keep it light. Not better in two weeks? See a doctor.' };
   function painSheet(rid, after, tapped) {
     const r = REGION[rid], types = new Set(pt(rid).length ? pt(rid) : ['pain']), paired = Math.abs(r.zone[0] - 100) >= 4; let v = pv(rid) || 4, side = paired ? (tapped && tapped !== 'b' ? (S.pain[rid] && ps(rid) !== tapped ? 'b' : tapped) : ps(rid)) : 'b';
     const opts = SYMPTOMS.filter(t => (!t.joints || t.joints.includes(rid)) && (!t.regions || t.regions.includes(rid)));
     sheet(r.n, close => {
       const draw = el => { el.innerHTML = `${paired ? `<p class="label">Which side?</p><div class="seg sides">${[['l', 'Left'], ['r', 'Right'], ['b', 'Both']].map(([k, n]) => `<button class="${side === k ? 'on' : ''}" data-side="${k}" aria-pressed="${side === k}">${sideIcon(k)}<span>${n}</span></button>`).join('')}</div>` : ''}<p class="label">How strong?</p><div class="scale">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button class="${n === v ? 'on' : ''}" ${n === v ? `style="background:${sevCol(n)};border-color:${sevCol(n)}"` : ''} data-v="${n}">${n}</button>`).join('')}</div><div class="sevkey"><span style="color:${sevCol(2)}">Mild</span><span style="color:${sevCol(5)}">Moderate</span><span style="color:${sevCol(8)}">Strong</span></div>
-<p class="label">Feels like</p><div class="chips">${opts.map(t => `<button class="chip ${types.has(t.id) ? 'on' : ''}" data-t="${t.id}">${t.n}</button>`).join('')}</div>
-${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="note warn">${I.alert}<span>${SYMPTOM_ADVICE[t].default}</span></div>`).join('')}
+<p class="label">Feels like</p><div class="chips two">${opts.map(t => `<button class="chip ${types.has(t.id) ? 'on' : ''}" data-t="${t.id}" aria-pressed="${types.has(t.id)}">${t.n}</button>`).join('')}</div>
+${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="note warn">${I.alert}<details><summary>${SYMPTOM_SHORT[t]}</summary><p>${SYMPTOM_ADVICE[t].default}</p></details></div>`).join('')}
 <div class="row"><button class="btn ghost" id="pclr">${S.pain[rid] ? 'Remove' : 'Cancel'}</button><button class="btn" id="pok">Done</button></div>`;
         el.querySelectorAll('[data-v]').forEach(b => b.onclick = () => { v = +b.dataset.v; draw(el); });
         el.querySelectorAll('[data-side]').forEach(b => b.onclick = () => { side = b.dataset.side; draw(el); });
@@ -179,11 +190,12 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
   }
 
   /* ---------- sheets and toasts ---------- */
-  function sheet(title, build) {
+  /* onclose runs once however the sheet is closed (Done, the cross, or a tap outside) */
+  function sheet(title, build, onclose) {
     const wrap = document.createElement('div'); wrap.className = 'sheetwrap';
     wrap.innerHTML = `<div class="backdrop"></div><div class="sheet" role="dialog" aria-label="${esc(title)}"><div class="grab"></div><div class="shead"><h2>${esc(title)}</h2><button class="iconbtn" aria-label="Close">${I.x}</button></div><div class="sbody"></div></div>`;
     document.body.appendChild(wrap); requestAnimationFrame(() => wrap.classList.add('on'));
-    const close = () => { wrap.classList.remove('on'); setTimeout(() => wrap.remove(), 260); };
+    let shut = false; const close = () => { if (shut) return; shut = true; wrap.classList.remove('on'); setTimeout(() => wrap.remove(), 260); onclose && onclose(); };
     wrap.querySelector('.backdrop').onclick = close; wrap.querySelector('.shead button').onclick = close;
     const draw = build(close); draw && draw(wrap.querySelector('.sbody')); return close;
   }
@@ -224,7 +236,7 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
   /* ---------- session builder: warm up, strengthen, lengthen, breathe ---------- */
   function buildSession() {
     const Pf = S.profile, A = analyseDay(), items = [], regions = Object.keys(S.pain), painM = new Set(regions.flatMap(r => REGION[r].m));
-    const RU = rules(), ST0 = stage(), ST = RU.gentle ? { ...STAGES[0], id: ST0.id, n: ST0.n, weeks: ST0.weeks } : ST0, dur = Pf.duration * 60, okS = x => !RU.exclude.has(x.id); let used = 0;
+    const RU = rules(), ST0 = stage(), ST = RU.gentle ? { ...STAGES[0], id: ST0.id, n: ST0.n, weeks: ST0.weeks } : ST0, dur = Pf.duration * 60, okS = x => !RU.exclude.has(x.id) && EQUIP.ok(x.id); let used = 0;
     /* Every item is timed by building the step the player will really run (holds, repetitions at their pace, rests
        between sets and sides) plus the "Up next" countdown, so the length you choose is the length you get. Short
        sessions use fewer sets and fewer stretch repetitions instead of dropping whole phases. */
@@ -256,7 +268,7 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
     const weak = new Map(); regions.forEach(r => REGION[r].m.forEach(id => { if (MUSCLE[id] && MUSCLE[id].tend === 'weak') weak.set(id, 1 + pv(r) / 10); }));
     tight.slice(0, 5).forEach(m => m.relax.forEach(i => { if (MUSCLE[i] && MUSCLE[i].tend !== 'tight') weak.set(i, Math.max(weak.get(i) || 0, 0.5)); }));
     const wl = [...weak.entries()].sort((a, b) => b[1] - a[1]).map(e => MUSCLE[e[0]]), sc = new Set(), str = [];
-    for (const id of RU.add) { const q = STRENGTH_BY[id]; if (!q) continue; const it = timed({ kind: 'strength', section: 'strength', ex: q, why: MUSCLE[q.m[0]] }); if (used + it.real > upTo(1.1)) continue; str.push(it); used += it.real; q.m.forEach(i => sc.add(i)); }
+    for (const id of RU.add) { const q = STRENGTH_BY[id]; if (!q || !EQUIP.ok(id)) continue; const it = timed({ kind: 'strength', section: 'strength', ex: q, why: MUSCLE[q.m[0]] }); if (used + it.real > upTo(1.1)) continue; str.push(it); used += it.real; q.m.forEach(i => sc.add(i)); }
     for (const m of wl) { if (str.length >= ST.strength + RU.add.length + (Pf.duration >= 30 ? 2 : 0)) break; if (sc.has(m.id)) continue;
       const c = STRENGTH.filter(q => okS(q) && !q.id.startsWith('pf-') && q.m.includes(m.id) && q.level <= Math.min(ST.level, RU.maxLevel) && !str.some(i => i.ex === q)).sort((x, y) => x.level - y.level); if (!c.length) continue;
       const it = timed({ kind: 'strength', section: 'strength', ex: c[0], why: m }); if (used + it.real > upTo(1.04)) continue; str.push(it); used += it.real; c[0].m.forEach(i => sc.add(i)); }
@@ -365,8 +377,7 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
   const flagged = () => S.profile.redflags.length || S.profile.breathless === 'yes';
   function renderOnboard() {
     const el = $('s-onboard'), Pf = S.profile; el.classList.add('on'); el.classList.toggle('fit', ob === 0); document.body.classList.add('onb'); $('nav').hidden = true;
-    const dots = `<div class="obtop"><div class="obnav">${ob ? `<button class="iconbtn" id="obback" aria-label="Back">${I.back}</button>` : ''}<div class="dots">${[0, 1, 2].map(i => `<i class="${i === ob ? 'on' : ''}"></i>`).join('')}</div></div><div class="seg icons" role="group" aria-label="Appearance">${[['light', I.sun, 'Light'], ['auto', I.contrast, 'Automatic'], ['dark', I.moon, 'Dark']].map(([v, ic, n]) => `<button class="${Pf.theme === v ? 'on' : ''}" data-theme="${v}" aria-label="${n}" title="${n}">${ic}</button>`).join('')}</div></div>`;
-    const bindTheme = () => el.querySelectorAll('[data-theme]').forEach(b => b.onclick = () => { Pf.theme = b.dataset.theme; save(); applyTheme(); renderOnboard(); });
+    const dots = `<div class="obtop"><div class="obnav">${ob ? `<button class="iconbtn" id="obback" aria-label="Back">${I.back}</button>` : '<span class="obslot"></span>'}<div class="dots">${[0, 1, 2].map(i => `<i class="${i === ob ? 'on' : ''}"></i>`).join('')}</div></div>${ob === 0 ? '<div class="obgear"></div>' : ''}</div>`;
     const goBack = () => { if (ob > 0) { ob--; renderOnboard(); window.scrollTo(0, 0); } };
     if (!el.dataset.swipe) { el.dataset.swipe = 1; let x0 = 0, y0 = 0;   // swipe right to go back a step
       el.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
@@ -375,11 +386,12 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
     if (ob === 0) {
       el.innerHTML = `${dots}<h1>Where do you have pain or issues?</h1>
 <div id="obmap"></div><div class="sticky"><button class="btn" id="obnext">${Object.keys(S.pain).length ? 'Continue' : 'Nothing, keep me moving'}</button></div>`;
+      gearSeg(el.querySelector('.obgear'));
       bodyMap($('obmap'), () => renderOnboard(), { compact: true, head: `<div class="seg sm"><button class="${Pf.sex === 'f' ? 'on' : ''}" data-sex="f">Woman</button><button class="${Pf.sex === 'm' ? 'on' : ''}" data-sex="m">Man</button></div>`,
         bind: m => m.querySelectorAll('[data-sex]').forEach(b => b.onclick = () => { Pf.sex = b.dataset.sex; ILLUS.setFemale(isF()); FIG3D.setFemale(isF()); save(); renderOnboard(); }) });
       $('obnext').onclick = () => { if (!Pf.sex) Pf.sex = 'x'; ob = 1; save(); renderOnboard(); };
     } else if (ob === 1) {
-      el.innerHTML = `${dots}<h1>Your day includes…</h1><p class="lede">Tap all that apply. Your workout adapts to each.</p>${dayGrid(Pf)}<div class="sticky"><button class="btn" id="obday">${Pf.days.length ? 'Continue' : 'Skip'}</button></div>`;
+      el.innerHTML = `${dots}<h1>Your day includes…</h1>${dayGrid(Pf)}<div class="sticky"><button class="btn" id="obday">${Pf.days.length ? 'Continue' : 'Skip'}</button></div>`;
       el.querySelectorAll('[data-day]').forEach(b => b.onclick = () => { togDay(Pf, b.dataset.day); renderOnboard(); });
       $('obday').onclick = () => { applyDays(Pf); ob = 2; save(); renderOnboard(); };
     } else {
@@ -387,9 +399,9 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
       el.innerHTML = `${dots}<h1>Quick safety check</h1><p class="lede">Does any of this apply right now?</p><div class="list">${FLAGS.map(([k, n]) => `<button class="opt ${sel(k) ? 'on' : ''}" data-f="${k}"><span class="box">${I.check}</span>${n}</button>`).join('')}</div>
 <div class="sticky"><button class="btn" id="obdone">${flagged() ? 'Continue' : 'None of these, let’s go'}</button></div>`;
       el.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { const k = b.dataset.f; if (k === 'breath') Pf.breathless = Pf.breathless === 'yes' ? 'no' : 'yes'; else { const i = Pf.redflags.indexOf(k); i >= 0 ? Pf.redflags.splice(i, 1) : Pf.redflags.push(k); } save(); renderOnboard(); });
-      $('obdone').onclick = () => { document.body.classList.remove('onb'); S.onboarded = true; S.lastCheck = today(); save(); el.classList.remove('on'); $('nav').hidden = false; show('today'); };
+      $('obdone').onclick = () => { document.body.classList.remove('onb'); S.onboarded = true; S.lastCheck = today(); save(); el.classList.remove('on'); $('nav').hidden = false; show('today'); toast('Your plan is ready'); };
     }
-    bindTheme(); const bb = $('obback'); if (bb) bb.onclick = goBack;
+    const bb = $('obback'); if (bb) bb.onclick = goBack;
   }
 
   /* ---------- today ---------- */
@@ -413,31 +425,46 @@ ${[...types].filter(t => t === 'tingle' || t === 'weak').map(t => `<div class="n
       const m = Math.max(1, Math.round(its.reduce((a, o) => a + o.it.secs, 0) / 60)), done = its.every(o => L.done.includes(itemKey(o.it)));
       return `<details class="act ${done ? 'done' : ''}"><summary><div class="thumb">${pic((its.find(o => !o.it.primer) || its[0]).st?.ill || 'stand', null, { uid: 't' + k, glow: false, fit: 1.375 })}</div><div class="grow"><b>${n}</b><span>${m} min · ${its.length} ${its.length === 1 ? 'exercise' : 'exercises'}</span></div><span class="num">${done ? I.check : k + 1}</span></summary>
 <div class="exlist">${its.map(o => `<button class="exrow ${L.done.includes(itemKey(o.it)) ? 'done' : ''}" data-play="${o.i}"><div class="thumb sm">${pic(o.st ? o.st.ill : 'stand', null, { uid: 'e' + o.i, fit: 1.39 })}</div><span class="grow">${esc(o.st ? o.st.name : o.it.ex.n)}</span><span class="go">${I.play}</span></button>`).join('')}</div></details>`; }).join('');
-    el.innerHTML = `<header class="top"><div><h1>Today</h1>${streak() > 1 ? `<p class="kicker">${I.sun}<span>${streak()} days in a row</span></p>` : ''}${runsOf(L).length ? `<p class="kicker runsum">${I.check}<span><b>${runsOf(L).length}</b> ${runsOf(L).length === 1 ? 'session' : 'sessions'} today · ${dayTotal(L)} min</span></p>` : ''}</div><div class="topbtns"><button class="iconbtn tint" data-go="program" aria-label="Program">${I.cal}</button><button class="iconbtn" data-settings aria-label="Settings">${I.cog}</button></div></header>
+    el.innerHTML = `<header class="top"><div><h1>Today</h1>${streak() > 1 ? `<p class="kicker">${I.sun}<span>${streak()} days in a row</span></p>` : ''}${runsOf(L).length ? `<p class="kicker runsum">${I.check}<span><b>${runsOf(L).length}</b> ${runsOf(L).length === 1 ? 'session' : 'sessions'} today · ${dayTotal(L)} min</span></p>` : ''}</div><div class="topbtns"><button class="iconbtn${S.remind.on ? ' tint' : ''}" id="bell" aria-label="Move reminders: ${S.remind.on ? 'every ' + S.remind.every + ' min' : 'off'}">${I.bell}</button><button class="iconbtn" data-settings aria-label="Settings">${I.cog}</button></div></header>
 
 ${flagged() ? `<div class="note bad">${I.alert}<span><b>Check with a doctor first.</b> Something you ticked needs a look before training. Gentle walking and the calm resets are fine meanwhile. <a href="#" id="editflags">Change answers</a></span></div>` : ''}
 ${RU.gentle ? `<div class="note">${I.heart}<span>Gentler today, since yesterday felt worse.</span></div>` : ''}
-<section class="hero"><div class="herotxt"><h2>${all ? 'Done for today' : 'How much time would you like?'}</h2><p>${all ? (runsOf(L).length > 1 ? `That is ${runsOf(L).length} today. Go again any time.` : 'Nice work. Go again any time.') : 'For ' + esc(focus) + '.'}</p>
+<section class="hero"><div class="herotxt"><h2>${all ? 'Done for today' : 'How much time would you like?'}</h2>${all ? `<p>${runsOf(L).length > 1 ? `That is ${runsOf(L).length} today. Go again any time.` : 'Nice work. Go again any time.'}</p>` : `<button class="herofor" id="herofor">For ${esc(focus)}.</button>`}
 <div class="seg xs">${[5, 10, 15, 20, 30].map(m => `<button class="${Pf.duration === m ? 'on' : ''}" data-dur="${m}" aria-label="${m} minutes"><b>${m}</b><small>min</small></button>`).join('')}</div></div><div class="heroart">${hero}</div></section>
 <button class="btn big" id="start">${I.play}<span>${all ? 'Go again' : doneN ? 'Continue' : 'Start session'}</span></button>
 ${chkId ? `<section class="card chk"><p><b>How is your ${esc(low(REGION[chkId].n))} today?</b></p><div class="scale sm">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button data-chk="${n}" class="${n === pv(chkId) ? 'was' : ''}">${n}</button>`).join('')}</div></section>` : ''}
-<h3 class="sect">Today’s activities</h3>${phaseRows}
+<div class="secthead mid"><h3 class="sect">Where it bothers you</h3><button class="iconbtn tint" id="editmap" aria-label="Edit where it bothers you">${I.edit}</button></div>
+<div class="chips">${areas.map(id => `<button class="chip on" data-area="${id}">${esc(REGION[id].n)}${sideTxt(id)} <b style="color:${sevCol(pv(id))}">${pv(id)}</b></button>`).join('') || '<button class="chip" id="addmap">Add an area</button>'}</div>
+<div class="tgear"></div>
+<div id="acts"><h3 class="sect">Today’s activities</h3>${phaseRows}</div>
 <div class="secthead"><h3 class="sect">Quickies for ${dayPart()[1]}</h3><button class="link" data-go="resets">See all</button></div>
-<div class="hscroll">${suggestResets().map(r => resetCard(r, 'q')).join('')}</div>
-<div class="secthead"><h3 class="sect">Where it bothers you</h3><button class="link" id="editmap">Edit</button></div>
-<div class="chips">${areas.map(id => `<button class="chip on" data-area="${id}">${esc(REGION[id].n)}${sideTxt(id)} <b style="color:${sevCol(pv(id))}">${pv(id)}</b></button>`).join('') || '<button class="chip" id="addmap">Add an area</button>'}</div>`;
+<div class="hscroll">${suggestResets().map(r => resetCard(r, 'q')).join('')}</div>`;
     el.querySelectorAll('[data-go]').forEach(b => b.onclick = () => show(b.dataset.go));
     el.querySelectorAll('[data-dur]').forEach(b => b.onclick = () => { Pf.duration = +b.dataset.dur; save(); renderToday(); });
     $('start').onclick = () => { const first = all ? 0 : session.items.findIndex(i => !L.done.includes(itemKey(i))); play(steps, { kind: 'session', from: Math.max(0, first) }); };
     el.querySelectorAll('[data-play]').forEach(b => b.onclick = () => play(steps, { kind: 'session', from: +b.dataset.play }));
     el.querySelectorAll('[data-reset]').forEach(b => b.onclick = () => startReset(b.dataset.reset));
-    const md = () => mapSheet(renderToday); ($('editmap') || {}).onclick = md; ($('addmap') || {}).onclick = md; el.querySelectorAll('[data-area]').forEach(b => b.onclick = () => painSheet(b.dataset.area, renderToday));
+    { const g = el.querySelector('.tgear'); if (g) { const r = replan(); gearSeg(g, r); } }
+    const md = () => mapSheet(replan()); ['editmap', 'addmap', 'herofor'].forEach(k => { const b = $(k); if (b) b.onclick = md; }); el.querySelectorAll('[data-area]').forEach(b => b.onclick = () => painSheet(b.dataset.area, replan()));
+    $('bell').onclick = () => SETTINGS.remind();
     const xd = $('xdisc'); if (xd) xd.onclick = () => { S.hideDisc = true; save(); xd.parentElement.classList.add('gone'); setTimeout(renderToday, 250); };
     const ef = $('editflags'); if (ef) ef.onclick = e => { e.preventDefault(); safetySheet(); };
     el.querySelectorAll('[data-chk]').forEach(b => b.onclick = () => { const v = +b.dataset.chk; S.pain[chkId].v = v; log().pain[chkId] = v; S.lastCheck = today(); save(); toast(v < pv(chkId) ? 'Noted. Going the right way.' : 'Noted. Thanks.'); renderToday(); });
   }
   const resetCard = (r, uid) => `<button class="rcard" data-reset="${r.id}"><div class="rart">${pic(r.ill, null, { uid: uid + r.id, glow: false, fit: 1.6 })}</div><span class="tag ${r.cat}">${SECTION_NAME[r.cat]}</span><b>${esc(r.n)}</b><span class="mins">${Math.max(1, Math.round(resetSteps(r).reduce((a, s) => a + stepSecs(s), 0) / 60))} min</span></button>`;
-  function mapSheet(after) { sheet('Where it bothers you', close => el => { el.innerHTML = '<div id="smap"></div><div class="sfoot"><button class="btn" id="mapdone">Done</button></div>'; bodyMap(el.querySelector('#smap'), () => {}); el.querySelector('#mapdone').onclick = () => { close(); after(); }; }); }
+  function mapSheet(after) { sheet('Where it bothers you', close => el => { el.innerHTML = '<div id="smap"></div><div class="sfoot"><button class="btn" id="mapdone">Done</button></div>'; bodyMap(el.querySelector('#smap'), () => {}); el.querySelector('#mapdone').onclick = close; }, after); }
+  /* Whatever changes what the plan is built from (pain areas, equipment): rebuild, redraw, and say so in one word.
+     On Today the activities list, which sits right under the pain chips, glows once so you see where it changed. */
+  const planIn = () => JSON.stringify([S.pain, S.profile.gear]);
+  function replan() { const was = planIn(); return () => { rerender(); if (planIn() === was) return; toast('Plan updated'); const a = $('acts'); if (a && tab === 'today') { a.classList.remove('fresh'); void a.offsetWidth; a.classList.add('fresh'); } }; }
+  /* No equipment, or some: writes the same field as the Equipment setting. "I have some" opens that chooser. */
+  function gearSeg(box, after) {
+    const draw = () => { const g = S.profile.gear, none = Array.isArray(g) && !g.length;
+      box.innerHTML = `<div class="seg gearseg" role="group" aria-label="Equipment"><button class="${none ? 'on' : ''}" data-gp="none" aria-pressed="${none}">No equipment</button><button class="${none ? '' : 'on'}" data-gp="some" aria-pressed="${!none}">I have some</button></div>`;
+      box.querySelector('[data-gp=none]').onclick = () => { S.profile.gear = []; EQUIP.set(S.profile.gear); save(); draw(); after && after(); };
+      box.querySelector('[data-gp=some]').onclick = () => { if (none) { S.profile.gear = null; EQUIP.set(null); save(); draw(); }
+        SETTINGS.gear(() => { if (box.isConnected) draw(); after && after(); }); }; };
+    draw(); }
   function startReset(id) { const r = RESETS.find(x => x.id === id); if (!r) return; play(resetSteps(r), { kind: 'reset', id, n: r.n }); }
 
   /* ---------- quickies (short routines) ---------- */
@@ -445,7 +472,6 @@ ${chkId ? `<section class="card chk"><p><b>How is your ${esc(low(REGION[chkId].n
   function renderResets() {
     const el = $('s-resets'), list = RESETS.filter(r => rcat === 'all' || r.cat === rcat);
     el.innerHTML = `<header class="top"><div><h1>Quickies</h1><p class="kicker">${I.bolt}<span>2 to 6 minutes, fully guided</span></p></div><button class="iconbtn" data-settings aria-label="Settings">${I.cog}</button></header>
-<p class="lede">Short routines for right before or after something: a walk, a bike ride, a long sit, bedtime.</p>
 <div class="seg cats">${RESET_CATS.map(([id, n]) => `<button class="${rcat === id ? 'on' : ''}" data-cat="${id}">${n}</button>`).join('')}</div>
 <div class="grid">${list.map(r => resetCard(r, 'r')).join('')}</div>`;
     el.querySelectorAll('[data-cat]').forEach(b => b.onclick = () => { rcat = b.dataset.cat; renderResets(); });
@@ -455,20 +481,20 @@ ${chkId ? `<section class="card chk"><p><b>How is your ${esc(low(REGION[chkId].n
   /* ---------- program ---------- */
   let wkOff = 0;
   function renderProgram() {
-    const el = $('s-program'), sess = session || buildSession(), ST = stage(), Pf = S.profile;
+    const el = $('s-program'), sess = session = buildSession(), ST = stage(), Pf = S.profile;
     const weekOf = off => { const now = new Date(), mon = new Date(now); mon.setDate(now.getDate() - ((now.getDay() + 6) % 7) + off * 7);
       return [...Array(7)].map((_, i) => { const d = new Date(mon); d.setDate(mon.getDate() + i); const k = dkey(Math.round((d - new Date(today() + 'T00:00')) / 864e5)); return { k, d, l: S.logs.find(x => x.d === k) }; }); };
     const week = weekOf(wkOff), doneW = week.filter(w => active(w.l)).length, st = streak(), thisW = weekOf(0).filter(w => active(w.l)).length;
     const fmtD = d => d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }), wkLabel = wkOff === 0 ? 'This week' : wkOff === -1 ? 'Last week' : `${fmtD(week[0].d)} – ${fmtD(week[6].d)}`;
-    const startOff = -Math.floor(daysSince(S.started) / 7) - 1, weeks = [...Array(8)].map((_, i) => i - 7).map(o => { const wk = weekOf(o); return { o, d: wk[0].d, n: wk.filter(w => active(w.l)).length }; });
+    const startOff = -Math.floor(daysSince(S.started) / 7) - 1, weeks = [...Array(8)].map((_, i) => i - 7).map(o => { const wk = weekOf(o); return { o, d: wk[0].d, end: wk[6].k, n: wk.filter(w => active(w.l)).length }; }).filter(w => w.end >= S.started);      // only weeks since you started
     // stage progress: what the next stage asks for
     const need = ST.id === 1 ? [14, 14] : ST.id === 2 ? [42, 28] : [84, 28], win = need[1], got = S.logs.filter(l => daysSince(l.d) < win && active(l)).length, req = Math.round(win * 4 / 7), dayN = daysSince(S.started) + 1;
     const msg = doneW >= Pf.perWeek ? ['Week complete', 'You hit your plan. That is how habits stick.'] : st >= 2 ? ['Keep it up', `${st} days in a row. Every bit of movement counts.`] : doneW ? ['Nice start', 'You are building a great habit.'] : ['Fresh week', 'Five minutes today gets it going.'];
     const exRow = (it, k) => `<button class="exrow" data-ex="${it.ex.id}"><div class="thumb sm">${pic(it.ex.ill, null, { ex: it.ex.id, uid: 'g' + k + it.ex.id, fit: 1.39 })}</div><span class="grow"><b>${esc(it.ex.n)}</b><small>${esc(it.why ? cap(WHERE[it.why.id] || it.why.n) : '')}</small></span>${I.chev}</button>`;
     const hist = week.map(w => w.l).filter(active).reverse();
-    el.innerHTML = `<header class="top"><div><h1>Program</h1><p class="kicker">${I.chart}<span><b class="acc">${thisW}</b> of ${Pf.perWeek} sessions this week</span></p></div><button class="iconbtn" data-settings aria-label="Settings">${I.cog}</button></header>
+    el.innerHTML = `<header class="top"><div><h1>Program</h1><button class="kicker kbtn" id="perweek" aria-label="Sessions per week: ${Pf.perWeek}. Change">${I.chart}<span><b class="acc">${thisW}</b> of ${Pf.perWeek} sessions this week</span>${I.chev}</button></div><button class="iconbtn" data-settings aria-label="Settings">${I.cog}</button></header>
 <section class="card"><div class="wknav"><button class="iconbtn" id="wkprev" aria-label="Previous week" ${wkOff <= startOff ? 'disabled' : ''}>${I.back}</button><p class="label">${wkLabel} · <b class="acc">${doneW}</b> of ${Pf.perWeek}</p><button class="iconbtn" id="wknext" aria-label="Next week" ${wkOff >= 0 ? 'disabled' : ''}>${I.chev}</button></div><div class="week">${week.map(w => `<div class="${w.k === today() ? 'today' : ''}"><span>${'MTWTFSS'[(w.d.getDay() + 6) % 7]}</span><span class="dn">${w.d.getDate()}</span><i class="${active(w.l) ? 'on' : ''}">${active(w.l) ? (runsOf(w.l).length > 1 ? `<b>${runsOf(w.l).length}</b>` : I.check) : ''}</i></div>`).join('')}</div></section>
-<section class="card"><p class="label">Last 8 weeks</p><div class="weeks">${weeks.map(w => `<button class="${w.o === wkOff ? 'on' : ''}" data-wk="${w.o}" aria-label="${w.n} active days"><span class="track"><i style="height:${w.n ? Math.max(12, w.n / 7 * 100) : 0}%"></i></span><span>${w.o === 0 ? 'Now<br>&nbsp;' : w.d.getDate() + '<br>' + w.d.toLocaleDateString(undefined, { month: 'short' })}</span></button>`).join('')}</div></section>
+<section class="card"><p class="label">${weeks.length < 8 ? 'Since you started' : 'Last 8 weeks'}</p><div class="weeks">${weeks.map((w, i) => `<button class="${w.o === wkOff ? 'on' : ''}" data-wk="${w.o}" ${i ? '' : `style="grid-column-start:${9 - weeks.length}"`} aria-label="${w.n} active days"><span class="track"><i style="height:${w.n ? Math.max(12, w.n / 7 * 100) : 0}%"></i></span><span>${w.o === 0 ? 'Now<br>&nbsp;' : w.d.getDate() + '<br>' + w.d.toLocaleDateString(undefined, { month: 'short' })}</span></button>`).join('')}</div></section>
 <section class="cheer"><span class="badge">${I.flag}</span><div><b>${msg[0]}</b><p>${msg[1]}</p></div></section>
 <h3 class="sect">Your program</h3><section class="card prog">
 <div class="stepper">${STAGES.map(s => `<button class="${s.id < ST.id ? 'done' : s.id === ST.id ? 'now' : ''}" data-stage="${s.id}" aria-label="Stage ${s.id}: ${s.n}"><span class="sdot">${s.id < ST.id ? I.check : s.id}</span><small>${s.n.split(' ')[0]}</small></button>`).join('')}</div>
@@ -477,16 +503,13 @@ ${ST.id < 4 ? `<div class="pbar"><i style="width:${Math.min(100, got / req * 100
 <div class="hscroll exs">${[...sess.stretches.map(it => [it, 'Lengthen', 'cool']), ...sess.strength.map(it => [it, 'Strengthen', 'energy'])].map(([it, tag, cl], k) => `<button class="xcard" data-ex="${it.ex.id}"><div class="thumb">${pic(it.ex.ill, null, { ex: it.ex.id, uid: 'g' + k + it.ex.id, fit: 1.375 })}</div><span class="tag ${cl}">${tag}</span><b>${esc(it.ex.n)}</b></button>`).join('') || '<p class="small">Add an area or your day to see your exercises.</p>'}</div></section>
 ${hist.length ? `<h3 class="sect">${wkLabel}</h3><section class="card flush">${hist.map(l => { const rs = runsOf(l), day = new Date(l.d + 'T12:00').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
   if (!rs.length) return `<div class="hrow"><span class="grow"><b>${day}</b><small>${[l.done.length >= 2 ? 'Session' : '', ...(l.resets || []).map(id => (RESETS.find(r => r.id === id) || {}).n)].filter(Boolean).join(', ')}${l.minutes ? ' · ' + l.minutes + ' min' : ''}</small></span>${l.feel ? `<span class="feel ${l.feel}">${cap(l.feel)}</span>` : ''}<i class="ok">${I.check}</i></div>`;
-  return `<div class="hrow day"><span class="grow"><b>${day}</b><small>${rs.length} ${rs.length === 1 ? 'session' : 'sessions'} · ${dayTotal(l)} min</small></span><i class="ok">${rs.length > 1 ? `<b>${rs.length}</b>` : I.check}</i></div>${rs.map(r => `<div class="hrow run"><time>${r.at}</time><span class="grow"><b>${esc(r.n)}${r.part ? ' (part)' : ''}</b><small>${r.min} min</small></span>${r.feel ? `<span class="feel ${r.feel}">${cap(r.feel)}</span>` : ''}</div>`).join('')}`; }).join('')}</section>` : ''}
-<h3 class="sect">Tune your plan</h3><section class="card flush settings">
-${settingRows().map(setRow).join('')}
-<button class="setrow danger" id="wipe">${I.trash}<span class="grow">Erase all my data</span></button></section>`;
+  return `<div class="hrow day"><span class="grow"><b>${day}</b><small>${rs.length} ${rs.length === 1 ? 'session' : 'sessions'} · ${dayTotal(l)} min</small></span><i class="ok">${rs.length > 1 ? `<b>${rs.length}</b>` : I.check}</i></div>${rs.map(r => `<div class="hrow run"><time>${r.at}</time><span class="grow"><b>${esc(r.n)}${r.part ? ' (part)' : ''}</b><small>${r.min} min</small></span>${r.feel ? `<span class="feel ${r.feel}">${cap(r.feel)}</span>` : ''}</div>`).join('')}`; }).join('')}</section>` : ''}`;
     el.querySelectorAll('[data-ex]').forEach(b => b.onclick = () => exSheet(b.dataset.ex));
-    el.querySelectorAll('[data-stage]').forEach(b => b.onclick = () => { const st = STAGES[+b.dataset.stage - 1]; sheet(`${st.id}. ${st.n}`, () => e => { e.innerHTML = `<div class="prose"><p class="small">${cap(st.weeks)}${st.id === ST.id ? ' · you are here' : ''}</p><p>${st.goal}</p><ul>${st.does.slice(0, 3).map(d => `<li>${d.replace(/\s*\([^)]*\)/g, '')}</li>`).join('')}</ul>${st.id === ST.id && ST.id < 4 ? `<div class="pbar"><i style="width:${Math.min(100, got / req * 100)}%"></i></div><p class="small">${got} of ${req} active days to move on.</p>` : ''}</div>`; }); });
+    el.querySelectorAll('[data-stage]').forEach(b => b.onclick = () => { const st = STAGES[+b.dataset.stage - 1]; sheet(`${st.id}. ${st.n}`, close => e => { e.innerHTML = `<div class="prose"><p class="small">${cap(st.weeks)}${st.id === ST.id ? ' · you are here' : ''}</p><p>${st.goal}</p><ul>${st.does.slice(0, 3).map(d => `<li>${d.replace(/\s*\([^)]*\)/g, '')}</li>`).join('')}</ul>${st.id === ST.id && ST.id < 4 ? `<div class="pbar"><i style="width:${Math.min(100, got / req * 100)}%"></i></div><p class="small">${got} of ${req} active days to move on.</p>` : ''}</div><p class="label">Your stage</p>${segRow([[0, 'Auto'], ...STAGES.map(s => [s.id, String(s.id)])], Pf.stage, 'st')}`;
+      e.querySelectorAll('[data-st]').forEach(b => b.onclick = () => { Pf.stage = +b.dataset.st; save(); close(); rerender(); }); }); });
     $('wkprev').onclick = () => { wkOff--; renderProgram(); }; $('wknext').onclick = () => { wkOff = Math.min(0, wkOff + 1); renderProgram(); };
     el.querySelectorAll('[data-wk]').forEach(b => b.onclick = () => { wkOff = +b.dataset.wk; renderProgram(); });
-    el.querySelectorAll('[data-set]').forEach(b => b.onclick = () => SETTINGS[b.dataset.set]());
-    armWipe($('wipe'));
+    $('perweek').onclick = () => SETTINGS.week();
   }
   function exSheet(id) {
     const x = STRETCH_BY[id] || STRENGTH_BY[id]; if (!x) return; const c = COACH[x.id] || { focus: [], avoid: [] };
@@ -495,6 +518,7 @@ ${settingRows().map(setRow).join('')}
 <button class="btn" id="exgo">${I.play}<span>Play this one</span></button>`;
       el.querySelector('#exgo').onclick = () => { close(); const st = mkStep({ r: id, section: x.sets == null ? 'stretch' : 'strength' }, rules()); play([st], { kind: 'single' }); }; });
   }
+  const segRow = (vals, cur, attr) => `<div class="seg fill">${vals.map(([v, n]) => `<button class="${String(cur) === String(v) ? 'on' : ''}" data-${attr}="${v}" aria-pressed="${String(cur) === String(v)}">${n}</button>`).join('')}</div>`;
   const chipRow = (vals, cur, attr) => `<div class="seg wrap">${vals.map(([v, n]) => `<button class="${cur === v ? 'on' : ''}" data-${attr}="${v}">${n}</button>`).join('')}</div>`;
   function safetySheet() { sheet('Safety answers', close => { const draw = el => { const Pf = S.profile, sel = k => k === 'breath' ? Pf.breathless === 'yes' : Pf.redflags.includes(k);
     el.innerHTML = `<p class="small">Tick anything that applies right now.</p><div class="list">${FLAGS.map(([k, n]) => `<button class="opt ${sel(k) ? 'on' : ''}" data-f="${k}"><span class="box">${I.check}</span>${n}</button>`).join('')}</div>
@@ -502,8 +526,12 @@ ${settingRows().map(setRow).join('')}
     el.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { const k = b.dataset.f; if (k === 'breath') Pf.breathless = Pf.breathless === 'yes' ? 'no' : 'yes'; else { const i = Pf.redflags.indexOf(k); i >= 0 ? Pf.redflags.splice(i, 1) : Pf.redflags.push(k); } save(); draw(el); });
     el.querySelectorAll('[data-br]').forEach(b => b.onclick = () => { Pf.breathless = b.dataset.br; save(); draw(el); });
     el.querySelector('#sdone').onclick = () => { close(); rerender(); }; }; return draw; }); }
-  const settingRows = () => { const Pf = S.profile; return [['map', I.body, 'Where it bothers you', Object.keys(S.pain).length + ' areas'], ['day', I.desk, 'Your day', dayNames(Pf)], ['sleep', I.moon, 'Sleep position', ({ side: 'Side', back: 'Back', curled: 'Curled up', backHigh: 'Back, high pillow' })[Pf.sleep] || 'Side'], ['about', I.user, 'About you', Pf.sex === 'f' ? 'Woman' : Pf.sex === 'm' ? 'Man' : 'Not set'], ['safety', I.shield, 'Safety answers', flagged() ? 'Needs a look' : 'All clear'], ['week', I.cal, 'Sessions per week', Pf.perWeek], ['remind', I.bell, 'Move reminders', S.remind.on ? 'Every ' + S.remind.every + ' min' : 'Off'], ['voice', I.voice, 'Coach voice', COACH_AUDIO.voiceName === COACH_AUDIO.CLIPS ? 'Andrew' : COACH_AUDIO.voiceName ? COACH_AUDIO.voiceName.replace(/Microsoft |Google /, '').split(' ')[0] : 'Default'], ['music', I.music, 'Music', COACH_AUDIO.musicOn ? 'On' : 'Off'], ['theme', I.contrast, 'Appearance', cap(Pf.theme)], ['gear', I.layers, 'Equipment', !Array.isArray(Pf.gear) ? 'All' : Pf.gear.length ? Pf.gear.map(k => EQUIP.NAMES[k]).join(', ') : 'None'], ['stage', I.steps, 'Stage', Pf.stage ? 'Stage ' + Pf.stage : 'Automatic']]; };
+  const SET_GROUPS = [['You', ['map', 'about', 'safety']], ['Plan', ['day', 'gear']], ['Coach', ['remind', 'voice', 'music', 'theme']]];
+  const settingRows = () => { const Pf = S.profile; return [['map', I.body, 'Where it bothers you', Object.keys(S.pain).length ? Object.keys(S.pain).length + (Object.keys(S.pain).length === 1 ? ' area' : ' areas') : 'None'], ['day', I.desk, 'Your day', dayNames(Pf)], ['about', I.user, 'About you', Pf.sex === 'f' ? 'Woman' : Pf.sex === 'm' ? 'Man' : 'Not set'], ['safety', I.shield, 'Safety answers', flagged() ? 'Needs a look' : 'All clear'], ['remind', I.bell, 'Move reminders', S.remind.on ? 'Every ' + S.remind.every + ' min' : 'Off'], ['voice', I.voice, 'Coach voice', COACH_AUDIO.voiceName === COACH_AUDIO.CLIPS ? 'Andrew' : COACH_AUDIO.voiceName ? COACH_AUDIO.voiceName.replace(/Microsoft |Google /, '').split(' ')[0] : 'Default'], ['music', I.music, 'Music', COACH_AUDIO.musicOn ? 'On' : 'Off'], ['theme', I.contrast, 'Appearance', cap(Pf.theme)], ['gear', I.layers, 'Equipment', !Array.isArray(Pf.gear) ? 'All' : Pf.gear.length ? Pf.gear.map(k => EQUIP.NAMES[k]).join(', ') : 'None']]; };
   const setRow = ([id, ic, n, v]) => `<button class="setrow" data-set="${id}">${ic}<span class="grow">${n}</span><small>${esc(String(v))}</small>${I.chev}</button>`;
+  const setGroups = () => { const rows = settingRows(); return SET_GROUPS.map(([g, ids]) => `<p class="label">${g}</p><section class="card flush settings">${ids.map(id => setRow(rows.find(r => r[0] === id))).join('')}</section>`).join(''); };
+  /* the catalogue is a testing tool: its card shows only once the app has been opened with ?go=catalogue */
+  const catOn = () => { try { return !!localStorage.getItem('coach.cat'); } catch (e) { return false; } };
   /* erase everything this app has stored on the device: the profile and logs, the voice and music choices, the welcome flag */
   function wipeAll() { try { Object.keys(localStorage).filter(k => k === KEY || k.startsWith('coach.') || k.startsWith('tension.')).forEach(k => localStorage.removeItem(k)); sessionStorage.clear(); } catch (e) {} location.reload(); }
   const armWipe = w => { w.onclick = () => { if (w.dataset.arm) return wipeAll(); w.dataset.arm = 1; w.querySelector('span').textContent = 'Tap again to erase everything'; setTimeout(() => { if (w.isConnected) { delete w.dataset.arm; w.querySelector('span').textContent = 'Erase all my data'; } }, 3000); }; };
@@ -521,7 +549,7 @@ ${settingRows().map(setRow).join('')}
       const days = j.data.logs.length, when = (j.saved || '').slice(0, 10); lab.textContent = `Tap again to replace everything with the backup${when ? ' from ' + when : ''} (${days} day${days === 1 ? '' : 's'} of history)`; btn.classList.add('danger');
       btn.onclick = () => { try { localStorage.setItem(KEY, JSON.stringify({ ...JSON.parse(JSON.stringify(DEF)), ...j.data, profile: { ...DEF.profile, ...j.data.profile } })); Object.entries(j.prefs || {}).forEach(([k, v]) => { if (k.startsWith('coach.') && typeof v === 'string') localStorage.setItem(k, v); }); } catch (e) { toast('Could not restore'); return; } location.reload(); }; };
     rd.readAsText(file); }
-  /* settings, reachable from the cog on every screen: the same rows as "Tune your plan", erase, and the version */
+  /* settings, reachable from the cog on every screen: You, Plan, Coach, your data, and the version */
   /* Catalogue, for testing: every movement the app can show, grouped, with the view it is drawn from. Tapping one plays
      it in the real player exactly as in a session (preview, animation, both sides, rests, voice); closing the player
      comes back here at the same place. Nothing played from here is logged. Open it from Settings or with ?go=catalogue. */
@@ -538,17 +566,17 @@ ${groups.filter(g => CATF === 'all' || CATF === g[0]).map(g => `<h3 class="sect"
       el.querySelectorAll('[data-cat]').forEach(b => b.onclick = () => { const sh = el.closest('.sheet'); CATY = sh ? sh.scrollTop : 0; const st = mkStep({ r: b.dataset.cat, key: b.dataset.cat }, rules()); if (!st) return toast('This one has no player step'); close(); setTimeout(() => play([st], { kind: 'test', n: st.name }), 260); }); };
     draw(); requestAnimationFrame(() => { const sh = el.closest('.sheet'); if (sh) sh.scrollTop = CATY; }); }); }
   function settingsSheet() { sheet('Settings', close => el => {
-    el.innerHTML = `<section class="card flush settings">${settingRows().map(setRow).join('')}</section><p class="label">Your data</p><section class="card flush settings"><button class="setrow" id="bkup">${I.save}<span class="grow">Back up my data<small>Everything in one file</small></span></button><button class="setrow" id="rstr">${I.restore}<span class="grow">Restore from a backup</span></button><input type="file" id="rstrfile" accept="application/json,.json" hidden><button class="setrow danger" id="wipe2">${I.trash}<span class="grow">Erase all my data</span></button></section><p class="label">For testing</p><section class="card flush settings"><button class="setrow" id="opencat">${I.layers}<span class="grow">Catalogue of all movements<small>Play any exercise on its own</small></span>${I.chev}</button></section><p class="setver" id="setver">Tension Coach</p>`;
-    el.querySelector('#opencat').onclick = () => { close(); setTimeout(catalogueSheet, 200); };
+    el.innerHTML = `${setGroups()}<p class="label">Your data</p><section class="card flush settings"><button class="setrow" id="bkup">${I.save}<span class="grow">Back up my data<small>Everything in one file</small></span></button><button class="setrow" id="rstr">${I.restore}<span class="grow">Restore from a backup</span></button><input type="file" id="rstrfile" accept="application/json,.json" hidden><button class="setrow danger" id="wipe2">${I.trash}<span class="grow">Erase all my data</span></button></section>${catOn() ? `<p class="label">For testing</p><section class="card flush settings"><button class="setrow" id="opencat">${I.layers}<span class="grow">Catalogue of all movements<small>Play any exercise on its own</small></span>${I.chev}</button></section>` : ''}<p class="setver" id="setver">Tension Coach</p>`;
+    const oc = el.querySelector('#opencat'); if (oc) oc.onclick = () => { close(); setTimeout(catalogueSheet, 200); };
     el.querySelectorAll('[data-set]').forEach(b => b.onclick = () => { close(); setTimeout(() => SETTINGS[b.dataset.set](), 180); });
     el.querySelector('#bkup').onclick = backupData; const rb = el.querySelector('#rstr'), rf = el.querySelector('#rstrfile'); rb.onclick = () => rf.click(); rf.onchange = () => { if (rf.files && rf.files[0]) restoreData(rf.files[0], rb); };
     armWipe(el.querySelector('#wipe2')); appVersion().then(v => { const t = el.querySelector('#setver'); if (t) t.textContent = 'Tension Coach · version ' + (v || 'local'); }); }); }
   document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-settings]'); if (b) settingsSheet(); });
   const SETTINGS = {
-    map: () => mapSheet(rerender),
+    map: () => mapSheet(replan()),
     safety: safetySheet,
     day: () => sheet('Your day', close => { const draw = el => { const Pf = S.profile;
-      el.innerHTML = `<p class="small">Tap all that apply.</p>${dayGrid(Pf)}
+      el.innerHTML = `${dayGrid(Pf)}
 <details class="more"><summary>Fine-tune hours</summary>${[['desk', 'Desk or computer', 12], ['sofa', 'Sofa or armchair', 8], ['phone', 'Phone, head down', 8], ['stand', 'Standing or walking', 12]].map(([k, t, mx]) => `<label class="rng">${t} <b id="v_${k}">${Pf[k]} h</b><input type="range" min="0" max="${mx}" step="0.5" value="${Pf[k]}" data-h="${k}"></label>`).join('')}
 <p class="label">Desk setup</p>${chipRow([['1', 'Screen at eye level'], ['0', 'Laptop, or I slouch']], Pf.deskGood ? '1' : '0', 'desk')}
 <p class="label">Sleep</p>${chipRow([['side', 'Side'], ['back', 'Back'], ['curled', 'Curled up'], ['backHigh', 'Back, high pillow']], Pf.sleep, 'sleep')}</details><button class="btn" id="ddone">Done</button>`;
@@ -570,12 +598,12 @@ ${has('period') || true ? `<div class="list"><button class="opt ${log().period ?
       on('[data-sex]', d => { Pf.sex = d.sex; ILLUS.setFemale(isF()); FIG3D.setFemale(isF()); }); on('[data-osteo]', () => { Pf.osteo = !Pf.osteo; }); on('[data-wn]', d => tog(w.now, d.wn)); on('[data-tri]', d => { w.tri = +d.tri; });
       on('[data-post]', d => { w.post = d.post; }); on('[data-cs]', () => { w.cs = !w.cs; }); on('[data-ws]', d => tog(w.sym, d.ws)); on('[data-period]', () => { log().period = !log().period; });
       el.querySelector('#adone').onclick = () => { close(); rerender(); }; }; return draw; }),
-    week: () => sheet('Sessions per week', close => el => { el.innerHTML = chipRow([[3, '3'], [4, '4'], [5, '5'], [6, '6'], [7, '7']], S.profile.perWeek, 'pw'); el.querySelectorAll('[data-pw]').forEach(b => b.onclick = () => { S.profile.perWeek = +b.dataset.pw; save(); close(); rerender(); }); }),
-    remind: () => sheet('Move reminders', close => { const draw = el => { el.innerHTML = `<p class="small">A gentle nudge to get up and do a reset, between 8:00 and 21:00. Works while the app is open or recently used; phones may pause it in the background.</p>
-${chipRow([['0', 'Off'], ['30', '30 min'], ['45', '45 min'], ['60', '60 min'], ['90', '90 min']], S.remind.on ? String(S.remind.every) : '0', 'rm')}<button class="btn" id="rdone">Done</button>`;
-      el.querySelectorAll('[data-rm]').forEach(b => b.onclick = async () => { const v = +b.dataset.rm; S.remind.on = v > 0; if (v) S.remind.every = v; S.remind.last = Date.now(); save();
-        if (v && 'Notification' in window && Notification.permission === 'default') { try { await Notification.requestPermission(); } catch (e) {} } draw(el); });
-      el.querySelector('#rdone').onclick = () => { close(); rerender(); }; }; return draw; }),
+    week: () => sheet('Sessions per week', close => el => { el.innerHTML = segRow([[3, '3'], [4, '4'], [5, '5'], [6, '6'], [7, '7']], S.profile.perWeek, 'pw'); el.querySelectorAll('[data-pw]').forEach(b => b.onclick = () => { S.profile.perWeek = +b.dataset.pw; save(); close(); rerender(); }); }),
+    remind: () => sheet('Move reminders', close => { const draw = el => { const blocked = 'Notification' in window && Notification.permission === 'denied';
+      el.innerHTML = `<p class="small">A nudge to move, 8:00 to 21:00.</p>${segRow([['0', 'Off'], ['30', '30 min'], ['45', '45 min'], ['60', '60 min'], ['90', '90 min']], S.remind.on ? String(S.remind.every) : '0', 'rm')}
+${blocked && S.remind.on ? `<div class="note warn">${I.alert}<span>Notifications are blocked. Turn them on in your phone’s settings. Until then reminders show only while the app is open.</span></div>` : ''}<button class="btn" id="rdone">Done</button>`;
+      el.querySelectorAll('[data-rm]').forEach(b => b.onclick = async () => { const v = +b.dataset.rm, was = S.remind.on; setRemind(v); draw(el); if (v && !was) { await askNotify(); if (el.isConnected) draw(el); } });
+      el.querySelector('#rdone').onclick = close; }; return draw; }, rerender),
     voice: () => sheet('Coach voice', close => { const draw = el => { const vs = COACH_AUDIO.curated();
       const rec = COACH_AUDIO.hasClips ? `<div class="vrow ${COACH_AUDIO.voiceName === COACH_AUDIO.CLIPS ? 'on' : ''}"><button class="vpick" data-vn="${COACH_AUDIO.CLIPS}"><span class="box">${I.check}</span><span class="grow"><b>Andrew</b><small>Male · natural · works on every device</small></span></button><button class="iconbtn tint" data-vs="${COACH_AUDIO.CLIPS}" aria-label="Play sample">${I.play2}</button></div>` : '';
       el.innerHTML = `<div class="list">${rec}${vs.length ? vs.map(v => `<div class="vrow ${v.name === COACH_AUDIO.voiceName ? 'on' : ''}"><button class="vpick" data-vn="${esc(v.name)}"><span class="box">${I.check}</span><span class="grow"><b>${esc(v.name.replace(/\s*\(.*\)|Microsoft |Google | Online| Natural/g, '').trim())}</b><small>${v.gender === 'm' ? 'Male' : v.gender === 'f' ? 'Female' : 'Voice'}${v.natural ? ' · natural' : v.hq ? ' · high quality' : ''} · ${v.lang}</small></span></button><button class="iconbtn tint" data-vs="${esc(v.name)}" aria-label="Play sample">${I.play2}</button></div>`).join('') : '<p class="small">No voices found on this device.</p>'}</div>
@@ -590,11 +618,12 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
       el.querySelectorAll('[data-mp]').forEach(b => b.onclick = () => COACH_AUDIO.preview(b.dataset.mp));
       el.querySelectorAll('[data-mon]').forEach(b => b.onclick = () => { COACH_AUDIO.musicOn = b.dataset.mon === '1'; draw(el); });
       el.querySelector('#mdone').onclick = () => { COACH_AUDIO.stop(); close(); rerender(); }; }; return draw; }),
-    gear: () => sheet('Equipment', close => { const draw = el => { const g = S.profile.gear, all = !Array.isArray(g);
-      el.innerHTML = `<p class="small">Your plan only uses exercises you have the equipment for.</p><div class="seg wrap"><button class="${all ? 'on' : ''}" data-ga="all">I have everything</button><button class="${!all && !g.length ? 'on' : ''}" data-ga="none">No equipment</button></div><p class="label">Or pick what you have</p><div class="seg wrap">${EQUIP.GEAR.map(k => `<button class="${!all && g.includes(k) ? 'on' : ''}" data-gk="${k}">${EQUIP.NAMES[k]}</button>`).join('')}</div>`;
-      const done = () => { EQUIP.set(S.profile.gear); save(); draw(el); rerender(); };
+    gear: after => { const fin = after || replan(); sheet('Equipment', close => { const draw = el => { const g = S.profile.gear, all = !Array.isArray(g);
+      el.innerHTML = `<p class="small">Your plan only uses exercises you have the equipment for.</p><div class="seg wrap"><button class="${all ? 'on' : ''}" data-ga="all">I have everything</button><button class="${!all && !g.length ? 'on' : ''}" data-ga="none">No equipment</button></div><p class="label">Or pick what you have</p><div class="seg wrap">${EQUIP.GEAR.map(k => `<button class="gk ${!all && g.includes(k) ? 'on' : ''}" data-gk="${k}">${GI[k] || ''}<span>${EQUIP.NAMES[k]}</span></button>`).join('')}</div><button class="btn" id="gdone">Done</button>`;
+      el.querySelector('#gdone').onclick = close;
+      const done = () => { EQUIP.set(S.profile.gear); save(); draw(el); };
       el.querySelectorAll('[data-ga]').forEach(b => b.onclick = () => { S.profile.gear = b.dataset.ga === 'all' ? null : []; done(); });
-      el.querySelectorAll('[data-gk]').forEach(b => b.onclick = () => { const cur = Array.isArray(S.profile.gear) ? S.profile.gear : []; S.profile.gear = cur.includes(b.dataset.gk) ? cur.filter(k => k !== b.dataset.gk) : [...cur, b.dataset.gk]; done(); }); }; return draw; }),
+      el.querySelectorAll('[data-gk]').forEach(b => b.onclick = () => { const cur = Array.isArray(S.profile.gear) ? S.profile.gear : []; S.profile.gear = cur.includes(b.dataset.gk) ? cur.filter(k => k !== b.dataset.gk) : [...cur, b.dataset.gk]; done(); }); }; return draw; }, fin); },
     sleep: () => sheet('Sleep position', close => el => { el.innerHTML = '<p class="small">How you mostly sleep. It counts as about a third of your day in the tension estimate.</p>' + chipRow([['side', 'Side'], ['back', 'Back'], ['curled', 'Curled up'], ['backHigh', 'Back, high pillow']], S.profile.sleep, 'sl'); el.querySelectorAll('[data-sl]').forEach(b => b.onclick = () => { S.profile.sleep = b.dataset.sl; save(); close(); rerender(); }); }),
     fig: () => sheet('Coach figure', close => el => { el.innerHTML = chipRow([['3d', '3D'], ['2d', '2D']], S.profile.fig === '2d' ? '2d' : '3d', 'fg') + (FIG3D.supported ? '' : '<p class="small">This device cannot show 3D, so the 2D figure is used.</p>'); el.querySelectorAll('[data-fg]').forEach(b => b.onclick = () => { S.profile.fig = b.dataset.fg; FIG3D.setMode(S.profile.fig); save(); close(); rerender(); }); }),
     theme: () => sheet('Appearance', close => el => { el.innerHTML = chipRow([['auto', 'Automatic'], ['light', 'Light'], ['dark', 'Dark']], S.profile.theme, 'th'); el.querySelectorAll('[data-th]').forEach(b => b.onclick = () => { S.profile.theme = b.dataset.th; save(); applyTheme(); close(); rerender(); }); }),
@@ -611,14 +640,14 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
       ['areas', I.body, 'Your areas', areas.length ? areas.length + ' areas explained' : 'Add an area first', areas.length ? areas.map(id => { const r = REGION[id]; return `<h3>${esc(r.n)}</h3><p>${r.why}</p><p><b>What works:</b> ${r.ev}</p><p class="bad"><b>See a doctor if:</b> ${r.red}</p>${pt(id).filter(t => SYMPTOM_ADVICE[t]).map(t => `<p class="small">${SYMPTOM_ADVICE[t][id] || SYMPTOM_ADVICE[t].default}</p>`).join('')}`; }).join('') : '<p>Tap “Add an area” on Today to see what helps each spot.</p>'],
       ['pain', I.shield, 'Pain rules', 'What is okay to feel.', `<ul><li>Up to 3 out of 10 during an exercise, settling within a day, is fine.</li><li>4 or more, or worse the next day: skip that exercise for a week.</li><li>Never stretch into sharp pain, tingling or numbness.</li><li>Tap “Worse” after a session and tomorrow will be gentler.</li></ul>`],
       ['doctor', I.alert, 'When to see a doctor', 'Signs that need a check.', `<ul><li><b>Urgent:</b> numbness around the groin, new bladder or bowel problems, leg weakness, chest pain, breathlessness at rest, a hot swollen calf.</li><li><b>Book a visit:</b> pain that wakes you, fever or weight loss with pain, or no improvement after two weeks of sensible self-care.</li></ul><p>${BREATH.screen.red}</p>`],
-      ...(isF() ? [['women', I.heart, 'Women’s health', RU.notes.length ? 'Adapted for you' : 'Pregnancy, periods, pelvic floor', (RU.notes.length ? RU.notes.map(n => `<p>${n}</p>`).join('') : '<p>Set what applies under Program, About you. The plan then removes or softens exercises and adds pelvic floor work where it helps.</p>') + (RU.stop ? `<p class="bad"><b>Stop and call your midwife or doctor if:</b> ${RU.stop.join('; ').toLowerCase()}.</p>` : '')]] : []),
+      ...(isF() ? [['women', I.heart, 'Women’s health', RU.notes.length ? 'Adapted for you' : 'Pregnancy, periods, pelvic floor', (RU.notes.length ? RU.notes.map(n => `<p>${n}</p>`).join('') : '<p>Set what applies under Settings, About you. The plan then removes or softens exercises and adds pelvic floor work where it helps.</p>') + (RU.stop ? `<p class="bad"><b>Stop and call your midwife or doctor if:</b> ${RU.stop.join('; ').toLowerCase()}.</p>` : '')]] : []),
       ['sleep', I.moon, 'Sleep and habits', 'Small changes that add up.', `<ul><li>Change position every 30 to 45 minutes. The best posture is the next one.</li><li>Screen top at eye level; elbows supported.</li><li>Side sleeping: pillow between the knees, neck level with the spine.</li>${BREATH.sleep.slice(0, 2).map(t => `<li>${t}</li>`).join('')}</ul>`],
       ['about', I.book, 'Disclaimer and sources', 'What this app is and is not.', `<p>Tension Coach gives general exercise guidance. It does not diagnose and has not been reviewed by a clinician. If something feels wrong, stop and get it checked.</p><ul class="small">${BREATH.SOURCES.map(s => `<li>${s}</li>`).join('')}<li>ACSM Guidelines for Exercise Testing and Prescription, 10th ed.</li><li>NICE NG59, Low back pain and sciatica.</li>${WOMEN.sources.map(t => `<li>${t}</li>`).join('')}</ul>`]
     ];
   }
   function renderLearn() {
     const el = $('s-learn'), T = learnTopics();
-    el.innerHTML = `<header class="top"><div><h1>Learn</h1><p class="kicker">${I.book}<span>Short reads. The coach covers the rest.</span></p></div><button class="iconbtn" data-settings aria-label="Settings">${I.cog}</button></header>
+    el.innerHTML = `<header class="top"><div><h1>Learn</h1><p class="kicker">${I.book}<span>Short reads</span></p></div><button class="iconbtn" data-settings aria-label="Settings">${I.cog}</button></header>
 <div class="learn">${T.map(([id, ic, n, sub]) => `<button class="lcard" data-t="${id}"><span class="badge">${ic}</span><span class="grow"><b>${n}</b><small>${esc(sub)}</small></span>${I.chev}</button>`).join('')}</div>`;
     el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { const t = T.find(x => x[0] === b.dataset.t); sheet(t[2], () => e => { e.innerHTML = `<div class="prose">${t[4]}</div>`; }); });
   }
@@ -782,14 +811,18 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
     const run = logRun(true), nToday = runsOf(L).length, st = streak(); if (run) mins = run.min;
     COACH_AUDIO.say(pick(['That is it. Well done for showing up today.', 'All done. That was great work.', 'Finished. Your body will thank you.']), { urgent: true, keep: true });
     if (st > 1) COACH_AUDIO.say(`That is ${st} days in a row.`, { keep: true }); COACH_AUDIO.say('How do you feel?', { keep: true });
-    P.innerHTML = `<div class="donebox"><div class="donecheck">${I.check}</div><h2>${PL.meta.kind === 'reset' ? esc(PL.meta.n) : 'Session'} done</h2><p>${mins} min${nToday > 1 ? ` · your ${ordinal(nToday)} today` : ''}${st > 1 ? ` · ${st} days in a row` : ''}</p>
-<p class="label">How do you feel?</p><div class="feelpick">${[['better', 'Better'], ['same', 'Same'], ['worse', 'Worse']].map(([v, n]) => `<button data-feel="${v}" aria-pressed="false">${n}</button>`).join('')}</div><p class="feelnote" id="feelnote" aria-live="polite">&nbsp;</p><button class="btn ghost" id="pfin">Close</button></div>`;
+    P.innerHTML = `<div class="donebox"><div class="donecheck">${I.check}</div><h2>Well done</h2><p>${PL.meta.kind === 'reset' ? esc(PL.meta.n) : 'Session'} · ${mins} min${nToday > 1 ? ` · your ${ordinal(nToday)} today` : ''}${st > 1 ? ` · ${st} days in a row` : ''}</p>
+<p class="label">How do you feel?</p><div class="feelpick">${[['better', 'Better'], ['same', 'Same'], ['worse', 'Worse']].map(([v, n]) => `<button data-feel="${v}" aria-pressed="false">${n}</button>`).join('')}</div><p class="feelnote" id="feelnote" aria-live="polite">&nbsp;</p><div class="remask" id="remask" hidden><p>Remind you to move during the day?</p><div class="row"><button class="btn ghost" data-ra="0">Not now</button><button class="btn" data-ra="45">Every 45 min</button></div></div><button class="btn ghost" id="pfin">Close</button></div>`;
     /* the answer is saved and shown straight away (button lights up, one line says what it changes), then the screen closes */
     const FEEL = { better: ['Love to hear it.', 'Saved. Your plan keeps building.'], same: ['Good. Consistency does the work.', 'Saved. Your plan stays as it is.'], worse: ['Thanks for telling me. Tomorrow will be gentler.', 'Saved. Tomorrow will be gentler.'] };
     P.querySelectorAll('[data-feel]').forEach(b => b.onclick = () => { L.feel = b.dataset.feel; if (run) run.feel = L.feel; save(); session = null;
       P.querySelectorAll('[data-feel]').forEach(q => { q.classList.toggle('on', q === b); q.setAttribute('aria-pressed', q === b); });
       const n = $('feelnote'); if (n) { n.textContent = FEEL[L.feel][1]; n.classList.add('on'); }
-      COACH_AUDIO.say(FEEL[L.feel][0], { urgent: true }); clearTimeout(PL.closeT); PL.closeT = setTimeout(endPlayer, 2200); });
+      COACH_AUDIO.say(FEEL[L.feel][0], { urgent: true }); clearTimeout(PL.closeT);
+      if (offer) { $('remask').hidden = false; $('pfin').hidden = true; } else PL.closeT = setTimeout(endPlayer, 2200); });
+    /* asked once, after the first finished session or quickie: move reminders, with the permission asked inside the tap */
+    const offer = !S.remind.on && !S.remindAsked;
+    P.querySelectorAll('[data-ra]').forEach(b => b.onclick = () => { const v = +b.dataset.ra; S.remindAsked = true; save(); if (v) { setRemind(v); askNotify(); toast('Reminders on'); } endPlayer(); });
     $('pfin').onclick = endPlayer;
   }
   function endPlayer() {
@@ -819,6 +852,10 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
   };
 
   /* ---------- move reminders ---------- */
+  function setRemind(v) { S.remind.on = v > 0; if (v) S.remind.every = v; S.remind.last = Date.now(); S.remindAsked = true; save(); }
+  /* asks for notification permission (only ever called from a tap); once allowed, one notification shows it works */
+  async function askNotify() { if (!('Notification' in window)) return; try { if (Notification.permission === 'default') await Notification.requestPermission(); } catch (e) {}
+    if (Notification.permission === 'granted' && navigator.serviceWorker) navigator.serviceWorker.ready.then(reg => reg.showNotification('Move reminders on', { body: `A nudge every ${S.remind.every} min, 8:00 to 21:00.`, tag: 'move', icon: 'icons/icon-192.png' })).catch(() => {}); }
   setInterval(() => { const R = S.remind; if (!R.on || PL) return; const h = new Date().getHours(); if (h < 8 || h >= 21) return;
     if (Date.now() - (R.last || 0) < R.every * 60000) return; R.last = Date.now(); save();
     const r = suggestResets()[0], body = `Time to move. Try “${r.n}”.`;
@@ -857,16 +894,16 @@ ${chipRow([['1', 'Music on'], ['0', 'Music off']], COACH_AUDIO.musicOn ? '1' : '
   /* ---------- test hook ----------
      tools/test-app.mjs builds sessions for many made-up people through this. It swaps the state in memory only for the
      duration of the call and never saves, so real data is untouched. */
-  window.__coachTest = { plan(state) { const keep = S, keepSess = session; S = JSON.parse(JSON.stringify({ ...DEF, ...state, profile: { ...DEF.profile, ...(state.profile || {}) } }));
+  window.__coachTest = { plan(state) { const keep = S, keepSess = session, keepGear = EQUIP.have; S = JSON.parse(JSON.stringify({ ...DEF, ...state, profile: { ...DEF.profile, ...(state.profile || {}) } })); EQUIP.set(S.profile.gear);
     try { const sess = buildSession(), steps = sessionSteps(sess), ex = x => ({ id: x.id, type: x.type, level: x.level, hold: x.hold, reps: x.reps, sets: x.sets, sides: x.sides });
       return { minutes: sess.minutes, stage: sess.stage.id, stageLevel: sess.stage.level, rules: { exclude: [...sess.rules.exclude], maxLevel: sess.rules.maxLevel, stretchCap: sess.rules.stretchCap, gentle: sess.rules.gentle, add: sess.rules.add, breath: sess.rules.breath },
-        items: sess.items.map(it => ({ kind: it.kind, section: it.section, primer: !!it.primer, secs: it.secs, ...ex(it.ex) })),
+        items: sess.items.map(it => ({ kind: it.kind, section: it.section, primer: !!it.primer, secs: it.secs, gear: EQUIP.gear(it.ex.id), ...ex(it.ex) })),
         steps: steps.map(st => ({ kind: st.kind, section: st.section, key: st.key, name: st.name, total: stepSecs(st), cycles: st.cycles.map(c => ({ t: c.t, rest: !!c.rest, hold: !!c.hold, reps: c.reps || 0, repT: c.repT || 0 })) })) };
-    } finally { S = keep; session = keepSess; } } };
+    } finally { S = keep; session = keepSess; EQUIP.set(keepGear); } } };
 
   /* ---------- start ---------- */
   applyTheme(); EQUIP.set(S.profile.gear); FIG3D.setMode('3d'); ILLUS.setFemale(isF()); FIG3D.setFemale(isF()); welcome();
-  if (!S.onboarded) renderOnboard(); else { show(qgo === 'quickies' ? 'resets' : 'today'); if (qgo === 'catalogue') setTimeout(catalogueSheet, 300); if (qr) setTimeout(() => startReset(qr), 300);
+  if (!S.onboarded) renderOnboard(); else { show(qgo === 'quickies' ? 'resets' : 'today'); if (qgo === 'catalogue') { try { localStorage.setItem('coach.cat', '1'); } catch (e) {} setTimeout(catalogueSheet, 300); } if (qr) setTimeout(() => startReset(qr), 300);
     // home-screen shortcut "Start": scroll is already at the Start button; sound needs a tap, so highlight it instead of auto-playing
     if (qgo === 'start') setTimeout(() => { const b = $('start'); if (b) { b.classList.add('nudge'); b.focus(); } }, 300); }
 })();

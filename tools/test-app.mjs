@@ -24,7 +24,8 @@ const ORDER = { warmup: 0, pre: 1, strength: 2, stretch: 3, breath: 4, calm: 5 }
 const PAINS = [{}, { neckB: { v: 5, side: 'b' } }, { lowBack: { v: 6, side: 'b' } }, { shoulder: { v: 4, side: 'r' }, hipF: { v: 3, side: 'l' } }, { knee: { v: 7, side: 'l' }, calf: { v: 3, side: 'b' }, neckSide: { v: 2, side: 'r' }, upperBack: { v: 5, side: 'b' } }];
 const PEOPLE = [['man', { sex: 'm' }], ['woman', { sex: 'f', w: { now: ['health'], sym: [] } }], ['pregnant, first trimester', { sex: 'f', w: { now: ['preg'], tri: 1, sym: [] } }], ['pregnant, second trimester', { sex: 'f', w: { now: ['preg'], tri: 2, sym: [] } }], ['pregnant, third trimester', { sex: 'f', w: { now: ['preg'], tri: 3, sym: [] } }],
   ['six weeks after birth', { sex: 'f', w: { now: ['post'], post: 'early', sym: [] } }], ['after a caesarean', { sex: 'f', w: { now: ['post'], post: 'early', cs: true, sym: [] } }], ['months after birth, leaking', { sex: 'f', w: { now: ['post'], post: 'late', sym: ['leak'] } }], ['menopause, prolapse', { sex: 'f', w: { now: ['meno'], sym: ['prolapse'] } }],
-  ['osteoporosis', { sex: 'f', osteo: true, w: { now: ['meno'], sym: [] } }], ['man with osteoporosis', { sex: 'm', osteo: true }], ['short of breath lying flat', { sex: 'm', breathless: 'yes' }], ['a bit tight lying flat', { sex: 'm', breathless: 'mild' }]];
+  ['osteoporosis', { sex: 'f', osteo: true, w: { now: ['meno'], sym: [] } }], ['man with osteoporosis', { sex: 'm', osteo: true }], ['short of breath lying flat', { sex: 'm', breathless: 'yes' }], ['a bit tight lying flat', { sex: 'm', breathless: 'mild' }],
+  ['all equipment', { sex: 'm', gear: null }], ['band only', { sex: 'f', gear: ['band'] }]];
 const lengths = {}, byLen = {}; let plans = 0;
 for (const dur of [5, 10, 15, 20, 30]) for (const stage of [1, 2, 3, 4]) for (const pain of PAINS) for (const [who, extra] of PEOPLE) for (const worse of [false, true]) {
   if (worse && (stage !== 2 || dur !== 15)) continue;
@@ -32,6 +33,7 @@ for (const dur of [5, 10, 15, 20, 30]) for (const stage of [1, 2, 3, 4]) for (co
   const P = await ev(`JSON.stringify(window.__coachTest.plan(${JSON.stringify(state)}))`).then(JSON.parse), tag = `${dur} min, stage ${stage}, ${who}, ${Object.keys(pain).join('+') || 'no pain'}${worse ? ', felt worse' : ''}`; plans++;
   const it = P.items, ex = new Set(P.rules.exclude), cap = Math.min(P.stageLevel, P.rules.maxLevel);
   ok(it.length >= 2 && it[0].section === 'warmup', `${tag}: does not start with a warm-up`);
+  const have = extra.gear === null ? null : extra.gear || []; ok(it.every(x => have === null || x.gear.every(k => have.includes(k))), `${tag}: uses equipment the person does not have (${it.filter(x => x.gear.length).map(x => x.id + ': ' + x.gear).join(', ')})`);
   ok(it.every((x, i) => i === 0 || ORDER[x.section] >= ORDER[it[i - 1].section]), `${tag}: phases out of order (${it.map(x => x.section).join(' > ')})`);
   ok(it.some(x => x.kind === 'breath') && ['breath', 'calm'].includes(it[it.length - 1].section), `${tag}: does not end with breathing`);
   for (const x of it) { if (x.kind !== 'stretch' && x.kind !== 'strength') continue;

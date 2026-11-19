@@ -139,7 +139,7 @@ p { margin: 0 0 10px; }
 .settings .setrow { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; text-align: left; }
 .settings .setrow + .setrow { border-top: 1px solid var(--line); }
 .setrow > .ic:first-child { color: var(--acc); } .setrow > .ic:last-child { color: var(--mute); width: 18px; height: 18px; }
-.setrow small { max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.setrow > small { max-width: 45%; text-align: right; line-height: 1.3; }
 .setrow.danger, .setrow.danger .ic { color: var(--bad); }
 .exart { border-radius: 16px; overflow: hidden; margin-bottom: 12px; } .exart { background: var(--ill-bg); } .exart .ill { width: 100%; aspect-ratio: 1.6; height: auto; display: block; }
 .dose { font-weight: 650; color: var(--acc); }
@@ -256,7 +256,7 @@ p { margin: 0 0 10px; }
 .pplay .ic { width: 30px; height: 30px; }
 .player.paused .ptime { opacity: .45; }
 /* calm phases: the room dims to dusk */
-.player.calm { --bg: #1C1F2B; --ink: #F1EEF6; --ink2: #CFCBDA; --mute: #8F8BA0; --line: #2E3242; --ill-bg: #262A3A; --ill-ground: #2F3346; --ill-bush: #4A5A55; --ill-bush2: #3E4C48; --ill-stem: #33413D; --ill-glow: #2E3347; --ill-cloud: #343950; --ill-hill: #38453F; --ill-pot: #7A5646; --ill-pot2: #66473A; --ill-mat: #6D4A3A; --ill-prop: #3A3E52; --ill-prop2: #464B62; --fig-leg: #4B525B; --fig-leg2: #3A4048; background: radial-gradient(120% 80% at 50% 30%, #2A2E42, #171923); }
+.player.calm { --bg: #1B1611; --ink: #F7F2EC; --ink2: #E2DAD2; --mute: #B3A99F; --line: #3A322B; --ill-bg: #2A221C; --ill-ground: #352B23; --ill-bush: #56664A; --ill-bush2: #48573E; --ill-stem: #3A4731; --ill-glow: #3A2C21; --ill-cloud: #3B3029; --ill-hill: #3E4634; --ill-pot: #8A5A40; --ill-pot2: #744A33; --ill-mat: #7A4E36; --ill-prop: #4A3F37; --ill-prop2: #5A4C42; --fig-leg: #4B525B; --fig-leg2: #3A4048; background: radial-gradient(120% 80% at 50% 30%, #3A2A1E, #15120F); }
 .breathe { position: relative; width: min(64vw, 300px); aspect-ratio: 1; display: grid; place-items: center; }
 .bring { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--acc) 40%, transparent); }
 .bcore { width: 100%; height: 100%; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 50% 40%, var(--acc2), var(--acc)); transform: scale(.62); transition: transform .25s linear; box-shadow: 0 0 60px color-mix(in srgb, var(--acc) 40%, transparent); }
@@ -307,9 +307,9 @@ p { margin: 0 0 10px; }
 .chart .side { font-size: 8.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; fill: var(--mute); }
 :root[data-theme=dark] { --map-skin: #5E493B; --map-wear: #47372D; --map-hair: #221A15; --map-line: #D2A988; --sel: #FFB07A; }
 :root[data-theme=dark] .zone.sel text { fill: #2A1608; }
-.player.calm { --map-skin: #3A3F56; --map-wear: #30354A; --map-hair: #23273A; --map-line: #8E93B0; }
+.player.calm { --map-skin: #5E493B; --map-wear: #47372D; --map-hair: #221A15; --map-line: #D2A988; }
 
-.seg.cats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; } .seg.cats button { padding: 8px 14px; }
+.seg.cats { display: flex; flex-wrap: nowrap; gap: 8px; margin: 0 -20px 16px; padding: 2px 20px 4px; overflow-x: auto; scrollbar-width: none; } .seg.cats::-webkit-scrollbar { display: none; } .seg.cats button { padding: 8px 14px; white-space: nowrap; flex: none; }
 
 /* player text never moves the layout: every line of text has a fixed box */
 .pinfo { flex: none; }
@@ -435,3 +435,35 @@ body.onb { padding-bottom: 0; }
 .f3hero .f3bg::before { display: none; }
 .f3hero .f3bg { background: radial-gradient(ellipse 62% 24% at 50% 93%, var(--ill-hill) 0 99%, transparent 100%), radial-gradient(circle at 76% 70%, var(--ill-bush) 0 7%, transparent 7.5%), radial-gradient(circle at 83% 66%, var(--ill-bush) 0 5.5%, transparent 6%), var(--ill-glow); -webkit-mask-image: radial-gradient(circle closest-side at 50% 50%, #000 0 96%, transparent 97%); mask-image: radial-gradient(circle closest-side at 50% 50%, #000 0 96%, transparent 97%); }
 .f3hero .f3img { object-fit: contain; object-position: 50% 50%; padding: 6% 0; box-sizing: border-box; }
+
+/* ---------- plan inputs: pains and equipment, where they shape the plan ---------- */
+.secthead.mid { align-items: center; margin: 22px 0 6px; } .secthead.mid .sect { margin: 0; } .secthead.mid .iconbtn { margin-right: -10px; }
+.herofor { display: block; text-align: left; margin: 6px 0 0; font-size: 15px; color: var(--ink2); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--acc) 55%, transparent); text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
+#acts.fresh .act { animation: fresh 1.8s ease-out; }
+@keyframes fresh { 0% { border-color: var(--acc); box-shadow: 0 0 0 3px color-mix(in srgb, var(--acc) 22%, transparent); } 100% { border-color: var(--line); box-shadow: 0 0 0 3px transparent; } }
+@media (prefers-reduced-motion: reduce) { #acts.fresh .act { animation: none; } }
+/* Front / Back: a quiet segmented track, so it does not read as a second Woman / Man choice */
+.seg.view { display: flex; gap: 0; padding: 3px; border-radius: 999px; background: var(--soft); border: 1px solid var(--line); }
+.seg.view button { flex: 1; padding: 6px 14px; font-size: 13.5px; border: 0; background: transparent; box-shadow: none; color: var(--mute); }
+.seg.view button.on { background: var(--card); color: var(--ink); border: 0; box-shadow: 0 1px 3px rgba(30, 36, 48, .14); }
+:root[data-theme=dark] .seg.view button.on { background: var(--line2); color: var(--ink); }
+.maptools { align-items: center; }
+/* No equipment / I have some: the same pills as the other choices, two equal halves */
+.gearseg { display: flex; width: 100%; } .gearseg button { flex: 1; white-space: nowrap; }
+.tgear { margin: 12px 0 4px; }
+.obgear .gearseg { gap: 6px; } .obgear .gearseg button { padding: 7px 11px; font-size: 13px; }
+.obslot { width: 44px; height: 44px; margin-left: -12px; flex: none; }
+/* one row of equal segments that never wraps */
+.seg.fill { display: flex; width: 100%; gap: 6px; } .seg.fill button { flex: 1 1 0; min-width: 0; padding: 9px 0; white-space: nowrap; font-size: 13.5px; }
+/* pain sheet: "feels like" in two even columns; chosen ones solid, like the other choices */
+.chips.two { display: grid; grid-template-columns: 1fr 1fr; } .chips.two .chip { text-align: center; }
+.chips.two .chip.on { background: var(--acc); border-color: var(--acc); color: #fff; }
+.note details { flex: 1; } .note summary { cursor: pointer; list-style: none; } .note summary::-webkit-details-marker { display: none; }
+.note summary::after { content: "More"; margin-left: 6px; color: var(--acc); font-weight: 600; } .note details[open] summary::after { content: "Less"; }
+.note details p { margin: 8px 0 0; }
+/* Program: the weekly goal is where you change it */
+.kbtn { text-align: left; } .kbtn > .ic:last-child { width: 16px; height: 16px; color: var(--mute); }
+/* end screen: the one-time reminder offer */
+.remask { margin-top: 18px; } .remask p { font-weight: 600; margin: 0; } .remask .row { margin-top: 12px; } .remask .btn { min-height: 48px; font-size: 16px; margin-top: 0; }
+
+.gk { display: inline-flex; align-items: center; justify-content: center; gap: 8px; } .gk .ic { width: 22px; height: 22px; flex: none; }

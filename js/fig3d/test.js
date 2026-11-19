@@ -8,7 +8,7 @@ let curTest = null;
 function runTest(only) {
   paused = true; const dt = 1 / 50, worst = new Map(), v = V3(), v2 = V3(), v3 = V3(), q = new THREE.Quaternion();
   const fail = (where, rule, value, t) => { const k = where + ' | ' + rule, o = worst.get(k); if (!o || value > o.value) worst.set(k, { where, rule, value: +value.toFixed(2), t: +t.toFixed(2) }); };
-  const joint = (A1, B1, C1) => { B1.getWorldPosition(v2); v3.copy(C1.getWorldPosition(v)).sub(v2).normalize(); v.copy(v2).sub(A1.getWorldPosition(v)).normalize(); return Math.acos(clamp(v.dot(v3), -1, 1)) / R; };
+  const joint = (A1, B1, C1) => { const a = A1.getWorldPosition(V3()), b = B1.getWorldPosition(V3()), c = C1.getWorldPosition(V3()); return Math.acos(clamp(b.clone().sub(a).normalize().dot(c.sub(b).normalize()), -1, 1)) / R; };
   const SPEED = { hand: 260, foot: 200, head: 160, hips: 160 }, JERK = { hand: 3, foot: 1.6, head: 1.2, hips: 1.2 };
   let track = null, prevP = null, propsOf = null;
   const checkFrame = (where, p, t) => { scene.updateMatrixWorld(true);

@@ -118,7 +118,7 @@ const STRETCHES = [
 
   /* ---------- thigh ---------- */
   { id: 'supine-ham', n: 'Supine hamstring stretch with strap', m: ['bicFem', 'medHams', 'gastroc'], hold: 30, reps: 2, sides: 2, type: 'static', ill: 'supine-ham',
-    how: 'On your back, loop a strap round one foot, straighten the knee and raise the leg to a mild pull behind the thigh.', cue: 'Keep the other leg on the floor and the raised knee straight; point the foot to add the calf.' },
+    how: 'On your back, loop a strap round one foot, straighten the knee and raise the leg to a mild pull behind the thigh.', cue: 'Keep the other leg on the floor and the raised knee straight; pull the toes toward you.' },
   { id: 'heel-step', n: 'Standing hamstring stretch, heel on a step', m: ['bicFem', 'medHams', 'popliteus'], hold: 30, reps: 2, sides: 2, type: 'static', ill: 'heel-step',
     how: 'Heel on a low step, knee straight, hinge forward from the hips with the back flat and chest toward the thigh.', cue: 'Bend from the hips, not the lower back; turn the foot slightly in or out to shift the stretch.' },
   { id: 'seated-ham', n: 'Seated hamstring stretch', m: ['medHams', 'bicFem', 'erector'], hold: 30, reps: 2, sides: 2, type: 'static', ill: 'seated-ham',

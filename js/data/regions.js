@@ -137,8 +137,8 @@ const REGIONS = [
 ];
 /* Symptom types. Each changes the advice; 'click' only exists for joints. */
 const SYMPTOMS = [
-  { id: 'pain', n: 'Pain or ache' }, { id: 'stiff', n: 'Stiffness' }, { id: 'click', n: 'Clicking or clunking', joints: ['jaw', 'neckB', 'shoulder', 'hipF', 'glute', 'knee', 'ankle', 'wrist'] },
-  { id: 'tingle', n: 'Tingling or numbness' }, { id: 'weak', n: 'Weakness or giving way' }, { id: 'head', n: 'Headache from here', regions: ['head', 'jaw', 'neckB', 'neckF'] }
+  { id: 'pain', n: 'Pain' }, { id: 'stiff', n: 'Stiff' }, { id: 'click', n: 'Clicking', joints: ['jaw', 'neckB', 'shoulder', 'hipF', 'glute', 'knee', 'ankle', 'wrist'] },
+  { id: 'tingle', n: 'Tingling or numb' }, { id: 'weak', n: 'Weak' }, { id: 'head', n: 'Headache', regions: ['head', 'jaw', 'neckB', 'neckF'] }
 ];
 const SYMPTOM_ADVICE = {
   click: { jaw: 'A painless click is the jaw\'s cushioning disc slipping forward and relocating. It is common and usually needs no treatment. Avoid wide yawning and hard chewing on that side, keep the teeth apart at rest, and see a dentist only if it locks, hurts, or opening becomes limited.',
